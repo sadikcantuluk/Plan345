@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PlanYonetimAraclari.Models;
+using PlanYonetimAraclari.Data;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace PlanYonetimAraclari.Controllers
@@ -10,13 +12,17 @@ namespace PlanYonetimAraclari.Controllers
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DashboardController(ILogger<DashboardController> logger)
+        public DashboardController(
+            ILogger<DashboardController> logger,
+            UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // Session'dan kullanıcı bilgilerini al
             string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
@@ -39,9 +45,28 @@ namespace PlanYonetimAraclari.Controllers
                 return RedirectToAction("Index", "Admin");
             }
             
+            // Kullanıcıyı veritabanından bul ve profil resmini al
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            string profileImageUrl = null;
+            
+            if (user != null)
+            {
+                profileImageUrl = user.ProfileImageUrl;
+                _logger.LogInformation($"Kullanıcı profil resmi: {profileImageUrl ?? "Yok"}");
+            }
+            
+            // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
+            string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
+            if (!string.IsNullOrEmpty(sessionProfileImage))
+            {
+                profileImageUrl = sessionProfileImage;
+                _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
+            }
+            
             // Dashboard için gereken bilgileri ViewData'da sakla
             ViewData["UserFullName"] = userName;
             ViewData["UserEmail"] = userEmail;
+            ViewData["UserProfileImage"] = profileImageUrl;
             
             _logger.LogInformation($"Kullanıcı başarıyla dashboard'a erişti: {userEmail}");
             return View();

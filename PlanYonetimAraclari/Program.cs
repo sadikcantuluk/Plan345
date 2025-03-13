@@ -104,4 +104,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Profil sayfası için route kontrolü
+app.MapControllerRoute(
+    name: "profile",
+    pattern: "Profile/{action=Index}/{id?}",
+    defaults: new { controller = "Profile" });
+
+// Dashboard sayfası için route kontrolü
+app.MapControllerRoute(
+    name: "dashboard",
+    pattern: "Dashboard/{action=Index}/{id?}",
+    defaults: new { controller = "Dashboard" });
+
 app.Run();

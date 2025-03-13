@@ -25,6 +25,9 @@ namespace PlanYonetimAraclari.Models
         [PersonalData]
         public bool IsActive { get; set; } = true;
 
+        [PersonalData]
+        public string ProfileImageUrl { get; set; }
+
         public string FullName => $"{FirstName} {LastName}";
     }
 } 

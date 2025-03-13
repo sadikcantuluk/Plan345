@@ -1,5 +1,6 @@
+@model PlanYonetimAraclari.Models.ProfileViewModel
 @{
-    ViewData["Title"] = "Dashboard - Plan345";
+    ViewData["Title"] = "Profil - Plan345";
     Layout = null;
 }
 
@@ -82,6 +83,43 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 15;
         }
+        .profile-image-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .upload-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background-color: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .upload-icon:hover {
+            background-color: #4f46e5;
+            transform: scale(1.1);
+        }
+        #file-input {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -114,27 +152,20 @@
                 <!-- Kullanıcı Menüsü -->
                 <div class="relative" id="user-menu">
                     <button id="user-menu-button" class="flex items-center space-x-3 focus:outline-none">
-                        @if (!string.IsNullOrEmpty(ViewData["UserProfileImage"]?.ToString()))
-                        {
-                            <img src="@ViewData["UserProfileImage"]" alt="Profil Resmi" class="w-8 h-8 rounded-full object-cover border-2 border-white shadow" onerror="this.src='/images/profiles/default.png'; this.onerror=null;" />
-                        }
-                        else
-                        {
-                            <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white">
-                                @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
-                                {
-                                    @(ViewData["UserFullName"].ToString()[0])
-                                }
-                                else
-                                {
-                                    @("U")
-                                }
-                            </div>
-                        }
-                        <span class="text-sm font-medium text-gray-700">
-                            @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
+                        <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white">
+                            @if (Model != null && !string.IsNullOrEmpty(Model.FirstName))
                             {
-                                @ViewData["UserFullName"]
+                                @Model.FirstName[0]
+                            }
+                            else
+                            {
+                                @("U")
+                            }
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">
+                            @if (Model != null)
+                            {
+                                @Model.FullName
                             }
                             else
                             {
@@ -168,13 +199,13 @@
         <nav class="px-4 py-4">
             <ul class="space-y-1">
                 <li>
-                    <a href="/Dashboard" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary-50 text-primary-600">
+                    <a href="/Dashboard" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
                         <i class="fas fa-home text-lg"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/Profile" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <a href="/Profile" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary-50 text-primary-600">
                         <i class="fas fa-user text-lg"></i>
                         <span>Profil</span>
                     </a>
@@ -229,210 +260,183 @@
     <main id="main-content" class="pt-16 lg:pl-64 pl-0 min-h-screen transition-all duration-300 ease-in-out bg-gray-50">
         <div class="p-6">
             <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Hoşgeldin, @ViewData["UserFullName"]!</h1>
-                <p class="text-sm text-gray-600">Projelerinizi ve görevlerinizi kolayca yönetin</p>
+                <h1 class="text-2xl font-bold text-gray-900">Profil Bilgilerim</h1>
+                <p class="text-sm text-gray-600">Kişisel bilgilerinizi güncelleyebilir ve profil resminizi değiştirebilirsiniz</p>
             </div>
 
-            <!-- Özet Kartları -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Aktif Projeler -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-900">Aktif Projeler</h3>
-                        <span class="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-50 text-primary-500">
-                            <i class="fas fa-folder-open"></i>
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-3xl font-bold text-gray-900">12</span>
-                        <span class="text-sm font-medium text-green-500 flex items-center">
-                            <i class="fas fa-arrow-up mr-1"></i> 8%
-                        </span>
-                    </div>
+            <!-- Başarı Mesajı -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+                    <p>@TempData["SuccessMessage"]</p>
                 </div>
+            }
 
-                <!-- Görevler -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-900">Görevler</h3>
-                        <span class="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
-                            <i class="fas fa-tasks"></i>
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-3xl font-bold text-gray-900">48</span>
-                        <div class="flex flex-col text-xs">
-                            <span class="text-green-500 font-medium">24 Tamamlandı</span>
-                            <span class="text-yellow-500 font-medium">16 Devam Ediyor</span>
-                            <span class="text-red-500 font-medium">8 Gecikmiş</span>
-                        </div>
-                    </div>
+            <!-- Bilgi Mesajı -->
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+                    <p>@TempData["InfoMessage"]</p>
                 </div>
+            }
 
-                <!-- Yaklaşan Tarihler -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-900">Yaklaşan Tarihler</h3>
-                        <span class="h-10 w-10 flex items-center justify-center rounded-full bg-red-50 text-red-500">
-                            <i class="fas fa-calendar-alt"></i>
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-3xl font-bold text-gray-900">5</span>
-                        <div class="text-xs">
-                            <div class="mb-1 text-orange-500 font-medium">3 görev bu hafta</div>
-                            <div class="text-red-500 font-medium">2 görev bugün</div>
-                        </div>
-                    </div>
+            <!-- Hata Mesajı -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                    <p>@TempData["ErrorMessage"]</p>
                 </div>
+            }
 
-                <!-- Ekip Performansı -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-900">Ekip Performansı</h3>
-                        <span class="h-10 w-10 flex items-center justify-center rounded-full bg-green-50 text-green-500">
-                            <i class="fas fa-chart-line"></i>
-                        </span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-3xl font-bold text-gray-900 mb-2">82%</span>
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill bg-green-500" style="width: 82%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Projeler ve Görevler Bölümü -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div class="lg:col-span-2">
-                    <!-- "Proje Oluştur" Bölümü -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-semibold text-lg text-gray-900">Projeleriniz</h3>
-                            <button id="create-project-btn" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg flex items-center transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i> Yeni Proje Oluştur
-                            </button>
-                        </div>
-                        
-                        <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Henüz proje yoksa gösterilecek bölüm -->
-                            <div id="no-projects-message" class="md:col-span-2 text-center py-8">
-                                <div class="mb-4 text-gray-400">
-                                    <i class="fas fa-folder-open text-5xl"></i>
-                                </div>
-                                <h4 class="text-lg font-medium text-gray-700 mb-2">Henüz projeniz bulunmuyor</h4>
-                                <p class="text-gray-500 mb-4">Hemen ilk projenizi oluşturun ve görevlerinizi yönetmeye başlayın.</p>
-                                <button class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg inline-flex items-center transition-colors duration-200">
-                                    <i class="fas fa-plus mr-2"></i> Yeni Proje Oluştur
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1">
-                    <!-- Yaklaşan Görevler -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-lg text-gray-900">Yaklaşan Görevler</h3>
-                            <a href="#" class="text-primary-500 hover:text-primary-600 text-sm font-medium">Tümünü Gör</a>
+                    <!-- Profil Resmi ve Bilgiler -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex flex-col items-center mb-6">
+                            <div class="profile-image-container mb-4">
+                                @if (Model != null && !string.IsNullOrEmpty(Model.ProfileImageUrl))
+                                {
+                                    <img id="profile-preview" src="@Model.ProfileImageUrl" alt="Profil Resmi" class="profile-image" onerror="this.src='/images/profiles/default.png'">
+                                }
+                                else
+                                {
+                                    <img id="profile-preview" src="/images/profiles/default.png" alt="Profil Resmi" class="profile-image">
+                                }
+                                <label for="file-input" class="upload-icon">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-800">
+                                @if (Model != null)
+                                {
+                                    @Model.FullName
+                                }
+                                else
+                                {
+                                    <span>Kullanıcı</span>
+                                }
+                            </h2>
+                            <p class="text-gray-500">
+                                @if (Model != null)
+                                {
+                                    @Model.Email
+                                }
+                                else
+                                {
+                                    <span>kullanici@example.com</span>
+                                }
+                            </p>
                         </div>
                         
-                        <div class="space-y-4">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                        <div class="border-t border-gray-100 pt-4">
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Üyelik Başlangıcı</span>
+                                    <span class="text-gray-800 font-medium">@DateTime.Now.AddMonths(-1).ToString("dd.MM.yyyy")</span>
                                 </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">Web sitesi tasarımı</h4>
-                                    <p class="text-xs text-gray-500">Bugün - 17:00</p>
-                                    <div class="mt-1 flex items-center">
-                                        <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">Gecikmiş</span>
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Tamamlanan Görevler</span>
+                                    <span class="text-gray-800 font-medium">24</span>
                                 </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
-                                    <i class="fas fa-clock text-yellow-500"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">İçerik güncelleme</h4>
-                                    <p class="text-xs text-gray-500">Yarın - 10:30</p>
-                                    <div class="mt-1 flex items-center">
-                                        <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Yaklaşıyor</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                                    <i class="fas fa-check text-green-500"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900">SEO optimizasyonu</h4>
-                                    <p class="text-xs text-gray-500">3 Gün Sonra</p>
-                                    <div class="mt-1 flex items-center">
-                                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Zamanında</span>
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Aktif Projeler</span>
+                                    <span class="text-gray-800 font-medium">5</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <!-- Profil Bilgileri Formu -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Profil Bilgilerini Düzenle</h3>
+                        
+                        <form asp-action="UpdateProfileInfo" asp-controller="Profile" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            @if (Model != null)
+                            {
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="ProfileImageUrl" />
+                            }
+                            
+                            <!-- Profil resmi yükleme alanı -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Profil Resmi</label>
+                                <div class="flex items-center">
+                                    <div class="relative w-16 h-16 mr-4 border rounded-full overflow-hidden shadow-sm">
+                                        <img id="profile-preview-small" src="@(Model?.ProfileImageUrl ?? "/images/profiles/default.png")" alt="Profil Önizleme" class="w-full h-full object-cover" />
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="file-input" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded cursor-pointer inline-block mb-1">
+                                            <i class="fas fa-upload mr-1"></i> Resim Seç
+                                        </label>
+                                        <input type="file" id="file-input" name="profileImage" accept="image/*" onchange="previewImage(this)" class="hidden" />
+                                        <p class="text-xs text-gray-500">JPG, PNG veya GIF - maks. 2MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label asp-for="FirstName" class="block text-sm font-medium text-gray-700 mb-1">Ad</label>
+                                        <input asp-for="FirstName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400" value="@(Model?.FirstName)" />
+                                        <span asp-validation-for="FirstName" class="text-red-500 text-xs"></span>
+                                    </div>
+                                    <div>
+                                        <label asp-for="LastName" class="block text-sm font-medium text-gray-700 mb-1">Soyad</label>
+                                        <input asp-for="LastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400" value="@(Model?.LastName)" />
+                                        <span asp-validation-for="LastName" class="text-red-500 text-xs"></span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label asp-for="Email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input asp-for="Email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400" value="@(Model?.Email)" />
+                                    <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
+                                </div>
+                                
+                                <div class="flex justify-end pt-4">
+                                    <button type="submit" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors duration-200">
+                                        Profil Bilgilerini Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     
-                    <!-- İş Dağılımı -->
+                    <!-- Şifre Değiştirme Formu - Ayrı form olarak -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-lg text-gray-900">İş Dağılımı</h3>
-                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Şifre Değiştir</h3>
                         
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <span class="text-sm font-medium">Ahmet Yılmaz</span>
-                                </div>
-                                <div class="w-24">
-                                    <div class="progress-bar">
-                                        <div class="progress-bar-fill bg-primary-500" style="width: 75%"></div>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-semibold text-gray-500">6/8</span>
-                            </div>
+                        <form asp-action="UpdatePassword" asp-controller="Profile" method="post">
+                            @Html.AntiForgeryToken()
+                            @if (Model != null)
+                            {
+                                <input type="hidden" asp-for="Id" />
+                            }
                             
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500 mr-3">
-                                        <i class="fas fa-user"></i>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label asp-for="NewPassword" class="block text-sm font-medium text-gray-700 mb-1">Yeni Şifre</label>
+                                        <input asp-for="NewPassword" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                        <span asp-validation-for="NewPassword" class="text-red-500 text-xs"></span>
                                     </div>
-                                    <span class="text-sm font-medium">Ayşe Demir</span>
-                                </div>
-                                <div class="w-24">
-                                    <div class="progress-bar">
-                                        <div class="progress-bar-fill bg-indigo-500" style="width: 50%"></div>
+                                    <div>
+                                        <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Şifre Tekrar</label>
+                                        <input asp-for="ConfirmPassword" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                        <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs"></span>
                                     </div>
                                 </div>
-                                <span class="text-xs font-semibold text-gray-500">4/8</span>
+                                
+                                <div class="flex justify-end pt-4">
+                                    <button type="submit" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors duration-200">
+                                        Şifreyi Değiştir
+                                    </button>
+                                </div>
                             </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-500 mr-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <span class="text-sm font-medium">Mehmet Kaya</span>
-                                </div>
-                                <div class="w-24">
-                                    <div class="progress-bar">
-                                        <div class="progress-bar-fill bg-green-500" style="width: 90%"></div>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-semibold text-gray-500">9/10</span>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -533,6 +537,23 @@
             window.addEventListener('resize', handleResize);
             handleResize();
         });
+        
+        // Profil resmi ön izleme
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Ana profil resmi önizlemesi
+                    document.getElementById('profile-preview').src = e.target.result;
+                    // Küçük önizleme için
+                    document.getElementById('profile-preview-small').src = e.target.result;
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+                console.log('Resim seçildi:', input.files[0].name);
+            }
+        }
     </script>
 </body>
 </html> 

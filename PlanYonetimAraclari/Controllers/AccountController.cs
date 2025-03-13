@@ -32,8 +32,9 @@ namespace PlanYonetimAraclari.Controllers
         }
         
         // GET endpoint basitleştirilmiş giriş için
-        [HttpGet("/Account/DirectLogin")]
-        public async Task<IActionResult> DirectLogin(string email, string password, bool rememberMe = false)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DirectLogin(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -43,73 +44,50 @@ namespace PlanYonetimAraclari.Controllers
 
             _logger.LogInformation($"DirectLogin denemesi: {email}");
             
-            // Sabit test kullanıcıları - gerçek uygulamada asla böyle yapmayın!
             bool isValidLogin = false;
             string userName = "";
             string userRole = "User";
             
-            // Admin kullanıcısı
-            if (email == "admin@plan345.com" && password == "Admin123!")
+            try
             {
-                isValidLogin = true;
-                userName = "Admin Kullanıcı";
-                userRole = "Admin";
-            }
-            // Test kullanıcıları
-            else if (email == "user@plan345.com" && password == "User123!")
-            {
-                isValidLogin = true;
-                userName = "Test Kullanıcısı";
-            }
-            else if (email == "demo@plan345.com" && password == "Demo123!")
-            {
-                isValidLogin = true;
-                userName = "Demo Kullanıcı";
-            }
-            else
-            {
-                // Sabit kullanıcılarda bulunamadıysa veritabanından kontrol et
-                try
+                // Kullanıcıyı e-posta adresine göre bul
+                var user = await _userManager.FindByEmailAsync(email);
+                
+                if (user != null)
                 {
-                    // Kullanıcıyı e-posta adresine göre bul
-                    var user = await _userManager.FindByEmailAsync(email);
+                    _logger.LogInformation($"Kullanıcı veritabanında bulundu: {email}, şifre kontrolü yapılıyor");
                     
-                    if (user != null)
+                    // Şifre kontrolü
+                    var passwordValid = await _userManager.CheckPasswordAsync(user, password);
+                    
+                    if (passwordValid)
                     {
-                        _logger.LogInformation($"Kullanıcı veritabanında bulundu: {email}, şifre kontrolü yapılıyor");
+                        _logger.LogInformation($"Şifre doğrulama başarılı: {email}");
                         
-                        // Şifre kontrolü
-                        var passwordValid = await _userManager.CheckPasswordAsync(user, password);
+                        // Kullanıcı rollerini kontrol et
+                        var roles = await _userManager.GetRolesAsync(user);
                         
-                        if (passwordValid)
-                        {
-                            _logger.LogInformation($"Şifre doğrulama başarılı: {email}");
-                            
-                            // Kullanıcı rolünü kontrol et
-                            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-                            
-                            isValidLogin = true;
-                            userName = $"{user.FirstName} {user.LastName}";
-                            userRole = isAdmin ? "Admin" : "User";
-                            
-                            // Son giriş zamanını güncelle
-                            user.LastLoginTime = DateTime.Now;
-                            await _userManager.UpdateAsync(user);
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"Şifre doğrulama başarısız: {email}");
-                        }
+                        isValidLogin = true;
+                        userName = $"{user.FirstName} {user.LastName}";
+                        userRole = roles.Contains("Admin") ? "Admin" : "User";
+                        
+                        // Son giriş zamanını güncelle
+                        user.LastLoginTime = DateTime.Now;
+                        await _userManager.UpdateAsync(user);
                     }
                     else
                     {
-                        _logger.LogWarning($"Kullanıcı veritabanında bulunamadı: {email}");
+                        _logger.LogWarning($"Şifre doğrulama başarısız: {email}");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError($"Kullanıcı doğrulaması sırasında hata: {ex.Message}");
+                    _logger.LogWarning($"Kullanıcı veritabanında bulunamadı: {email}");
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Kullanıcı doğrulaması sırasında hata: {ex.Message}");
             }
             
             if (isValidLogin)

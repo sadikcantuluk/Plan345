@@ -421,26 +421,62 @@
 <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden lg:hidden"></div>
 
 <script>
-    // Sidebar Toggle
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('sidebar');
-    
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('-translate-x-full');
-    });
-    
-    // User Menu Toggle
-    const userMenuButton = document.getElementById('userMenu');
-    const userMenu = document.getElementById('userDropdown');
-    
-    userMenuButton.addEventListener('click', () => {
-        userMenu.classList.toggle('hidden');
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
-            userMenu.classList.add('hidden');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        if (sidebarToggle && sidebar && overlay) {
+            console.log('Sidebar elements found');
+            
+            sidebarToggle.addEventListener('click', function() {
+                console.log('Sidebar toggle clicked');
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+            
+            // Overlay'a tıklandığında sidebar'ı kapat
+            overlay.addEventListener('click', function() {
+                console.log('Overlay clicked');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+            
+            // Pencere yeniden boyutlandırıldığında
+            window.addEventListener('resize', function() {
+                console.log('Window resized: ' + window.innerWidth);
+                // Genişlik 1024px'den büyükse ve sidebar gizliyse göster
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.add('hidden');
+                } else if (!sidebar.classList.contains('-translate-x-full')) {
+                    // Küçük ekranda ve sidebar açıksa, overlay'ı göster
+                    overlay.classList.remove('hidden');
+                }
+            });
+        } else {
+            console.error('Sidebar elements not found');
+            if (!sidebarToggle) console.error('sidebar-toggle not found');
+            if (!sidebar) console.error('sidebar not found');
+            if (!overlay) console.error('overlay not found');
+        }
+        
+        // User Menu Toggle
+        const userMenuButton = document.getElementById('userMenu');
+        const userMenu = document.getElementById('userDropdown');
+        
+        if (userMenuButton && userMenu) {
+            userMenuButton.addEventListener('click', function() {
+                userMenu.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            });
         }
     });
 </script>

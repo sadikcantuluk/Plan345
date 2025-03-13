@@ -1,0 +1,210 @@
+@model EditUserViewModel
+@{
+    ViewData["Title"] = "Kullanıcı Düzenle - Plan345";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        secondary: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-tasks text-primary-500 text-2xl"></i>
+                    <span class="text-xl font-bold text-secondary">Plan<span class="text-primary-500">345</span> Admin</span>
+                </div>
+                
+                <!-- Kullanıcı Bilgileri ve Çıkış -->
+                <div class="flex items-center space-x-4">
+                    <a href="/Admin/Index" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-arrow-left mr-2"></i> Admin Paneline Dön
+                    </a>
+                    <a href="/Account/SimpleLogout" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Ana İçerik -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Başlık -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Kullanıcı Düzenle</h1>
+            <p class="mt-1 text-sm text-gray-600">Kullanıcı bilgilerini güncelleyin.</p>
+        </div>
+        
+        <!-- Hata Mesajı -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <div asp-validation-summary="All" class="text-sm text-red-700"></div>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        <!-- Form -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="p-6">
+                <form asp-action="EditUser" method="post" class="space-y-6">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <!-- Ad -->
+                        <div>
+                            <label asp-for="FirstName" class="block text-sm font-medium text-gray-700">Ad</label>
+                            <div class="mt-1">
+                                <input asp-for="FirstName" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Adınız">
+                            </div>
+                            <span asp-validation-for="FirstName" class="text-xs text-red-600"></span>
+                        </div>
+                        
+                        <!-- Soyad -->
+                        <div>
+                            <label asp-for="LastName" class="block text-sm font-medium text-gray-700">Soyad</label>
+                            <div class="mt-1">
+                                <input asp-for="LastName" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Soyadınız">
+                            </div>
+                            <span asp-validation-for="LastName" class="text-xs text-red-600"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label asp-for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
+                        <div class="mt-1">
+                            <input asp-for="Email" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="ornek@sirket.com">
+                        </div>
+                        <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+                    </div>
+                    
+                    <!-- Rol Seçimi -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kullanıcı Rolü</label>
+                        <div class="mt-1">
+                            <select id="userRole" name="userRole" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+                                <option value="User">Kullanıcı</option>
+                                <option value="Admin">Yönetici</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-6 border-gray-200" />
+                    
+                    <div class="bg-gray-50 p-4 rounded-md">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Şifre Değiştirme</h3>
+                        <p class="text-sm text-gray-600 mb-4">Kullanıcının şifresini değiştirmek istiyorsanız, yeni şifreyi aşağıya girin. Aksi takdirde bu alanları boş bırakın.</p>
+                        
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <!-- Yeni Şifre -->
+                            <div>
+                                <label asp-for="NewPassword" class="block text-sm font-medium text-gray-700">Yeni Şifre</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <input asp-for="NewPassword" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="••••••••">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <button type="button" onclick="togglePassword('NewPassword')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="NewPassword" class="text-xs text-red-600"></span>
+                            </div>
+                            
+                            <!-- Şifre Tekrar -->
+                            <div>
+                                <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Şifre Tekrar</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <input asp-for="ConfirmPassword" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="••••••••">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <button type="button" onclick="togglePassword('ConfirmPassword')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-xs text-red-600"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end pt-6">
+                        <a href="/Admin/Index" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 mr-4">
+                            İptal
+                        </a>
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white mt-12 py-6 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">
+                &copy; @DateTime.Now.Year Plan345 - Tüm hakları saklıdır.
+            </p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = input.parentElement.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html> 

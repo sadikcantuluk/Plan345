@@ -1,0 +1,194 @@
+/* Temel değişkenler */
+:root {
+    --primary-color-50: #eef2ff;
+    --primary-color-100: #e0e7ff;
+    --primary-color-200: #c7d2fe;
+    --primary-color-300: #a5b4fc;
+    --primary-color-400: #818cf8;
+    --primary-color-500: #6366f1;
+    --primary-color-600: #4f46e5;
+    --primary-color-700: #4338ca;
+    --primary-color-800: #3730a3;
+    --primary-color-900: #312e81;
+    --primary-color-950: #1e1b4b;
+    --secondary-color: #0f172a;
+    --accent-color: #f59e0b;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+}
+
+/* Tipografi */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    color: #1f2937;
+}
+
+/* Navigasyon stilleri */
+.nav-link {
+    position: relative;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: var(--primary-color-500);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Bileşenler */
+.btn-custom {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card {
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+.pricing-card {
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.testimonial-card {
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+/* Hero Section Stilleri */
+.hero-section {
+    position: relative;
+    background-color: var(--primary-color-950);
+}
+
+.text-gradient-light {
+    background: linear-gradient(to right, #fff, var(--primary-color-300));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+/* Dashboard Mockup Stilleri */
+.perspective {
+    perspective: 1500px;
+}
+
+.rotate-x-5 {
+    transform: rotateX(5deg);
+}
+
+.rotate-x-80 {
+    transform: rotateX(80deg);
+}
+
+/* Testimonial Slider Özel Stilleri */
+.testimonials-container {
+    position: relative;
+    overflow: hidden;
+    padding: 0 4px;
+}
+
+.testimonials-slider {
+    display: flex;
+    transition: transform 300ms ease-in-out;
+}
+
+/* Renk yardımcıları */
+.text-primary { color: var(--primary-color-500); }
+.text-secondary { color: var(--secondary-color); }
+.text-success { color: var(--success-color); }
+.text-danger { color: var(--danger-color); }
+.text-warning { color: var(--warning-color); }
+
+/* Özel stiller */
+.text-gradient {
+    background: linear-gradient(to right, var(--primary-color-500), #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.bg-gradient-hero {
+    background: linear-gradient(135deg, var(--primary-color-50) 0%, var(--primary-color-100) 100%);
+}
+
+.footer-gradient {
+    background: linear-gradient(180deg, var(--primary-color-900) 0%, var(--secondary-color) 100%);
+}
+
+/* Düzen yardımcıları */
+.shadow-soft {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-card {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
+}
+
+/* Düzen yardımcıları */
+.container-fluid {
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Duyarlı ekran boyutu noktaları */
+@media (min-width: 640px) {
+    .container {
+        max-width: 640px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 768px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1024px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .container {
+        max-width: 1280px;
+    }
+}

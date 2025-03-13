@@ -1,0 +1,153 @@
+@model PlanYonetimAraclari.Models.LoginViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Giriş Yap - Plan345";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center mb-6">
+                    <i class="fas fa-tasks text-blue-500 text-2xl"></i>
+                    <a href="/" class="text-2xl font-bold tracking-tight text-gray-900 ml-2">Plan<span class="text-blue-500">345</span></a>
+                </div>
+                <h2 class="text-2xl font-semibold text-gray-900">Hoş Geldiniz</h2>
+                <p class="text-gray-600 text-sm mt-2">Hesabınıza giriş yapın</p>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="mb-4 p-4 rounded-md bg-green-50 border border-green-200">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <p class="text-green-800">@TempData["SuccessMessage"]</p>
+                    </div>
+                </div>
+            }
+            
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                        <p class="text-red-800">@TempData["ErrorMessage"]</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Manuel JS hata mesajı alanı -->
+            <div id="error-message" class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 hidden">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <p class="text-red-800" id="error-text">Lütfen kullanıcı adı ve şifrenizi kontrol edin.</p>
+                </div>
+            </div>
+
+            <!-- Basit HTML Form - ID eklendi -->
+            <form id="login-form" asp-controller="Account" asp-action="Login" method="post">
+                <!-- Anti-forgery token -->
+                @Html.AntiForgeryToken()
+                
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                
+                <div class="mb-4">
+                    <label for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
+                    <input type="email" id="Email" name="Email" 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                        placeholder="ornek@sirket.com" required>
+                    <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label for="Password" class="block text-sm font-medium text-gray-700">Şifre</label>
+                    <div class="mt-1 relative">
+                        <input type="password" id="Password" name="Password" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="••••••••" required>
+                        <button type="button" onclick="togglePassword('Password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="far fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="RememberMe" name="RememberMe" value="true" 
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="RememberMe" class="ml-2 block text-sm text-gray-700">Beni hatırla</label>
+                    </div>
+                    <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">Şifremi unuttum</a>
+                </div>
+
+                <div>
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Giriş Yap
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-8 text-center text-sm text-gray-600">
+                Hesabınız yok mu?
+                <a href="/Account/Register" class="font-medium text-blue-600 hover:text-blue-500">Hemen ücretsiz kaydolun</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Form submit işlemini yönlendir
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('Email').value;
+            const password = document.getElementById('Password').value;
+            const rememberMe = document.getElementById('RememberMe').checked;
+            
+            // Boş alan kontrolü
+            if (!email || !password) {
+                const errorBox = document.getElementById('error-message');
+                const errorText = document.getElementById('error-text');
+                errorText.textContent = 'E-posta ve şifre alanları doldurulmalıdır.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+            
+            // Test için bazı kullanıcılar:
+            // admin@plan345.com / Admin123!
+            // user@plan345.com / User123!
+            // demo@plan345.com / Demo123!
+            
+            // DirectLogin endpoint'ine yönlendir
+            window.location.href = `/Account/DirectLogin?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&rememberMe=${rememberMe}`;
+        });
+    </script>
+</body>
+</html> 

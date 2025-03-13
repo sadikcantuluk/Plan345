@@ -1,0 +1,786 @@
+﻿@{
+    ViewData["Title"] = "Plan345 - Modern Proje Yönetimi";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1', /* primary color */
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        secondary: '#0f172a',
+                        accent: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -3px rgba(0, 0, 0, 0.04)',
+                        'card': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/Template/src/styles/main.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm fixed w-full z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-tasks text-primary-500 text-2xl"></i>
+                <span class="text-2xl font-bold tracking-tight text-secondary">Plan<span class="text-primary-500">345</span></span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#features" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">Özellikler</a>
+                <a href="#about" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">Hakkımızda</a>
+                <a href="#team" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">Ekibimiz</a>
+                <a href="#testimonials" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">Referanslar</a>
+                <a href="#pricing" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">Fiyatlar</a>
+                <a href="#contact" class="text-gray-700 hover:text-primary-500 font-medium text-lg tracking-wide transition-colors duration-300 ease-in-out">İletişim</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a asp-controller="Account" asp-action="Login" class="btn-custom bg-white border border-gray-200 hover:border-primary-500 text-gray-700 font-medium px-6 py-2 rounded-lg shadow-sm">Giriş Yap</a>
+                <a asp-controller="Account" asp-action="Register" class="btn-custom bg-primary-500 text-white hover:bg-primary-600 font-medium px-6 py-2 rounded-lg shadow-sm">Ücretsiz Başla</a>
+                <!-- Mobil Menü Butonu -->
+                <button class="md:hidden mobile-menu-btn">
+                    <i class="fas fa-bars text-gray-700 text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobil Menü -->
+        <div class="mobile-menu hidden md:hidden px-6 py-4 bg-white border-t border-gray-100">
+            <a href="#features" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Özellikler</a>
+            <a href="#about" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Hakkımızda</a>
+            <a href="#team" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Ekibimiz</a>
+            <a href="#testimonials" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Referanslar</a>
+            <a href="#pricing" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Fiyatlar</a>
+            <a href="#contact" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">İletişim</a>
+        </div>
+    </nav>
+    <div class="h-20"></div>
+
+    <!-- Hero Section -->
+    <section class="relative hero-section py-32 overflow-hidden">
+        <!-- Dashboard görselini arka plan olarak kullan -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-primary-900 bg-opacity-75 backdrop-blur-sm"></div>
+            <img src="~/Template/src/assets/images/dashboard.png" alt="" class="w-full h-full object-cover opacity-30" />
+        </div>
+        
+        <!-- Ana içerik -->
+        <div class="container relative z-10 mx-auto px-4">
+            <div class="text-center max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl font-bold mb-8 text-white">
+                    <span class="text-gradient-light">Modern</span> Proje Yönetimi Platformu
+                </h1>
+                <p class="text-xl text-gray-200 mb-10 max-w-3xl mx-auto">
+                    Ekibinizle birlikte projelerinizi kolayca yönetin, görevleri organize edin ve verimliliğinizi artırın.
+                </p>
+                
+                <!-- Aksiyon butonları -->
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a asp-controller="Account" asp-action="Register" class="btn-custom bg-primary-500 text-white hover:bg-primary-600 px-8 py-3 rounded-lg font-medium shadow-md">
+                        Ücretsiz Deneyin
+                    </a>
+                    <a href="#" class="btn-custom bg-white text-primary-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-medium shadow-md flex items-center justify-center">
+                        <i class="fas fa-play text-primary-500 mr-2"></i> Demo İzleyin
+                    </a>
+                </div>
+                
+                <!-- Dashboard özellikleri vurgusu -->
+                <div class="grid grid-cols-3 gap-4 md:gap-8 mt-16 text-white">
+                    <div class="backdrop-blur-md bg-white bg-opacity-10 p-4 rounded-lg">
+                        <div class="text-3xl mb-2"><i class="fas fa-chart-bar"></i></div>
+                        <h4 class="font-semibold">Gerçek Zamanlı Analitik</h4>
+                    </div>
+                    <div class="backdrop-blur-md bg-white bg-opacity-10 p-4 rounded-lg">
+                        <div class="text-3xl mb-2"><i class="fas fa-users"></i></div>
+                        <h4 class="font-semibold">İşbirliği Araçları</h4>
+                    </div>
+                    <div class="backdrop-blur-md bg-white bg-opacity-10 p-4 rounded-lg">
+                        <div class="text-3xl mb-2"><i class="fas fa-calendar-check"></i></div>
+                        <h4 class="font-semibold">Görev Takibi</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Öne Çıkan Özellikler</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">İşlerinizi daha verimli hale getirmek için geliştirilmiş yenilikçi araçlar</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="feature-card p-8 bg-white rounded-xl shadow-soft border border-gray-100 text-center">
+                    <div class="bg-primary-50 w-16 h-16 flex items-center justify-center rounded-xl mx-auto mb-6">
+                        <i class="fas fa-columns text-2xl text-primary-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Sürükle & Bırak Kanban</h3>
+                    <p class="text-gray-600">Görevlerinizi kolayca organize edin ve iş akışınızı görselleştirin.</p>
+                </div>
+                <div class="feature-card p-8 bg-white rounded-xl shadow-soft border border-gray-100 text-center">
+                    <div class="bg-primary-50 w-16 h-16 flex items-center justify-center rounded-xl mx-auto mb-6">
+                        <i class="fas fa-users text-2xl text-primary-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Ekip İşbirliği</h3>
+                    <p class="text-gray-600">Ekibinizle gerçek zamanlı iletişim kurun ve projeleri birlikte yönetin.</p>
+                </div>
+                <div class="feature-card p-8 bg-white rounded-xl shadow-soft border border-gray-100 text-center">
+                    <div class="bg-primary-50 w-16 h-16 flex items-center justify-center rounded-xl mx-auto mb-6">
+                        <i class="fas fa-chart-line text-2xl text-primary-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">İlerleme Takibi</h3>
+                    <p class="text-gray-600">Proje ilerlemesini ölçün ve detaylı raporlar alın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Hakkımızda</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Yenilikçi çözümlerimizle işletmenizi geleceğe taşıyoruz</p>
+</div>
+
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <!-- Sol Taraf - İstatistikler -->
+                <div class="lg:col-span-4 space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-users text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-xl text-gray-900">10K+</h4>
+                                <p class="text-gray-600">Aktif Kullanıcı</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-project-diagram text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-xl text-gray-900">50K+</h4>
+                                <p class="text-gray-600">Tamamlanan Proje</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-chart-line text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-xl text-gray-900">%98</h4>
+                                <p class="text-gray-600">Müşteri Memnuniyeti</p>
+                            </div>
+                        </div>
+                        <div class="h-1.5 w-full bg-gray-100 rounded-full mt-4">
+                            <div class="h-1.5 w-[98%] bg-primary-500 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orta - Ana İçerik -->
+                <div class="lg:col-span-8 bg-white rounded-2xl shadow-soft p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-primary-50 rounded-full -mr-20 -mt-20"></div>
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-primary-50 rounded-full -ml-16 -mb-16"></div>
+                    <div class="relative">
+                        <h3 class="text-2xl font-bold mb-6 text-gray-900">Modern Proje Yönetiminde <span class="text-primary-500">Güvenilir Çözüm Ortağınız</span></h3>
+                        <p class="text-gray-600 mb-8 leading-relaxed">2020 yılından bu yana, işletmelerin dijital dönüşüm süreçlerinde yanlarında olarak, proje yönetimi alanında yenilikçi çözümler sunuyoruz. Deneyimli ekibimiz ve sürekli gelişen teknolojik altyapımız ile müşterilerimizin iş süreçlerini optimize ediyor, verimliliği artırıyor ve başarılarına katkıda bulunuyoruz.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="bg-primary-50 w-10 h-10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-primary-500"></i>
+                                    </div>
+                                    <h4 class="font-semibold">Güvenilir</h4>
+                                </div>
+                                <p class="text-gray-600 text-sm">En yüksek güvenlik standartlarıyla verilerinizi koruyoruz</p>
+                            </div>
+                            <div class="p-5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="bg-primary-50 w-10 h-10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-rocket text-primary-500"></i>
+                                    </div>
+                                    <h4 class="font-semibold">Yenilikçi</h4>
+                                </div>
+                                <p class="text-gray-600 text-sm">Sürekli gelişen teknolojilerle çözümler üretiyoruz</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Ekibimiz</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Deneyimli ve tutkulu ekibimizle sizlere en iyi hizmeti sunuyoruz</p>
+            </div>
+            <div class="relative team-container">
+                <div class="overflow-hidden">
+                    <div class="flex transition-transform duration-300 ease-in-out team-slider">
+                        <!-- Ekip Üyesi 1 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=11" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Ahmet Yılmaz</h4>
+                                <p class="text-primary-500 mb-3">CEO & Kurucu</p>
+                                <p class="text-gray-600 text-sm mb-4">10+ yıl teknoloji ve proje yönetimi deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 2 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=12" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Ayşe Demir</h4>
+                                <p class="text-primary-500 mb-3">Ürün Müdürü</p>
+                                <p class="text-gray-600 text-sm mb-4">8+ yıl ürün geliştirme deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 3 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=13" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Mehmet Kaya</h4>
+                                <p class="text-primary-500 mb-3">Baş Mühendis</p>
+                                <p class="text-gray-600 text-sm mb-4">12+ yıl yazılım geliştirme deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 4 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=14" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Zeynep Arslan</h4>
+                                <p class="text-primary-500 mb-3">UX Tasarımcısı</p>
+                                <p class="text-gray-600 text-sm mb-4">6+ yıl kullanıcı deneyimi tasarımı</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-dribbble"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 5 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=15" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Can Öztürk</h4>
+                                <p class="text-primary-500 mb-3">Pazarlama Müdürü</p>
+                                <p class="text-gray-600 text-sm mb-4">7+ yıl dijital pazarlama deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 6 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=16" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Elif Yıldız</h4>
+                                <p class="text-primary-500 mb-3">Müşteri Başarı Yöneticisi</p>
+                                <p class="text-gray-600 text-sm mb-4">5+ yıl müşteri ilişkileri deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 7 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=17" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Burak Şahin</h4>
+                                <p class="text-primary-500 mb-3">Frontend Geliştirici</p>
+                                <p class="text-gray-600 text-sm mb-4">4+ yıl web geliştirme deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 8 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=18" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Selin Aydın</h4>
+                                <p class="text-primary-500 mb-3">Backend Geliştirici</p>
+                                <p class="text-gray-600 text-sm mb-4">6+ yıl sistem mimarisi deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ekip Üyesi 9 -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="https://i.pravatar.cc/128?img=19" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Deniz Korkmaz</h4>
+                                <p class="text-primary-500 mb-3">DevOps Mühendisi</p>
+                                <p class="text-gray-600 text-sm mb-4">5+ yıl altyapı yönetimi deneyimi</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 focus:outline-none team-prev-btn z-10">
+                    <i class="fas fa-chevron-left text-gray-600"></i>
+                </button>
+                <button class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 focus:outline-none team-next-btn z-10">
+                    <i class="fas fa-chevron-right text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+     <!-- Testimonials Section -->
+     <section id="testimonials" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Müşterilerimiz Ne Diyor?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Platformumuzdan memnun kalan müşterilerimizin deneyimleri</p>
+            </div>
+            <div class="relative testimonials-container">
+                <div class="overflow-hidden">
+                    <div class="flex transition-transform duration-300 ease-in-out testimonials-slider">
+                        <div class="testimonial-card bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-soft flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="flex mb-6">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6">"Plan345 ile projelerimizi çok daha etkili yönetiyoruz. Ekip içi iletişimimiz ve verimliliğimiz arttı."</p>
+                            <div class="flex items-center">
+                                <img src="https://i.pravatar.cc/60?img=1" alt="Avatar" class="w-12 h-12 rounded-full mr-4">
+                                <div>
+                                    <h4 class="font-semibold">Ayşe Yılmaz</h4>
+                                    <p class="text-gray-500">Proje Yöneticisi, Tech Co.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-soft flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="flex mb-6">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star-half-alt text-yellow-400"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6">"Kullanımı çok kolay ve sezgisel. Artık projelerimizi takip etmek çok daha kolay."</p>
+                            <div class="flex items-center">
+                                <img src="https://i.pravatar.cc/60?img=2" alt="Avatar" class="w-12 h-12 rounded-full mr-4">
+                                <div>
+                                    <h4 class="font-semibold">Mehmet Demir</h4>
+                                    <p class="text-gray-500">Kurucu, StartupX</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-soft flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="flex mb-6">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6">"Plan345'in analitik özellikleri sayesinde proje performansımızı sürekli iyileştirebiliyoruz. Müşteri memnuniyetimiz %40 arttı."</p>
+                            <div class="flex items-center">
+                                <img src="https://i.pravatar.cc/60?img=3" alt="Avatar" class="w-12 h-12 rounded-full mr-4">
+                                <div>
+                                    <h4 class="font-semibold">Ali Kaya</h4>
+                                    <p class="text-gray-500">Ürün Müdürü, InnoTech</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-soft flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="flex mb-6">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6">"Ekip üyelerimiz arasındaki iş birliği Plan345 ile bambaşka bir boyuta taşındı. Proje teslim sürelerimiz %30 kısaldı."</p>
+                            <div class="flex items-center">
+                                <img src="https://i.pravatar.cc/60?img=4" alt="Avatar" class="w-12 h-12 rounded-full mr-4">
+                                <div>
+                                    <h4 class="font-semibold">Zeynep Arslan</h4>
+                                    <p class="text-gray-500">CTO, Digital Solutions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 focus:outline-none prev-btn z-10">
+                    <i class="fas fa-chevron-left text-gray-600"></i>
+                </button>
+                <button class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 focus:outline-none next-btn z-10">
+                    <i class="fas fa-chevron-right text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Fiyatlandırma Planları</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Her bütçeye uygun, ihtiyaçlarınıza göre ölçeklenebilir çözümler</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="pricing-card bg-white p-8 rounded-xl shadow-card border border-gray-100 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Ücretsiz</h3>
+                            <p class="text-gray-500 text-sm">Bireysel kullanıcılar için</p>
+                        </div>
+                        <span class="bg-gray-100 text-gray-700 py-1 px-3 rounded-full text-sm font-medium">Başlangıç</span>
+                    </div>
+                    <p class="text-4xl font-bold mb-1">₺0<span class="text-gray-500 text-lg">/ay</span></p>
+                    <p class="text-gray-500 mb-6">Her zaman ücretsiz</p>
+                    <ul class="space-y-4 mb-8 flex-grow">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>2 Proje</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>5 Kullanıcı</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Temel Özellikler</li>
+                    </ul>
+                    <a href="#" class="btn-custom bg-white border border-gray-200 hover:border-primary-500 w-full text-center block py-3 rounded-lg font-medium mt-auto">Başlayın</a>
+                </div>
+                <div class="pricing-card bg-white p-8 rounded-xl shadow-card border-2 border-primary-500 transform scale-105 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Pro</h3>
+                            <p class="text-gray-500 text-sm">Küçük ve orta ölçekli ekipler için</p>
+                        </div>
+                        <span class="bg-primary-50 text-primary-700 py-1 px-3 rounded-full text-sm font-medium">Popüler</span>
+                    </div>
+                    <p class="text-4xl font-bold mb-1">₺199<span class="text-gray-500 text-lg">/ay</span></p>
+                    <p class="text-gray-500 mb-6">Yıllık ödeme ile %20 indirim</p>
+                    <ul class="space-y-4 mb-8 flex-grow">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Sınırsız Proje</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>20 Kullanıcı</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Tüm Özellikler</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Öncelikli Destek</li>
+                    </ul>
+                    <a href="#" class="btn-custom bg-primary-500 text-white hover:bg-primary-600 w-full text-center block py-3 rounded-lg font-medium mt-auto">Şimdi Başlayın</a>
+                </div>
+                <div class="pricing-card bg-white p-8 rounded-xl shadow-card border border-gray-100 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Kurumsal</h3>
+                            <p class="text-gray-500 text-sm">Büyük ölçekli organizasyonlar için</p>
+                        </div>
+                        <span class="bg-gray-100 text-gray-700 py-1 px-3 rounded-full text-sm font-medium">Özel</span>
+                    </div>
+                    <p class="text-4xl font-bold mb-1">₺499<span class="text-gray-500 text-lg">/ay</span></p>
+                    <p class="text-gray-500 mb-6">İhtiyaçlarınıza göre özelleştirilebilir</p>
+                    <ul class="space-y-4 mb-8 flex-grow">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Sınırsız Proje</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Sınırsız Kullanıcı</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Özel Destek</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Gelişmiş Güvenlik</li>
+                    </ul>
+                    <a href="#" class="btn-custom bg-white border border-gray-200 hover:border-primary-500 w-full text-center block py-3 rounded-lg font-medium mt-auto">İletişime Geçin</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-primary-50 opacity-50 transform rotate-12 translate-x-1/3"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">İletişime Geçin</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Sorularınız için bize ulaşın, en kısa sürede size dönüş yapalım</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+                <!-- İletişim Bilgileri -->
+                <div class="space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg mb-1">Adres</h4>
+                                <p class="text-gray-600">Atakum Teknoloji Merkezi<br>Samsun, Türkiye</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-phone text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg mb-1">Telefon</h4>
+                                <p class="text-gray-600">+90 212 345 6789</p>
+                                <p class="text-gray-600">+90 212 987 6543</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-soft hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-primary-50 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-envelope text-xl text-primary-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg mb-1">E-posta</h4>
+                                <p class="text-gray-600">info@plan345.com</p>
+                                <p class="text-gray-600">destek@plan345.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-primary-50 hover:bg-primary-100 w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-linkedin-in text-xl text-primary-500"></i>
+                        </a>
+                        <a href="#" class="bg-primary-50 hover:bg-primary-100 w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-twitter text-xl text-primary-500"></i>
+                        </a>
+                        <a href="#" class="bg-primary-50 hover:bg-primary-100 w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-instagram text-xl text-primary-500"></i>
+                        </a>
+                        <a href="#" class="bg-primary-50 hover:bg-primary-100 w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-youtube text-xl text-primary-500"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- İletişim Formu -->
+                <div class="bg-white p-8 rounded-2xl shadow-soft">
+                    <form class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2" for="name">Ad Soyad</label>
+                                <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Adınız Soyadınız">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2" for="email">E-posta</label>
+                                <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="ornek@email.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="subject">Konu</label>
+                            <input type="text" id="subject" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Mesajınızın konusu">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="message">Mesaj</label>
+                            <textarea id="message" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none" placeholder="Mesajınızı buraya yazın..."></textarea>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center space-x-2 text-sm text-gray-600">
+                                <input type="checkbox" class="form-checkbox h-4 w-4 text-primary-500 rounded border-gray-300 focus:ring-primary-500">
+                                <span>KVKK şartlarını okudum ve kabul ediyorum</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="w-full bg-primary-500 text-white py-3 px-6 rounded-lg hover:bg-primary-600 transition-colors duration-300 font-medium">
+                            Mesaj Gönder
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-primary-500 to-primary-700 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Hemen Başlayın</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">14 gün ücretsiz deneyin, kredi kartı gerekmez.</p>
+            <div class="flex justify-center">
+                <a asp-controller="Account" asp-action="Register" class="btn-custom bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-lg inline-block font-medium shadow-md">Ücretsiz Hesap Oluşturun</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-gradient text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tasks text-primary-500 text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-white">Plan<span class="text-primary-300">345</span></span>
+                    </div>
+                    <p class="mb-6 text-gray-300">Modern proje yönetimi platformu ile iş akışınızı optimize edin.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-primary-800 hover:bg-primary-700 rounded-full flex items-center justify-center transition-colors">
+                            <i class="fab fa-twitter text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-primary-800 hover:bg-primary-700 rounded-full flex items-center justify-center transition-colors">
+                            <i class="fab fa-linkedin-in text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-primary-800 hover:bg-primary-700 rounded-full flex items-center justify-center transition-colors">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-6">Ürün</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#features" class="text-gray-300 hover:text-white transition-colors">Özellikler</a></li>
+                        <li><a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Fiyatlandırma</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Güvenlik</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Entegrasyonlar</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-6">Şirket</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Hakkımızda</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Kariyer</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Basın</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-6">İletişim</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope text-primary-300 mt-1 mr-3"></i>
+                            <span class="text-gray-300">iletisim@plan345.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone text-primary-300 mt-1 mr-3"></i>
+                            <span class="text-gray-300">+90 212 345 6789</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-primary-300 mt-1 mr-3"></i>
+                            <span class="text-gray-300">Atakum, Samsun, Türkiye</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-primary-800 mt-12 pt-8">
+                <div class="flex flex-col md:flex-row md:justify-between items-center">
+                    <p class="text-gray-300 mb-4 md:mb-0">&copy; 2025 Plan345. Tüm hakları saklıdır.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">Gizlilik Politikası</a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">Kullanım Koşulları</a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">KVKK</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="~/Template/src/js/main.js"></script>
+</body>
+</html>

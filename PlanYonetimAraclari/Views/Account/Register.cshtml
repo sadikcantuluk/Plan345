@@ -1,0 +1,142 @@
+@model PlanYonetimAraclari.Models.RegisterViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Kayıt Ol - Plan345";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center mb-6">
+                    <i class="fas fa-tasks text-blue-500 text-2xl"></i>
+                    <a href="/" class="text-2xl font-bold tracking-tight text-gray-900 ml-2">Plan<span class="text-blue-500">345</span></a>
+                </div>
+                <h2 class="text-2xl font-semibold text-gray-900">Hesap Oluştur</h2>
+                <p class="text-gray-600 text-sm mt-2">Plan345'e hoş geldiniz</p>
+            </div>
+
+            <!-- Manuel JS hata mesajı alanı -->
+            <div id="error-message" class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 hidden">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <p class="text-red-800" id="error-text">Lütfen form alanlarını kontrol edin.</p>
+                </div>
+            </div>
+
+            <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
+                <!-- Anti-forgery token -->
+                @Html.AntiForgeryToken()
+                
+                <!-- viewmodel'de olmayan returnUrl alanını kaldıralım veya value boş bırakalım -->
+                @if (ViewData["ReturnUrl"] != null)
+                {
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                }
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="FirstName" class="block text-sm font-medium text-gray-700">Ad</label>
+                        <input type="text" id="FirstName" name="FirstName" 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="Adınız" required>
+                        <span asp-validation-for="FirstName" class="text-red-500 text-xs"></span>
+                    </div>
+                    <div>
+                        <label for="LastName" class="block text-sm font-medium text-gray-700">Soyad</label>
+                        <input type="text" id="LastName" name="LastName" 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="Soyadınız" required>
+                        <span asp-validation-for="LastName" class="text-red-500 text-xs"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
+                    <input type="email" id="Email" name="Email" 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                        placeholder="ornek@sirket.com" required>
+                    <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label for="Password" class="block text-sm font-medium text-gray-700">Şifre</label>
+                    <div class="mt-1 relative">
+                        <input type="password" id="Password" name="Password" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="••••••••" required>
+                        <button type="button" onclick="togglePassword('Password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="far fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Şifre Tekrarı</label>
+                    <div class="mt-1 relative">
+                        <input type="password" id="ConfirmPassword" name="ConfirmPassword" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="••••••••" required>
+                        <button type="button" onclick="togglePassword('ConfirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="far fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="AcceptTerms" name="AcceptTerms" value="true" 
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required>
+                        <label for="AcceptTerms" class="ml-2 block text-sm text-gray-700">
+                            <a href="#" class="text-blue-600 hover:underline">Kullanım Koşulları</a>'nı kabul ediyorum
+                        </label>
+                    </div>
+                    <span asp-validation-for="AcceptTerms" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div>
+                    <button type="submit" 
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Kayıt Ol
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-8 text-center text-sm text-gray-600">
+                Zaten hesabınız var mı?
+                <a href="/Account/Login" class="font-medium text-blue-600 hover:text-blue-500">Giriş yapın</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje Detayları</title>
+    <link rel="stylesheet" href="../styles/project.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="project-container">
+        <div class="project-header">
+            <h1 class="project-title">Proje Adı</h1>
+            <p class="project-description">
+                Bu proje ile ilgili genel açıklama ve detaylar burada yer alacak. Projenin amacı, hedefleri ve genel bilgileri buraya eklenebilir.
+            </p>
+        </div>
+
+        <div class="project-board">
+            <div class="board-column todo-column" id="todo">
+                <h2 class="column-header">Yapılacaklar</h2>
+                <div class="tasks-container">
+                    <div class="task-card" draggable="true">
+                        <h3 class="task-title">Görev 1</h3>
+                        <p class="task-description">Bu görev için detaylı açıklama</p>
+                        <div class="task-meta">
+                            <span class="due-date">Son Tarih: 20 Mart</span>
+                            <span class="assigned-to">Ali Y.</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="add-task-btn">+ Yeni Görev Ekle</button>
+            </div>
+
+            <div class="board-column in-progress-column" id="in-progress">
+                <h2 class="column-header">Devam Edenler</h2>
+                <div class="tasks-container">
+                    <div class="task-card" draggable="true">
+                        <h3 class="task-title">Görev 2</h3>
+                        <p class="task-description">Devam eden görev açıklaması</p>
+                        <div class="task-meta">
+                            <span class="due-date">Son Tarih: 25 Mart</span>
+                            <span class="assigned-to">Ayşe K.</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="add-task-btn">+ Yeni Görev Ekle</button>
+            </div>
+
+            <div class="board-column done-column" id="done">
+                <h2 class="column-header">Tamamlananlar</h2>
+                <div class="tasks-container">
+                    <div class="task-card" draggable="true">
+                        <h3 class="task-title">Görev 3</h3>
+                        <p class="task-description">Tamamlanan görev açıklaması</p>
+                        <div class="task-meta">
+                            <span class="due-date">Tamamlandı: 15 Mart</span>
+                            <span class="assigned-to">Mehmet S.</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="add-task-btn">+ Yeni Görev Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/project.js"></script>
+</body>
+</html> 

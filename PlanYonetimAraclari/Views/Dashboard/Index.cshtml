@@ -1,0 +1,448 @@
+@{
+    ViewData["Title"] = "Dashboard - Plan345";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        secondary: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="~/Template/src/styles/dashboard.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    
+   <!-- Header -->
+<header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30">
+    <div class="px-4 py-3 flex items-center justify-between">
+        <!-- Sol Taraf: Sidebar Toggle -->
+        <div class="flex items-center">
+            <button id="sidebar-toggle" class="text-gray-500 hover:text-primary-500 focus:outline-none p-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Orta: Logo -->
+        <div class="absolute left-1/2 transform -translate-x-1/2">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-tasks text-primary-500 text-2xl"></i>
+                <span class="text-xl font-bold text-secondary">Plan<span class="text-primary-500">345</span></span>
+            </div>
+        </div>
+
+        <!-- Sağ Taraf: Kullanıcı Menüsü -->
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button id="notification-btn" class="text-gray-500 hover:text-primary-500 focus:outline-none p-2 relative">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span class="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                </button>
+            </div>
+
+            <div class="relative">
+                <button id="userMenu" class="flex items-center text-gray-600 focus:outline-none">
+                    <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white mr-2">
+                        @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
+                        {
+                            @(ViewData["UserFullName"].ToString()[0])
+                        }
+                        else
+                        {
+                            @("U")
+                        }
+                    </div>
+                    <span class="hidden md:block">
+                        @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
+                        {
+                            @ViewData["UserFullName"]
+                        }
+                        else
+                        {
+                            @("Kullanıcı")
+                        }
+                    </span>
+                    <i class="fas fa-chevron-down ml-2"></i>
+                </button>
+                <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-10">
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-user mr-2"></i> Profil
+                    </a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i> Ayarlar
+                    </a>
+                    <div class="border-t border-gray-100"></div>
+                    <a href="/Account/SimpleLogout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 pt-16 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-20">
+    <div class="px-4 py-6">
+        <nav class="space-y-1">
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-primary-50 text-primary-700">
+                <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-tasks w-5 h-5 mr-3 text-gray-500"></i>
+                <span>Görevler</span>
+            </a>
+
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-calendar-alt w-5 h-5 mr-3 text-gray-500"></i>
+                <span>Takvim</span>
+            </a>
+
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-chart-bar w-5 h-5 mr-3 text-gray-500"></i>
+                <span>Raporlar</span>
+            </a>
+
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-users w-5 h-5 mr-3 text-gray-500"></i>
+                <span>Ekip</span>
+            </a>
+
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-cog w-5 h-5 mr-3 text-gray-500"></i>
+                <span>Ayarlar</span>
+            </a>
+        </nav>
+
+        <div class="mt-10 pt-6 border-t border-gray-100">
+            <div class="bg-blue-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-blue-800 mb-2">Pro'ya Yükselt</h3>
+                <p class="text-xs text-blue-600 mb-3">Daha fazla özellik ve depolama alanı için planınızı yükseltin</p>
+                <a href="#" class="inline-flex justify-center items-center py-2 px-3 text-xs font-medium rounded bg-blue-700 text-white hover:bg-blue-800">
+                    <i class="fas fa-arrow-circle-up mr-1"></i> Planınızı Yükseltin
+                </a>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Ana İçerik -->
+<main class="pt-16 lg:pl-64 min-h-screen">
+    <div class="p-6">
+        <!-- Selamlama -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Hoş Geldiniz, @ViewData["UserFullName"]!</h1>
+            <p class="text-gray-600">İşte bugünkü istatistikleriniz ve yapmanız gerekenler.</p>
+        </div>
+
+        <!-- Kartlar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Kart 1: Görevler -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-xl font-semibold text-gray-900">12</div>
+                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                        <i class="fas fa-tasks text-blue-500"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm">Aktif Görev</p>
+                <div class="mt-2 flex items-center">
+                    <span class="text-green-500 text-xs font-medium"><i class="fas fa-arrow-up mr-1"></i> %8</span>
+                    <span class="text-gray-500 text-xs ml-2">geçen haftadan</span>
+                </div>
+            </div>
+
+            <!-- Kart 2: Tamamlanan -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-xl font-semibold text-gray-900">74</div>
+                    <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm">Tamamlanan</p>
+                <div class="mt-2 flex items-center">
+                    <span class="text-green-500 text-xs font-medium"><i class="fas fa-arrow-up mr-1"></i> %12</span>
+                    <span class="text-gray-500 text-xs ml-2">geçen haftadan</span>
+                </div>
+            </div>
+
+            <!-- Kart 3: Projeler -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-xl font-semibold text-gray-900">7</div>
+                    <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-indigo-500"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm">Aktif Proje</p>
+                <div class="mt-2 flex items-center">
+                    <span class="text-red-500 text-xs font-medium"><i class="fas fa-arrow-down mr-1"></i> %2</span>
+                    <span class="text-gray-500 text-xs ml-2">geçen haftadan</span>
+                </div>
+            </div>
+
+            <!-- Kart 4: Saatler -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-xl font-semibold text-gray-900">32.5</div>
+                    <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+                        <i class="fas fa-clock text-purple-500"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm">Çalışma Saati</p>
+                <div class="mt-2 flex items-center">
+                    <span class="text-green-500 text-xs font-medium"><i class="fas fa-arrow-up mr-1"></i> %4</span>
+                    <span class="text-gray-500 text-xs ml-2">geçen haftadan</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Görevler ve Projeler -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Sol: Görevler Listesi -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-sm">
+                <div class="border-b border-gray-200 p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Görevlerim</h2>
+                        <a href="#" class="text-sm font-medium text-primary-600 hover:text-primary-700">Tümünü Gör</a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görev</th>
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proje</th>
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- Görev 1 -->
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-3 w-3 rounded-full bg-blue-500 mr-2"></div>
+                                            <div class="text-sm font-medium text-gray-900">Login sayfası tasarımı</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-500">Plan345 Yenileme</div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Devam Ediyor</span>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        25 Mart 2025
+                                    </td>
+                                </tr>
+
+                                <!-- Görev 2 -->
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-3 w-3 rounded-full bg-purple-500 mr-2"></div>
+                                            <div class="text-sm font-medium text-gray-900">Veritabanı optimizasyonu</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-500">Plan345 Yenileme</div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Tamamlandı</span>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        20 Mart 2025
+                                    </td>
+                                </tr>
+
+                                <!-- Görev 3 -->
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
+                                            <div class="text-sm font-medium text-gray-900">API entegrasyonu</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-500">MobiTech Projesi</div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">İnceleme</span>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        30 Mart 2025
+                                    </td>
+                                </tr>
+
+                                <!-- Görev 4 -->
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                                            <div class="text-sm font-medium text-gray-900">Test otomasyonu</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-500">QA Altyapısı</div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Rötarlı</span>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        15 Mart 2025
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ: Aktivite ve Notlar -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="border-b border-gray-200 p-4 sm:p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Son Aktiviteler</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Aktivite 1 -->
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-comments text-blue-500"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900"><strong>Ahmet Demir</strong> "Veritabanı optimizasyonu" görevine yorum yaptı.</p>
+                                <p class="text-xs text-gray-500 mt-1">2 saat önce</p>
+                            </div>
+                        </div>
+
+                        <!-- Aktivite 2 -->
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900"><strong>Siz</strong> "Login sayfası tasarımı" görevini tamamladınız.</p>
+                                <p class="text-xs text-gray-500 mt-1">5 saat önce</p>
+                            </div>
+                        </div>
+
+                        <!-- Aktivite 3 -->
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-purple-500"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900"><strong>Zeynep Kaya</strong> "API entegrasyonu" görevine eklendi.</p>
+                                <p class="text-xs text-gray-500 mt-1">1 gün önce</p>
+                            </div>
+                        </div>
+
+                        <!-- Aktivite 4 -->
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-yellow-500"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900"><strong>Sistem</strong> "Test otomasyonu" görevi yaklaşan son tarihe sahip.</p>
+                                <p class="text-xs text-gray-500 mt-1">2 gün önce</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Hızlı Notlar</h2>
+                    
+                    <div class="space-y-3">
+                        <!-- Not 1 -->
+                        <div class="p-3 bg-yellow-50 rounded-lg">
+                            <p class="text-sm text-gray-800">Pazartesi toplantısı için sunum hazırla</p>
+                            <p class="text-xs text-gray-500 mt-1">25 Mart 2025</p>
+                        </div>
+                        
+                        <!-- Not 2 -->
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-gray-800">API dokümantasyonunu gözden geçir</p>
+                            <p class="text-xs text-gray-500 mt-1">26 Mart 2025</p>
+                        </div>
+                        
+                        <!-- Not Ekleme -->
+                        <div class="mt-3">
+                            <button class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700">
+                                <i class="fas fa-plus mr-2"></i> Yeni Not Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Mobil Overlay -->
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden lg:hidden"></div>
+
+<script>
+    // Sidebar Toggle
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+    
+    // User Menu Toggle
+    const userMenuButton = document.getElementById('userMenu');
+    const userMenu = document.getElementById('userDropdown');
+    
+    userMenuButton.addEventListener('click', () => {
+        userMenu.classList.toggle('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
+            userMenu.classList.add('hidden');
+        }
+    });
+</script>
+</body>
+</html> 

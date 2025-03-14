@@ -26,14 +26,11 @@ namespace PlanYonetimAraclari.Services
             _emailSettings = emailSettings.Value;
             _logger = logger;
             
-            // E-posta ayarlarını başlangıçta kontrol et
-            _logger.LogInformation("E-posta ayarları yüklenmiştir:");
-            _logger.LogInformation($"Mail Server: {_emailSettings.MailServer}");
-            _logger.LogInformation($"Mail Port: {_emailSettings.MailPort}");
-            _logger.LogInformation($"Sender Name: {_emailSettings.SenderName}");
-            _logger.LogInformation($"Sender Email: {_emailSettings.SenderEmail}");
-            _logger.LogInformation($"Username: {_emailSettings.UserName}");
-            _logger.LogInformation("Şifre yapılandırılmış: " + (!string.IsNullOrEmpty(_emailSettings.Password) ? "Evet" : "Hayır"));
+            // Log yapılacaksa sadece bir kere ve debug modunda yapılsın 
+            #if DEBUG
+            // Gereksiz logları kaldırdık
+            _logger.LogDebug("E-posta servisi başlatıldı.");
+            #endif
         }
 
         public async Task SendEmailAsync(string email, string subject, string message)

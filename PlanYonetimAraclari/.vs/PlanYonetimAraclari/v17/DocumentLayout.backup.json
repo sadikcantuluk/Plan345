@@ -5,6 +5,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -54,15 +58,28 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAG8AAABcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-14T15:40:44.131Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "AccountController.cs",
               "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
               "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\AccountController.cs",
               "RelativeToolTip": "Controllers\\AccountController.cs",
-              "ViewState": "AgIAAEgBAAAAAAAAAAASwFgBAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAALIAAAAAAAAAAAAkwJsAAABeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T09:46:53.27Z",
+              "WhenOpened": "2025-03-14T15:40:38Z",
               "EditorCaption": ""
             }
           ]

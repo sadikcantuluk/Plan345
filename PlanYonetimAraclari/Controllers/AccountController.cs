@@ -35,13 +35,16 @@ namespace PlanYonetimAraclari.Controllers
             _emailService = emailService;
         }
         
-        // GET endpoint basitleştirilmiş giriş için
+        // DirectLogin endpoint for POST requests
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DirectLogin(string email, string password)
+        public async Task<IActionResult> DirectLogin(string email, string password, bool rememberMe = false)
         {
+            _logger.LogInformation($"DirectLogin POST metodu çağrıldı - Email: {email}, RememberMe: {rememberMe}");
+            
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
+                _logger.LogWarning("DirectLogin - Email veya şifre boş gönderildi");
                 TempData["ErrorMessage"] = "E-posta ve şifre alanları zorunludur.";
                 return RedirectToAction("Login");
             }
@@ -129,14 +132,26 @@ namespace PlanYonetimAraclari.Controllers
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
-            // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            _logger.LogInformation("Login GET metodu çağrıldı.");
             
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            try
+            {
+                // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
+                if (User.Identity.IsAuthenticated)
+                {
+                    _logger.LogInformation("Kullanıcı zaten giriş yapmış, anasayfaya yönlendiriliyor.");
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                ViewData["ReturnUrl"] = returnUrl;
+                _logger.LogInformation("Login sayfası gösteriliyor.");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Login sayfası gösterilirken hata oluştu: {ex.Message}");
+                throw;
+            }
         }
 
         [HttpPost]
@@ -203,14 +218,26 @@ namespace PlanYonetimAraclari.Controllers
         [HttpGet]
         public IActionResult Register(string? returnUrl = null)
         {
-            // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            _logger.LogInformation("Register GET metodu çağrıldı.");
             
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            try
+            {
+                // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
+                if (User.Identity.IsAuthenticated)
+                {
+                    _logger.LogInformation("Kullanıcı zaten giriş yapmış, anasayfaya yönlendiriliyor.");
+                    return RedirectToAction("Index", "Home");
+                }
+                
+                ViewData["ReturnUrl"] = returnUrl;
+                _logger.LogInformation("Register sayfası gösteriliyor.");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Register sayfası gösterilirken hata oluştu: {ex.Message}");
+                throw;
+            }
         }
 
         [HttpPost]

@@ -35,6 +35,19 @@
                 </div>
             </div>
 
+            <!-- ASP.NET Validation Summary -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                        <div class="text-red-800">
+                            <div asp-validation-summary="All" class="text-red-800"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+
             <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
                 <!-- Anti-forgery token -->
                 @Html.AntiForgeryToken()
@@ -48,14 +61,14 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label for="FirstName" class="block text-sm font-medium text-gray-700">Ad</label>
-                        <input type="text" id="FirstName" name="FirstName" 
+                        <input type="text" id="FirstName" name="FirstName" value="@Model?.FirstName"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                             placeholder="Adınız" required>
                         <span asp-validation-for="FirstName" class="text-red-500 text-xs"></span>
                     </div>
                     <div>
                         <label for="LastName" class="block text-sm font-medium text-gray-700">Soyad</label>
-                        <input type="text" id="LastName" name="LastName" 
+                        <input type="text" id="LastName" name="LastName" value="@Model?.LastName"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                             placeholder="Soyadınız" required>
                         <span asp-validation-for="LastName" class="text-red-500 text-xs"></span>
@@ -64,7 +77,7 @@
 
                 <div class="mb-4">
                     <label for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
-                    <input type="email" id="Email" name="Email" 
+                    <input type="email" id="Email" name="Email" value="@Model?.Email"
                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                         placeholder="ornek@sirket.com" required>
                     <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
@@ -112,7 +125,7 @@
                     <div class="bg-white rounded-lg p-6 maxw-md w-full max-h-[80vh] overflow-y-auto">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">Kullanım Koşulları</h3>
-                            <button onclick="closeTerms()" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <button onclick="closeTerms(event)" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -160,7 +173,7 @@
                             </p>
                         </div>
                         <div class="mt-4 text-right">
-                            <button onclick="closeTerms()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="closeTerms(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 Kapat
                             </button>
                         </div>
@@ -183,6 +196,9 @@
     </div>
 
     <script>
+        // Form değerlerini saklamak için değişkenler
+        let savedFormValues = {};
+
         function togglePassword(id) {
             const input = document.getElementById(id);
             const icon = input.nextElementSibling.querySelector('i');
@@ -200,11 +216,33 @@
 
         function showTerms(event) {
             event.preventDefault();
+            
+            // Modal açılmadan önce form değerlerini kaydet
+            savedFormValues = {
+                firstName: document.getElementById('FirstName').value,
+                lastName: document.getElementById('LastName').value,
+                email: document.getElementById('Email').value,
+                password: document.getElementById('Password').value,
+                confirmPassword: document.getElementById('ConfirmPassword').value,
+                acceptTerms: document.getElementById('AcceptTerms').checked
+            };
+            
             document.getElementById('termsModal').classList.remove('hidden');
         }
 
-        function closeTerms() {
+        function closeTerms(event) {
+            event.preventDefault(); // Form gönderimini engelle
             document.getElementById('termsModal').classList.add('hidden');
+            
+            // Modal kapandıktan sonra form değerlerini geri yükle
+            document.getElementById('FirstName').value = savedFormValues.firstName || '';
+            document.getElementById('LastName').value = savedFormValues.lastName || '';
+            document.getElementById('Email').value = savedFormValues.email || '';
+            document.getElementById('Password').value = savedFormValues.password || '';
+            document.getElementById('ConfirmPassword').value = savedFormValues.confirmPassword || '';
+            document.getElementById('AcceptTerms').checked = savedFormValues.acceptTerms || false;
+            
+            return false; // Link tıklamasını engelle
         }
     </script>
 </body>

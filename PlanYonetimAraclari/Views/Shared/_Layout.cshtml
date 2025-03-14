@@ -1,53 +1,372 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    ViewData["Title"] = "Dashboard - Plan345";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - PlanYonetimAraclari</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/PlanYonetimAraclari.styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        secondary: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+        }
+
+        .dashboard-card {
+            transition: all 0.3s ease;
+        }
+
+            .dashboard-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+
+        #sidebar, #main-content {
+            transition: all 0.3s ease-in-out;
+        }
+
+        #sidebar {
+            width: 16rem;
+            left: 0;
+            transform: translateX(0);
+        }
+
+        @@media (max-width: 1024px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+                #sidebar.active {
+                    transform: translateX(0);
+                }
+
+            #main-content {
+                padding-left: 0 !important;
+            }
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 15;
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    <i class="fas fa-tasks text-primary"></i> Plan<span class="text-primary">345</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <!-- Sol Taraf: Sidebar Toggle -->
+            <div class="flex items-center">
+                <button id="sidebar-toggle" class="text-gray-500 hover:text-primary-500 focus:outline-none p-2">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="/">Anasayfa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="/Home/Privacy">Gizlilik</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+            </div>
+
+            <!-- Orta: Logo -->
+            <div class="absolute left-1/2 transform -translate-x-1/2">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-tasks text-primary-500 text-2xl"></i>
+                    <a href="/Dashboard" class="text-2xl font-bold tracking-tight text-secondary">
+                        Plan<span class="text-primary-500">345</span>
+                    </a>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Plan345 - <a href="/Home/Privacy">Gizlilik</a>
+            <!-- Sağ Taraf: Bildirimler ve Kullanıcı Menüsü -->
+            <div class="flex items-center space-x-4">
+                <!-- Bildirimler -->
+                <button class="relative p-2 text-gray-500 hover:text-primary-500 focus:outline-none">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                </button>
+
+                <!-- Kullanıcı Menüsü -->
+                <div class="relative" id="user-menu">
+                    <button id="user-menu-button" class="flex items-center space-x-3 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow">
+                            @if (!string.IsNullOrEmpty(ViewData["UserProfileImage"]?.ToString()))
+                            {
+                                <img src="@ViewData["UserProfileImage"]" alt="Profil Resmi" class="w-full h-full object-cover" onerror="this.src='/images/profiles/default.png'; this.onerror=null; console.log('Profil resmi yüklenirken hata oluştu, varsayılan resim kullanılıyor.');" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-primary-600 flex items-center justify-center text-white">
+                                    @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
+                                    {
+                                        @(ViewData["UserFullName"].ToString()[0])
+                                    }
+                                    else
+                                    {
+                                        @("U")
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">
+                            @if (!string.IsNullOrEmpty(ViewData["UserFullName"]?.ToString()))
+                            {
+                                @ViewData["UserFullName"]
+                            }
+                            else
+                            {
+                                @("Kullanıcı")
+                            }
+                        </span>
+                        <i class="fas fa-chevron-down text-sm text-gray-500"></i>
+                    </button>
+                    <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-10">
+                        <a href="/Profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i> Profil
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog mr-2"></i> Ayarlar
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="/Account/SimpleLogout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay for Mobile -->
+    <div id="overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 pt-16 transition-transform duration-300 ease-in-out z-20">
+        <nav class="px-4 py-4">
+            <ul class="space-y-1">
+                <li>
+                    <a href="/Dashboard" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Dashboard") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-home text-lg"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Profile" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Profile") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-user text-lg"></i>
+                        <span>Profil</span>
+                    </a>
+                </li>
+                <li>
+                    <div class="project-dropdown">
+                        <button id="projects-dropdown-btn" class="w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <i class="fas fa-tasks text-lg mr-3"></i>
+                                <span>Projeler</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
+                        </button>
+                        <div id="projects-dropdown-content" class="hidden px-3 py-2 mt-1">
+                            <ul class="space-y-1 pl-5 border-l border-gray-200">
+                                <li class="text-sm">
+                                    <span class="text-gray-500 italic">Henüz proje bulunmuyor</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-calendar text-lg"></i>
+                        <span>Takvim</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-users text-lg"></i>
+                        <span>Ekip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-chart-bar text-lg"></i>
+                        <span>Raporlar</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-cog text-lg"></i>
+                        <span>Ayarlar</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main id="main-content" class="pt-16 lg:pl-64 pl-0 min-h-screen transition-all duration-300 ease-in-out bg-gray-50">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 shadow-sm lg:ml-64 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center mb-4 sm:mb-0">
+                <i class="fas fa-tasks text-primary-500 text-lg mr-2"></i>
+                <span class="text-sm font-semibold text-gray-800">Plan<span class="text-primary-500">345</span> &copy; @DateTime.Now.Year</span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="#" class="ml-2 text-xs text-gray-500 hover:text-primary-500 transition-colors">Gizlilik</a>
+                <a href="#" class="text-xs text-gray-500 hover:text-primary-500 transition-colors">İletişim</a>
+            </div>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // DOM yüklendikten sonra çalışacak fonksiyonlar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle işlevi
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const overlay = document.getElementById('overlay');
+
+            // Sidebar'ın kapalı veya açık olma durumunu izleyen değişken
+            let sidebarCollapsed = false;
+
+            function toggleSidebar() {
+                if (window.innerWidth < 1024) {
+                    // Küçük ekranlarda mevcut davranış
+                    sidebar.classList.toggle('active');
+                    overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+                } else {
+                    // Büyük ekranlarda sidebar'ı daraltma/genişletme
+                    sidebarCollapsed = !sidebarCollapsed;
+
+                    if (sidebarCollapsed) {
+                        // Sidebar'ı daralt
+                        sidebar.style.width = '0';
+                        sidebar.style.overflow = 'hidden';
+                        mainContent.style.paddingLeft = '0';
+                        document.querySelector('footer').style.marginLeft = '0'; // Footer konumunu güncelle
+                    } else {
+                        // Sidebar'ı genişlet
+                        sidebar.style.width = '16rem';
+                        sidebar.style.overflow = 'visible';
+                        mainContent.style.paddingLeft = '16rem';
+                        document.querySelector('footer').style.marginLeft = '16rem'; // Footer konumunu güncelle
+                    }
+                }
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            });
+
+            // Kullanıcı menüsü açma/kapama işlevi
+            const userMenu = document.getElementById('user-menu');
+            const userMenuButton = document.getElementById('user-menu-button');
+            const userDropdown = document.getElementById('userDropdown');
+
+            userMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userMenu.contains(e.target)) {
+                    userDropdown.classList.add('hidden');
+                }
+            });
+
+            // Projeler açılır menüsü
+            const projectsDropdownBtn = document.getElementById('projects-dropdown-btn');
+            const projectsDropdownContent = document.getElementById('projects-dropdown-content');
+
+            projectsDropdownBtn.addEventListener('click', () => {
+                projectsDropdownContent.classList.toggle('hidden');
+                projectsDropdownBtn.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+            });
+
+            // Ekran boyutu değiştiğinde sidebar durumu
+            function handleResize() {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+
+                    // Eğer sidebar daraltılmış durumda değilse, genişletilmiş halde göster
+                    if (!sidebarCollapsed) {
+                        sidebar.style.width = '16rem';
+                        sidebar.style.overflow = 'visible';
+                        mainContent.style.paddingLeft = '16rem';
+                        document.querySelector('footer').style.marginLeft = '16rem'; // Footer konumunu güncelle
+                    } else {
+                        // Sidebar daraltılmışsa footer da ona göre konumlandır
+                        document.querySelector('footer').style.marginLeft = '0';
+                    }
+                } else {
+                    // Küçük ekranlarda
+                    sidebar.style.width = '16rem';  // Stil özelliklerini sıfırla
+                    sidebar.style.overflow = 'visible';
+                    mainContent.style.paddingLeft = '0';
+                    document.querySelector('footer').style.marginLeft = '0'; // Footer konumunu güncelle
+
+                    if (sidebar.classList.contains('active')) {
+                        overlay.style.display = 'block';
+                    }
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
+    </script>
 </body>
-</html>
+</html> 

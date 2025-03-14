@@ -123,7 +123,7 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
             if (User.Identity.IsAuthenticated)
@@ -137,7 +137,7 @@ namespace PlanYonetimAraclari.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             
@@ -197,7 +197,7 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register(string returnUrl = null)
+        public IActionResult Register(string? returnUrl = null)
         {
             // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
             if (User.Identity.IsAuthenticated)
@@ -211,7 +211,7 @@ namespace PlanYonetimAraclari.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = "")
         {
             _logger.LogInformation($"Register POST metodu başladı. Email: {model.Email}");
             
@@ -246,7 +246,8 @@ namespace PlanYonetimAraclari.Controllers
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    ProfileImageUrl = "/images/profiles/default.jpg"
                 };
                 
                 try

@@ -58,6 +58,23 @@ namespace PlanYonetimAraclari.Controllers
                     ProfileImageUrl = user.ProfileImageUrl
                 };
                 
+                // Session'dan kullanıcı bilgilerini al
+                string userName = HttpContext.Session.GetString("UserName");
+                
+                // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
+                string profileImageUrl = user.ProfileImageUrl;
+                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
+                if (!string.IsNullOrEmpty(sessionProfileImage))
+                {
+                    profileImageUrl = sessionProfileImage;
+                    _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
+                }
+                
+                // Layout için gereken bilgileri ViewData'da sakla (DashboardController ile aynı)
+                ViewData["UserFullName"] = userName ?? $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = userEmail;
+                ViewData["UserProfileImage"] = profileImageUrl;
+                
                 return View(model);
             }
             catch (Exception ex)
@@ -71,68 +88,80 @@ namespace PlanYonetimAraclari.Controllers
         // Profil bilgilerini güncelleme (Ad, Soyad, Email, Resim)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfileInfo(ProfileViewModel model, IFormFile profileImage)
+        public async Task<IActionResult> UpdateProfileInfo(ProfileViewModel model, IFormFile ProfileImage)
         {
-            _logger.LogInformation($"UpdateProfileInfo başladı. Model: {model?.Id}, Resim: {(profileImage != null ? $"{profileImage.FileName}, {profileImage.Length} bytes" : "Yok")}");
+            _logger.LogInformation($"UpdateProfileInfo başladı. Model: {model?.Id}, Resim: {(ProfileImage != null ? $"{ProfileImage.FileName}, {ProfileImage.Length} bytes" : "Yok")}");
             
-            // Şifre alanları için ModelState hatalarını temizle
-            ModelState.Remove("NewPassword");
-            ModelState.Remove("ConfirmPassword");
-            // ProfileImageUrl alanı için hataları temizle
-            ModelState.Remove("ProfileImageUrl");
+            // Session kontrolü
+            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            string userEmail = HttpContext.Session.GetString("UserEmail");
             
-            if (!ModelState.IsValid)
+            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
             {
-                var stateErrors = string.Join("; ", ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage));
-                _logger.LogWarning($"ModelState geçersiz: {stateErrors}");
-                return View("Index", model);
+                _logger.LogWarning("Yetkisiz erişim denemesi Profil sayfasına");
+                return RedirectToAction("Login", "Account");
             }
-
+            
             try
             {
-                var user = await _userManager.FindByIdAsync(model.Id);
+                // Kullanıcıyı bul - Eğer model.Id boş ise, session'daki e-posta ile kullanıcıyı bulalım
+                var user = string.IsNullOrEmpty(model.Id) 
+                    ? await _userManager.FindByEmailAsync(userEmail)
+                    : await _userManager.FindByIdAsync(model.Id);
+                
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "Kullanıcı bulunamadı.");
-                    return View("Index", model);
+                    _logger.LogWarning($"Kullanıcı bulunamadı. ID: {model.Id}, Email: {userEmail}");
+                    TempData["ErrorMessage"] = "Kullanıcı bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
                 }
                 
+                // Formdaki inputlar boş geldiyse, mevcut değerleri koru
+                // Ad boş ise mevcut adı koru, soyad boş ise mevcut soyadı koru
+                var firstName = !string.IsNullOrWhiteSpace(model.FirstName) ? model.FirstName : user.FirstName;
+                var lastName = !string.IsNullOrWhiteSpace(model.LastName) ? model.LastName : user.LastName;
+                var email = !string.IsNullOrWhiteSpace(model.Email) ? model.Email : user.Email;
+                
                 // Debug için loglama
-                _logger.LogInformation($"Profil bilgileri güncelleme: Kullanıcı {user.Email}, Resim: {(profileImage != null ? "Var" : "Yok")}");
+                _logger.LogInformation($"Profil bilgileri güncelleme: Kullanıcı {user.Email}, İsim: {firstName}, Soyisim: {lastName}, Resim: {(ProfileImage != null ? "Var" : "Yok")}");
                 
                 // Herhangi bir bilgi güncellendiyse işaretleyecek bayrak
                 bool isUserUpdated = false;
                 
                 // Ad ve soyad değerlerini güncelle
-                if (user.FirstName != model.FirstName || user.LastName != model.LastName)
+                if (firstName != user.FirstName)
                 {
-                    user.FirstName = model.FirstName;
-                    user.LastName = model.LastName;
+                    user.FirstName = firstName;
                     isUserUpdated = true;
-                    _logger.LogInformation($"Ad/Soyad güncellendi: {model.FirstName} {model.LastName}");
+                    _logger.LogInformation($"Ad güncellendi: {firstName}");
                 }
                 
-                // Email değiştiyse
-                if (user.Email != model.Email)
+                if (lastName != user.LastName)
                 {
-                    user.Email = model.Email;
-                    user.UserName = model.Email; // ASP.NET Identity genellikle username ve email'i senkronize eder
-                    user.NormalizedEmail = model.Email.ToUpper();
-                    user.NormalizedUserName = model.Email.ToUpper();
+                    user.LastName = lastName;
                     isUserUpdated = true;
-                    _logger.LogInformation($"Email güncellendi: {model.Email}");
+                    _logger.LogInformation($"Soyad güncellendi: {lastName}");
+                }
+                
+                // Email değiştiyse - ancak UI'da readonly olduğu için muhtemelen değişmeyecek
+                if (email != user.Email && !string.IsNullOrWhiteSpace(email))
+                {
+                    user.Email = email;
+                    user.UserName = email; // ASP.NET Identity genellikle username ve email'i senkronize eder
+                    user.NormalizedEmail = email.ToUpper();
+                    user.NormalizedUserName = email.ToUpper();
+                    isUserUpdated = true;
+                    _logger.LogInformation($"Email güncellendi: {email}");
                 }
                 
                 // Profil resmi yüklendiyse
                 string profileImagePath = null;
-                if (profileImage != null && profileImage.Length > 0)
+                if (ProfileImage != null && ProfileImage.Length > 0)
                 {
                     try
                     {
                         // Debug için loglama
-                        _logger.LogInformation($"Profil resmi yükleniyor: {profileImage.FileName}, Boyut: {profileImage.Length} byte, ContentType: {profileImage.ContentType}");
+                        _logger.LogInformation($"Profil resmi yükleniyor: {ProfileImage.FileName}, Boyut: {ProfileImage.Length} byte, ContentType: {ProfileImage.ContentType}");
                         
                         // Profil resimleri için klasör yolu
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles");
@@ -146,7 +175,7 @@ namespace PlanYonetimAraclari.Controllers
                         }
                         
                         // Benzersiz dosya adı oluştur
-                        string uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(profileImage.FileName)}";
+                        string uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(ProfileImage.FileName)}";
                         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                         
                         _logger.LogInformation($"Dosya kaydediliyor: {filePath}");
@@ -154,7 +183,7 @@ namespace PlanYonetimAraclari.Controllers
                         // Dosyayı kaydet
                         using (var fileStream = new FileStream(filePath, FileMode.Create))
                         {
-                            await profileImage.CopyToAsync(fileStream);
+                            await ProfileImage.CopyToAsync(fileStream);
                         }
                         
                         // Dosya var mı kontrol et
@@ -175,13 +204,13 @@ namespace PlanYonetimAraclari.Controllers
                         else
                         {
                             _logger.LogError($"Dosya kaydedildi ancak bulunamadı: {filePath}");
-                            ModelState.AddModelError("", "Profil resmi kaydedildi ancak dosya sisteminde bulunamadı.");
+                            TempData["ErrorMessage"] = "Profil resmi kaydedildi ancak dosya sisteminde bulunamadı.";
                         }
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError($"Profil resmi yüklenirken hata oluştu: {ex.Message}, StackTrace: {ex.StackTrace}");
-                        ModelState.AddModelError("", "Profil resmi yüklenirken bir hata oluştu: " + ex.Message);
+                        TempData["ErrorMessage"] = "Profil resmi yüklenirken bir hata oluştu: " + ex.Message;
                     }
                 }
                 
@@ -199,16 +228,21 @@ namespace PlanYonetimAraclari.Controllers
                             HttpContext.Session.SetString("UserProfileImage", profileImagePath);
                         }
                         
+                        // Header için ViewData'yı güncelle
+                        ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                        ViewData["UserEmail"] = user.Email;
+                        ViewData["UserProfileImage"] = !string.IsNullOrEmpty(profileImagePath) 
+                            ? profileImagePath 
+                            : user.ProfileImageUrl;
+                        
                         TempData["SuccessMessage"] = "Profil bilgileriniz başarıyla güncellendi.";
                         _logger.LogInformation($"Kullanıcı {user.Email} profil bilgilerini başarıyla güncelledi");
                     }
                     else
                     {
-                        foreach (var error in updateResult.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                            _logger.LogError($"Kullanıcı güncelleme hatası: {error.Description}");
-                        }
+                        string errorMessage = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                        _logger.LogError($"Kullanıcı güncelleme hataları: {errorMessage}");
+                        TempData["ErrorMessage"] = $"Profil bilgileri güncellenirken hata oluştu: {errorMessage}";
                     }
                 }
                 else
@@ -223,8 +257,8 @@ namespace PlanYonetimAraclari.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Profil bilgileri güncellenirken hata oluştu: {ex.Message}, StackTrace: {ex.StackTrace}");
-                ModelState.AddModelError("", "Profil bilgileri güncellenirken bir hata oluştu: " + ex.Message);
-                return View("Index", model);
+                TempData["ErrorMessage"] = "Profil bilgileri güncellenirken bir hata oluştu: " + ex.Message;
+                return RedirectToAction("Index");
             }
         }
         
@@ -235,35 +269,49 @@ namespace PlanYonetimAraclari.Controllers
         {
             _logger.LogInformation($"UpdatePassword başladı. Model: {model?.Id}");
             
+            // Session kontrolü
+            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+            
+            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
+            {
+                _logger.LogWarning("Yetkisiz erişim denemesi Profil sayfasına");
+                return RedirectToAction("Login", "Account");
+            }
+            
             // Şifre alanlarının doğruluğunu kontrol et
             if (string.IsNullOrEmpty(model.NewPassword))
             {
                 ModelState.AddModelError("NewPassword", "Yeni şifre alanı zorunludur.");
-                return View("Index", await GetProfileModel(model.Id));
+                return await RedirectToProfilePage(model.Id ?? "", "Yeni şifre alanı zorunludur.");
             }
             
             if (string.IsNullOrEmpty(model.ConfirmPassword))
             {
                 ModelState.AddModelError("ConfirmPassword", "Şifre tekrar alanı zorunludur.");
-                return View("Index", await GetProfileModel(model.Id));
+                return await RedirectToProfilePage(model.Id ?? "", "Şifre tekrar alanı zorunludur.");
             }
             
             if (model.NewPassword != model.ConfirmPassword)
             {
                 ModelState.AddModelError("ConfirmPassword", "Şifreler eşleşmiyor.");
-                return View("Index", await GetProfileModel(model.Id));
+                return await RedirectToProfilePage(model.Id ?? "", "Şifreler eşleşmiyor.");
             }
             
             try
             {
-                var user = await _userManager.FindByIdAsync(model.Id);
+                // Id veya email ile kullanıcıyı bul
+                var user = string.IsNullOrEmpty(model.Id) 
+                    ? await _userManager.FindByEmailAsync(userEmail)
+                    : await _userManager.FindByIdAsync(model.Id);
+                
                 if (user == null)
                 {
                     ModelState.AddModelError("", "Kullanıcı bulunamadı.");
-                    return View("Index", await GetProfileModel(model.Id));
+                    return await RedirectToProfilePage("", "Kullanıcı bulunamadı.");
                 }
                 
-                _logger.LogInformation("Şifre değiştirme işlemi başlatılıyor");
+                _logger.LogInformation($"Şifre değiştirme işlemi başlatılıyor - Kullanıcı: {user.Email}");
                 
                 // Önce token oluştur
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -273,12 +321,15 @@ namespace PlanYonetimAraclari.Controllers
                 var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
                 if (!resetPasswordResult.Succeeded)
                 {
+                    string errorMessages = string.Join(", ", resetPasswordResult.Errors.Select(e => e.Description));
+                    _logger.LogError($"Şifre değiştirme hataları: {errorMessages}");
+                    
                     foreach (var error in resetPasswordResult.Errors)
                     {
                         ModelState.AddModelError("", error.Description);
-                        _logger.LogError($"Şifre değiştirme hatası: {error.Description}");
                     }
-                    return View("Index", await GetProfileModel(model.Id));
+                    
+                    return await RedirectToProfilePage(user.Id, $"Şifre değiştirme başarısız: {errorMessages}");
                 }
                 
                 _logger.LogInformation($"Kullanıcı {user.Email} şifresini başarıyla değiştirdi");
@@ -290,22 +341,45 @@ namespace PlanYonetimAraclari.Controllers
             {
                 _logger.LogError($"Şifre değiştirme işlemi sırasında hata: {ex.Message}, StackTrace: {ex.StackTrace}");
                 ModelState.AddModelError("", "Şifre değiştirme sırasında bir hata oluştu: " + ex.Message);
-                return View("Index", await GetProfileModel(model.Id));
+                return await RedirectToProfilePage(model.Id ?? "", $"Şifre değiştirme sırasında hata: {ex.Message}");
             }
         }
         
-        // Yardımcı metod: Profil modelini getir
-        private async Task<ProfileViewModel> GetProfileModel(string userId)
+        // Yardımcı metod: Hata mesajı ile profil sayfasına yönlendir
+        private async Task<IActionResult> RedirectToProfilePage(string userId, string errorMessage = null)
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
+                string userEmail = HttpContext.Session.GetString("UserEmail");
+                ApplicationUser user;
+                
+                // Kullanıcıyı Id veya Email ile bul
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    return new ProfileViewModel();
+                    user = await _userManager.FindByIdAsync(userId);
+                }
+                else
+                {
+                    user = await _userManager.FindByEmailAsync(userEmail);
                 }
                 
-                return new ProfileViewModel
+                if (user == null)
+                {
+                    // Son çare olarak session'daki email'i kullan
+                    if (!string.IsNullOrEmpty(userEmail))
+                    {
+                        user = await _userManager.FindByEmailAsync(userEmail);
+                    }
+                    
+                    if (user == null)
+                    {
+                        TempData["ErrorMessage"] = "Kullanıcı bilgileri bulunamadı. Lütfen tekrar giriş yapın.";
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+                
+                // Modeli hazırla
+                var model = new ProfileViewModel
                 {
                     Id = user.Id,
                     FirstName = user.FirstName,
@@ -313,11 +387,32 @@ namespace PlanYonetimAraclari.Controllers
                     Email = user.Email,
                     ProfileImageUrl = user.ProfileImageUrl
                 };
+                
+                // Hata mesajı varsa ekle
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    TempData["ErrorMessage"] = errorMessage;
+                }
+                
+                // ViewData'yı güncelle
+                string profileImageUrl = user.ProfileImageUrl;
+                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
+                if (!string.IsNullOrEmpty(sessionProfileImage))
+                {
+                    profileImageUrl = sessionProfileImage;
+                }
+                
+                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = user.Email;
+                ViewData["UserProfileImage"] = profileImageUrl;
+                
+                return View("Index", model);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Profil modeli getirilirken hata: {ex.Message}");
-                return new ProfileViewModel { Id = userId };
+                _logger.LogError($"RedirectToProfilePage metodu hata: {ex.Message}");
+                TempData["ErrorMessage"] = "Bir hata oluştu, lütfen tekrar deneyin.";
+                return RedirectToAction("Index", "Dashboard");
             }
         }
     }

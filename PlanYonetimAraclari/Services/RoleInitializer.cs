@@ -9,39 +9,56 @@ namespace PlanYonetimAraclari.Services
     {
         public static async Task InitializeAsync(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
+            // Rolleri oluştur
             string[] roleNames = { "Admin", "User" };
             
-            // Rolleri oluştur
             foreach (var roleName in roleNames)
             {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
+                if (!await roleManager.RoleExistsAsync(roleName))
                 {
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
+
+            // Test Kullanıcıları Oluştur
+            await EnsureUserExists(userManager, "admin@plan345.com", "Admin123!", "Admin", "Kullanıcı", "Admin");
+            await EnsureUserExists(userManager, "user@plan345.com", "User123!", "Test", "Kullanıcı", "User");
+            await EnsureUserExists(userManager, "demo@plan345.com", "Demo123!", "Demo", "Kullanıcı", "User");
             
-            // İlk admin kullanıcısını oluştur (eğer yoksa)
-            var adminEmail = "admin@plan345.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            // Test amaçlı olarak belirtilen e-posta adresini ekleyelim
+            await EnsureUserExists(userManager, "sadikcantuluk@gmail.com", "Test123!", "Sadık", "Tuluk", "User");
+        }
+        
+        private static async Task EnsureUserExists(
+            UserManager<ApplicationUser> userManager,
+            string email,
+            string password,
+            string firstName,
+            string lastName,
+            string role)
+        {
+            // E-posta adresine göre kullanıcıyı ara
+            var user = await userManager.FindByEmailAsync(email);
             
-            if (adminUser == null)
+            // Kullanıcı yoksa oluştur
+            if (user == null)
             {
-                var admin = new ApplicationUser
+                user = new ApplicationUser
                 {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    FirstName = "Admin",
-                    LastName = "User",
+                    UserName = email,
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName,
                     EmailConfirmed = true,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    ProfileImageUrl = "/images/profiles/default.jpg"
                 };
                 
-                var result = await userManager.CreateAsync(admin, "Admin123!");
+                var result = await userManager.CreateAsync(user, password);
                 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(user, role);
                 }
             }
         }

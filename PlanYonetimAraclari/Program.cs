@@ -11,6 +11,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// E-posta ayarlarını yapılandır
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 // Identity yapılandırması
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {
@@ -28,9 +32,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     
     // Kullanıcı ayarları
     options.User.RequireUniqueEmail = true;
+    
+    // E-posta doğrulaması için ayarlar (Şifre sıfırlama için)
+    options.SignIn.RequireConfirmedEmail = false;  // Geliştirme aşamasında false
+    options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders(); // Token sağlayıcılar (şifre sıfırlama için)
 
 // Oturum ve çerez ayarları
 builder.Services.ConfigureApplicationCookie(options =>

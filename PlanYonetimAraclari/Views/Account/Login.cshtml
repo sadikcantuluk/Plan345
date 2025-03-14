@@ -27,16 +27,6 @@
                 <p class="text-gray-600 text-sm mt-2">Hesabınıza giriş yapın</p>
             </div>
 
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="mb-4 p-4 rounded-md bg-green-50 border border-green-200">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                        <p class="text-green-800">@TempData["SuccessMessage"]</p>
-                    </div>
-                </div>
-            }
-            
             @if (TempData["ErrorMessage"] != null)
             {
                 <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
@@ -72,7 +62,7 @@
                         <div class="flex items-center justify-between">
                             <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Şifre</label>
                             <div class="text-sm">
-                                <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">Şifremi Unuttum</a>
+                                <a href="/Account/ForgotPassword" class="font-semibold text-indigo-600 hover:text-indigo-500">Şifremi Unuttum</a>
                             </div>
                         </div>
                         <div class="mt-2 relative">

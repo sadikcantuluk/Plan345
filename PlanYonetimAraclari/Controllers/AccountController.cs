@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PlanYonetimAraclari.Models;
+using PlanYonetimAraclari.Services;
 using System.Diagnostics;
 using System.Security.Claims;
 using System;
@@ -18,17 +19,20 @@ namespace PlanYonetimAraclari.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailService _emailService;
 
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IEmailService emailService)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _emailService = emailService;
         }
         
         // GET endpoint basitleştirilmiş giriş için
@@ -356,5 +360,208 @@ namespace PlanYonetimAraclari.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        #region Şifre Sıfırlama İşlemleri
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _logger.LogInformation($"Şifre sıfırlama talebi: {model.Email}");
+                
+                // Kullanıcıyı e-posta adresine göre bul
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                
+                string token = "";
+                string callbackUrl = "";
+                
+                if (user == null)
+                {
+                    _logger.LogWarning($"Şifre sıfırlama talebi - Kullanıcı bulunamadı: {model.Email}");
+                    
+                    // DEV ORTAMI İÇİN: Test amaçlı olarak, kullanıcı olmasa da e-posta göndermeyi deneyelim
+                    // Ancak bu durumda bile ResetPassword sayfasına yönlendirmeliyiz, Login'e değil
+                    token = "TEST-TOKEN-123456789";
+                    callbackUrl = Url.Action(
+                        "ResetPassword", 
+                        "Account",
+                        new { code = token },
+                        protocol: HttpContext.Request.Scheme);
+                }
+                else
+                {
+                    // Şifre sıfırlama token'ı oluştur
+                    token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    
+                    // Şifre sıfırlama bağlantısı oluştur
+                    callbackUrl = Url.Action(
+                        "ResetPassword", 
+                        "Account",
+                        new { userId = user.Id, code = token },
+                        protocol: HttpContext.Request.Scheme);
+                }
+                
+                try
+                {
+                    // E-posta göndermeyi dene (test amaçlı olarak kullanıcı olsa da olmasa da)
+                    _logger.LogInformation($"E-posta gönderimi başlatılıyor: {model.Email}, Callback URL: {callbackUrl}");
+                    
+                    // E-posta gönder
+                    await _emailService.SendPasswordResetEmailAsync(model.Email, callbackUrl);
+                    _logger.LogInformation($"Şifre sıfırlama e-postası gönderildi: {model.Email}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"E-posta gönderirken hata oluştu: {ex.Message}");
+                    _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                    
+                    if (ex.InnerException != null)
+                    {
+                        _logger.LogError($"Inner Exception: {ex.InnerException.Message}");
+                    }
+                    
+                    // Hata mesajını göster
+                    TempData["ErrorMessage"] = "E-posta gönderirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+                }
+                
+                // Kullanıcıyı şifre sıfırlama bağlantısının gönderildiği konusunda bilgilendir
+                TempData["SuccessMessage"] = "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.";
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+            
+            // ModelState geçerli değilse, formu tekrar göster
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            // Şifre sıfırlama onay sayfasını göster
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string? code = null)
+        {
+            if (code == null)
+            {
+                _logger.LogWarning("Şifre sıfırlama sayfası geçersiz token ile açılmaya çalışıldı");
+                return BadRequest("Şifre sıfırlama için bir token gereklidir.");
+            }
+            
+            var model = new ResetPasswordViewModel 
+            { 
+                Code = code 
+            };
+            
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            
+            _logger.LogInformation($"Şifre sıfırlama işlemi başlatıldı: {model.Email}");
+            
+            // Kullanıcıyı e-posta adresine göre bul
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            
+            if (user == null)
+            {
+                _logger.LogWarning($"Şifre sıfırlama - Kullanıcı bulunamadı: {model.Email}");
+                
+                // Kullanıcıyı bilgilendirmek yerine, işlem başarılıymış gibi davran (güvenlik için)
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+            
+            // Şifreyi sıfırla
+            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            
+            if (result.Succeeded)
+            {
+                _logger.LogInformation($"Şifre başarıyla sıfırlandı: {model.Email}");
+                
+                // Şifre sıfırlama başarılı e-postası gönder
+                try
+                {
+                    string subject = "Şifre Sıfırlandı - Plan345";
+                    string message = $@"
+                        <html>
+                        <head>
+                            <style>
+                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+                                .header {{ text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }}
+                                .logo {{ font-size: 24px; font-weight: bold; color: #333; }}
+                                .logo span {{ color: #4f46e5; }}
+                                .content {{ padding: 20px 0; }}
+                                .button {{ display: inline-block; background-color: #4f46e5; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; margin: 20px 0; }}
+                                .footer {{ font-size: 12px; text-align: center; margin-top: 30px; color: #888; }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class='container'>
+                                <div class='header'>
+                                    <div class='logo'>Plan<span>345</span></div>
+                                </div>
+                                <div class='content'>
+                                    <h2>Şifre Sıfırlama Başarılı</h2>
+                                    <p>Merhaba,</p>
+                                    <p>Plan345 hesabınızın şifresi başarıyla değiştirildi. Eğer bu değişikliği siz yapmadıysanız, lütfen hemen bizimle iletişime geçin.</p>
+                                    <div style='text-align: center;'>
+                                        <a class='button' href='{Url.Action("Login", "Account", null, Request.Scheme)}' style='color: white !important; font-weight: bold; display: inline-block; background-color: #4f46e5; text-decoration: none; padding: 10px 20px; border-radius: 5px; margin: 20px 0;'>Giriş Yap</a>
+                                    </div>
+                                </div>
+                                <div class='footer'>
+                                    <p>Bu e-posta Plan345 Proje Yönetim Sistemi tarafından otomatik olarak gönderilmiştir.</p>
+                                    <p>&copy; 2023 Plan345. Tüm hakları saklıdır.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>";
+                        
+                    await _emailService.SendEmailAsync(model.Email, subject, message);
+                    _logger.LogInformation($"Şifre sıfırlama onay e-postası gönderildi: {model.Email}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Şifre sıfırlama onay e-postası gönderirken hata oluştu: {ex.Message}");
+                    // E-posta gönderilemese bile, kullanıcı akışını bozmuyoruz
+                }
+                
+                TempData["SuccessMessage"] = "Şifreniz başarıyla sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz.";
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+            
+            // Hata durumunda, hataları göster
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+                _logger.LogError($"Şifre sıfırlama hatası: {error.Description}");
+            }
+            
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
+        #endregion
     }
 } 

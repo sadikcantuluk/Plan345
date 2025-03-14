@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "M8Q3Ndox1CuEAAO70x7BpasrNSertUSglFl8+0pJ9dY=",
+  "Hash": "BhEUhOCdkNeVliDBzO8JykjY+e4tGKWFvxBye8ub/4Y=",
   "Source": "PlanYonetimAraclari",
   "BasePath": "_content/PlanYonetimAraclari",
   "Mode": "Default",
@@ -1527,6 +1527,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Template\\README.md"
+    },
+    {
+      "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\src\\assets\\images\\dashboard_new.png",
+      "SourceId": "PlanYonetimAraclari",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\",
+      "BasePath": "_content/PlanYonetimAraclari",
+      "RelativePath": "Template/src/assets/images/dashboard_new#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "5wdyz5347m",
+      "Integrity": "1eFj5UnUq8Yxn6D91LoCOak14TbK31hbrW9X+CVJcVY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Template\\src\\assets\\images\\dashboard_new.png"
     },
     {
       "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\src\\assets\\images\\dashboard.png",
@@ -7704,6 +7725,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-r3XIcGlZ4PS8L6NFQARhgKO1zc3qm8bpPq2HhxL6rgI="
+        }
+      ]
+    },
+    {
+      "Route": "Template/src/assets/images/dashboard_new.5wdyz5347m.png",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\src\\assets\\images\\dashboard_new.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "151379"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"1eFj5UnUq8Yxn6D91LoCOak14TbK31hbrW9X+CVJcVY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 14 Mar 2025 10:56:09 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "5wdyz5347m"
+        },
+        {
+          "Name": "label",
+          "Value": "Template/src/assets/images/dashboard_new.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-1eFj5UnUq8Yxn6D91LoCOak14TbK31hbrW9X+CVJcVY="
+        }
+      ]
+    },
+    {
+      "Route": "Template/src/assets/images/dashboard_new.png",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\src\\assets\\images\\dashboard_new.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "151379"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"1eFj5UnUq8Yxn6D91LoCOak14TbK31hbrW9X+CVJcVY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 14 Mar 2025 10:56:09 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-1eFj5UnUq8Yxn6D91LoCOak14TbK31hbrW9X+CVJcVY="
         }
       ]
     },

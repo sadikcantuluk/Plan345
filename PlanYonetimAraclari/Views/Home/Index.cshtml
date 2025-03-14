@@ -183,7 +183,7 @@
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-bold mb-4">Hakkımızda</h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">Yenilikçi çözümlerimizle işletmenizi geleceğe taşıyoruz</p>
-</div>
+            </div>
 
             <div class="grid lg:grid-cols-12 gap-12 items-center">
                 <!-- Sol Taraf - İstatistikler -->
@@ -659,32 +659,53 @@
 
                 <!-- İletişim Formu -->
                 <div class="bg-white p-8 rounded-2xl shadow-soft">
-                    <form class="space-y-6">
+                    <form id="contactForm" asp-controller="Home" asp-action="ContactForm" method="post" class="space-y-6">
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Başarı Mesajı -->
+                        <div id="successMessage" class="mb-4 p-4 rounded-md bg-green-50 border border-green-200 hidden" style="transition: opacity 0.5s ease-in-out;">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <p class="text-green-800">Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Hata Mesajı -->
+                        <div id="errorMessage" class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 hidden" style="transition: opacity 0.5s ease-in-out;">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                                <p id="errorText" class="text-red-800">Lütfen tüm alanları doğru şekilde doldurunuz.</p>
+                            </div>
+                        </div>
+                        
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-gray-700 font-medium mb-2" for="name">Ad Soyad</label>
-                                <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Adınız Soyadınız">
+                                <input type="text" id="name" name="Name" value="@TempData["ContactFormName"]" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Adınız Soyadınız" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 font-medium mb-2" for="email">E-posta</label>
-                                <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="ornek@email.com">
+                                <input type="email" id="email" name="Email" value="@TempData["ContactFormEmail"]" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="ornek@email.com" required>
                             </div>
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2" for="subject">Konu</label>
-                            <input type="text" id="subject" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Mesajınızın konusu">
+                            <input type="text" id="subject" name="Subject" value="@TempData["ContactFormSubject"]" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Mesajınızın konusu" required>
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-2" for="message">Mesaj</label>
-                            <textarea id="message" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none" placeholder="Mesajınızı buraya yazın..."></textarea>
+                            <textarea id="message" name="Message" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none" placeholder="Mesajınızı buraya yazın..." required>@TempData["ContactFormMessage"]</textarea>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <label class="flex items-center space-x-2 text-sm text-gray-600">
-                                <input type="checkbox" class="form-checkbox h-4 w-4 text-primary-500 rounded border-gray-300 focus:ring-primary-500">
-                                <span>KVKK şartlarını okudum ve kabul ediyorum</span>
+                            <label for="AcceptPrivacy" class="flex items-center space-x-2 text-sm text-gray-600 bg-primary-50 p-3 rounded-lg border border-primary-100 w-full">
+                                <input type="checkbox" id="AcceptPrivacy" name="AcceptPrivacy" value="true" class="form-checkbox h-5 w-5 text-primary-500 rounded border-gray-300 focus:ring-primary-500" required>
+                                <span class="font-medium">
+                                    <a href="#" onclick="showKVKK(event)" class="text-blue-600 hover:underline">KVKK şartlarını</a> 
+                                    okudum ve kabul ediyorum <span class="text-red-500">*</span>
+                                </span>
                             </label>
                         </div>
-                        <button type="submit" class="w-full bg-primary-500 text-white py-3 px-6 rounded-lg hover:bg-primary-600 transition-colors duration-300 font-medium">
+                        <button type="submit" id="submitButton" class="w-full bg-primary-500 text-white py-3 px-6 rounded-lg hover:bg-primary-600 transition-colors duration-300 font-medium">
                             Mesaj Gönder
                         </button>
                     </form>
@@ -782,5 +803,249 @@
 
     <!-- Custom JS -->
     <script src="~/Template/src/js/main.js"></script>
+    
+    <!-- KVKK Modal ve Form JavaScript -->
+    <script>
+        // Form değerlerini saklamak için değişkenler
+        let contactFormValues = {};
+
+        // KVKK modalını göster
+        function showKVKK(event) {
+            event.preventDefault();
+            
+            // Modal açılmadan önce form değerlerini kaydet
+            contactFormValues = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value,
+                acceptPrivacy: document.getElementById('AcceptPrivacy').checked
+            };
+            
+            document.getElementById('kvkkModal').classList.remove('hidden');
+        }
+
+        // KVKK modalını kapat
+        function closeKVKK(event) {
+            event.preventDefault(); 
+            document.getElementById('kvkkModal').classList.add('hidden');
+            
+            // Modal kapandıktan sonra form değerlerini geri yükle
+            document.getElementById('name').value = contactFormValues.name || '';
+            document.getElementById('email').value = contactFormValues.email || '';
+            document.getElementById('subject').value = contactFormValues.subject || '';
+            document.getElementById('message').value = contactFormValues.message || '';
+            document.getElementById('AcceptPrivacy').checked = contactFormValues.acceptPrivacy || false;
+            
+            return false; 
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // İletişim formu submit olduğunda
+            const contactForm = document.querySelector('#contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Sayfanın yenilenmesini engelle
+                    
+                    // KVKK kutucuğu işaretlenmediyse formu engelle ve hatırlatma göster
+                    if (!document.getElementById('AcceptPrivacy').checked) {
+                        document.getElementById('errorMessage').classList.remove('hidden');
+                        document.getElementById('errorText').innerText = 'KVKK şartlarını kabul etmelisiniz.';
+                        document.getElementById('kvkkReminder').classList.remove('hidden');
+                        setTimeout(function() {
+                            document.getElementById('kvkkReminder').classList.add('translate-y-full');
+                        }, 100);
+                        
+                        // 5 saniye sonra otomatik kapat
+                        setTimeout(function() {
+                            closeKVKKReminder();
+                        }, 5000);
+                        
+                        // KVKK kutucuğunu vurgula
+                        document.querySelector('label[for="AcceptPrivacy"]').classList.add('animate-pulse');
+                        setTimeout(function() {
+                            document.querySelector('label[for="AcceptPrivacy"]').classList.remove('animate-pulse');
+                        }, 2000);
+                        
+                        return false;
+                    }
+                    
+                    // Formu gönderme düğmesini devre dışı bırak ve yükleniyor durumunu göster
+                    const submitButton = document.getElementById('submitButton');
+                    const originalButtonText = submitButton.innerHTML;
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Gönderiliyor...';
+                    
+                    // Form verilerini topla
+                    const formData = new FormData(contactForm);
+                    
+                    // AJAX isteği yap
+                    fetch(contactForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Form gönderilemedi. Lütfen daha sonra tekrar deneyin.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Formu sıfırla
+                        contactForm.reset();
+                        
+                        // Başarı mesajını göster
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.classList.remove('hidden');
+                        successMessage.style.opacity = '1';
+                        successMessage.style.transition = 'opacity 0.5s ease-in-out';
+                        document.getElementById('errorMessage').classList.add('hidden');
+                        
+                        // 5 saniye sonra başarı mesajını otomatik gizle
+                        setTimeout(function() {
+                            // Önce soluklaştır
+                            successMessage.style.opacity = '0';
+                            
+                            // Soluklaşma tamamlandıktan sonra tamamen gizle
+                            setTimeout(function() {
+                                successMessage.classList.add('hidden');
+                                // Opacity'yi sıfırla ki bir sonraki gösterimde sorun olmasın
+                                successMessage.style.opacity = '1';
+                            }, 500);
+                        }, 5000);
+                        
+                        // Form alanlarını temizle
+                        document.getElementById('name').value = '';
+                        document.getElementById('email').value = '';
+                        document.getElementById('subject').value = '';
+                        document.getElementById('message').value = '';
+                        document.getElementById('AcceptPrivacy').checked = false;
+                        
+                        // Sayfa konumunu koru
+                        document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                    })
+                    .catch(error => {
+                        // Hata mesajını göster
+                        const errorMessage = document.getElementById('errorMessage');
+                        errorMessage.classList.remove('hidden');
+                        errorMessage.style.opacity = '1';
+                        errorMessage.style.transition = 'opacity 0.5s ease-in-out';
+                        document.getElementById('errorText').innerText = error.message || 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+                        document.getElementById('successMessage').classList.add('hidden');
+                        
+                        // 5 saniye sonra hata mesajını otomatik gizle
+                        setTimeout(function() {
+                            // Önce soluklaştır
+                            errorMessage.style.opacity = '0';
+                            
+                            // Soluklaşma tamamlandıktan sonra tamamen gizle
+                            setTimeout(function() {
+                                errorMessage.classList.add('hidden');
+                                // Opacity'yi sıfırla ki bir sonraki gösterimde sorun olmasın
+                                errorMessage.style.opacity = '1';
+                            }, 500);
+                        }, 5000);
+                    })
+                    .finally(() => {
+                        // Düğme durumunu geri yükle
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                    });
+                });
+            }
+        });
+        
+        // KVKK hatırlatma modalını kapat
+        function closeKVKKReminder() {
+            document.getElementById('kvkkReminder').classList.remove('translate-y-full');
+            setTimeout(function() {
+                document.getElementById('kvkkReminder').classList.add('hidden');
+            }, 300);
+        }
+    </script>
+
+    <!-- KVKK Modal -->
+    <div id="kvkkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Kişisel Verilerin Korunması</h3>
+                <button onclick="closeKVKK(event)" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-sm text-gray-700">
+                <h4 class="font-medium mb-2">KVKK Aydınlatma Metni</h4>
+                <p class="mb-3">
+                    Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, Plan345 tarafından
+                    kişisel verilerinizin işlenmesi ve korunması hakkında sizleri bilgilendirmek amacıyla hazırlanmıştır.
+                </p>
+                
+                <h4 class="font-medium mb-2">1. Veri Sorumlusu</h4>
+                <p class="mb-3">
+                    Plan345 Yazılım A.Ş., veri sorumlusu olarak kişisel verilerinizi işlemektedir. 
+                    İletişim Bilgileri: Atakum Teknoloji Merkezi, Samsun, Türkiye. 
+                    E-posta: info@plan345.com, Tel: +90 212 345 6789
+                </p>
+                
+                <h4 class="font-medium mb-2">2. İşlenen Kişisel Verileriniz</h4>
+                <p class="mb-3">
+                    İletişim formunu doldurmanız halinde; ad-soyadınız, e-posta adresiniz, iletişim konusu ve mesaj içeriğiniz 
+                    tarafımızca işlenmektedir.
+                </p>
+                
+                <h4 class="font-medium mb-2">3. Kişisel Verileri İşleme Amacı</h4>
+                <p class="mb-3">
+                    Kişisel verileriniz, talebinizin/şikayetinizin değerlendirilmesi, cevaplandırılması ve müşteri memnuniyetinin sağlanması
+                    amaçlarıyla sınırlı olarak işlenmektedir.
+                </p>
+                
+                <h4 class="font-medium mb-2">4. Kişisel Verilerin Aktarılması</h4>
+                <p class="mb-3">
+                    Kişisel verileriniz, talebinizin/şikayetinizin değerlendirilmesi amacıyla yetkili departmanlarımız ile paylaşılabilir.
+                    Bunun dışında, kişisel verileriniz, yasal zorunluluklar dışında, açık rızanız olmaksızın üçüncü kişilerle paylaşılmaz.
+                </p>
+                
+                <h4 class="font-medium mb-2">5. Kişisel Verilerin Korunması ve Saklama Süresi</h4>
+                <p class="mb-3">
+                    Plan345, kişisel verilerinizin güvenliğini sağlamak için gerekli teknik ve idari tedbirleri almaktadır.
+                    Kişisel verileriniz, iletişiminizin tamamlanmasını takiben 2 yıl süre ile saklanmaktadır.
+                </p>
+                
+                <h4 class="font-medium mb-2">6. Yasal Haklarınız</h4>
+                <p>
+                    KVKK'nın 11. maddesi uyarınca, kişisel verilerinizle ilgili olarak aşağıdaki haklara sahipsiniz:
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+                        <li>Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme</li>
+                        <li>Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+                        <li>Kişisel verilerinizin düzeltilmesini, silinmesini veya yok edilmesini isteme</li>
+                        <li>Kişisel verilerinizin aktarıldığı üçüncü kişilere bildirilmesini isteme</li>
+                    </ul>
+                </p>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="closeKVKK(event)" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- KVKK Hatırlatma Banner -->
+    <div id="kvkkReminder" class="fixed bottom-0 inset-x-0 bg-red-600 text-white p-4 transform translate-y-full transition-transform duration-300 ease-in-out hidden z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+                <p><strong>Dikkat!</strong> Formu göndermek için lütfen KVKK şartlarını kabul edin.</p>
+            </div>
+            <button onclick="closeKVKKReminder()" class="text-white focus:outline-none">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
 </body>
 </html>

@@ -13,6 +13,7 @@ namespace PlanYonetimAraclari.Services
     {
         Task SendEmailAsync(string email, string subject, string message);
         Task SendPasswordResetEmailAsync(string email, string callbackUrl);
+        Task SendContactEmailAsync(string name, string email, string subject, string message);
     }
 
     public class EmailService : IEmailService
@@ -158,6 +159,119 @@ namespace PlanYonetimAraclari.Services
                 </html>";
                 
             await SendEmailAsync(email, subject, message);
+        }
+        
+        public async Task SendContactEmailAsync(string name, string email, string subject, string message)
+        {
+            string emailSubject = $"İletişim Formu: {subject}";
+            
+            string emailBody = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+                        .header {{ text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }}
+                        .logo {{ font-size: 24px; font-weight: bold; color: #333; }}
+                        .logo span {{ color: #4f46e5; }}
+                        .content {{ padding: 20px 0; }}
+                        .field {{ margin-bottom: 15px; }}
+                        .field strong {{ display: inline-block; width: 100px; color: #555; }}
+                        .message-box {{ background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 15px; }}
+                        .footer {{ font-size: 12px; text-align: center; margin-top: 30px; color: #888; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <div class='logo'>Plan<span>345</span></div>
+                        </div>
+                        <div class='content'>
+                            <h2>Yeni İletişim Formu Mesajı</h2>
+                            <p>Web sitesi iletişim formundan yeni bir mesaj alındı:</p>
+                            
+                            <div class='field'>
+                                <strong>Ad Soyad:</strong> {name}
+                            </div>
+                            <div class='field'>
+                                <strong>E-posta:</strong> {email}
+                            </div>
+                            <div class='field'>
+                                <strong>Konu:</strong> {subject}
+                            </div>
+                            <div class='field'>
+                                <strong>Mesaj:</strong>
+                                <div class='message-box'>{message}</div>
+                            </div>
+                        </div>
+                        <div class='footer'>
+                            <p>Bu e-posta Plan345 Proje Yönetim Sistemi tarafından otomatik olarak gönderilmiştir.</p>
+                            <p>&copy; 2023 Plan345. Tüm hakları saklıdır.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+                
+            // Kullanıcıya teşekkür e-postası
+            string userSubject = "Plan345 - İletişim Talebiniz Alınmıştır";
+            string userMessage = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+                        .header {{ text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }}
+                        .logo {{ font-size: 24px; font-weight: bold; color: #333; }}
+                        .logo span {{ color: #4f46e5; }}
+                        .content {{ padding: 20px 0; }}
+                        .footer {{ font-size: 12px; text-align: center; margin-top: 30px; color: #888; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <div class='logo'>Plan<span>345</span></div>
+                        </div>
+                        <div class='content'>
+                            <h2>İletişim Talebiniz Alındı</h2>
+                            <p>Merhaba {name},</p>
+                            <p>İletişim formu aracılığıyla gönderdiğiniz mesaj başarıyla alınmıştır. En kısa sürede size geri dönüş yapacağız.</p>
+                            <p>Mesajınızın konusu: <strong>{subject}</strong></p>
+                            <p>Bizi tercih ettiğiniz için teşekkür ederiz.</p>
+                        </div>
+                        <div class='footer'>
+                            <p>Bu e-posta Plan345 Proje Yönetim Sistemi tarafından otomatik olarak gönderilmiştir.</p>
+                            <p>&copy; 2023 Plan345. Tüm hakları saklıdır.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+            
+            try
+            {
+                // İletişim formunu plan345destek@gmail.com adresine gönder
+                _logger.LogInformation($"İletişim formu e-postası gönderiliyor: {_emailSettings.SenderEmail}");
+                await SendEmailAsync(_emailSettings.SenderEmail, emailSubject, emailBody);
+                
+                // Kullanıcıya teşekkür e-postası gönder
+                _logger.LogInformation($"Kullanıcıya teşekkür e-postası gönderiliyor: {email}");
+                await SendEmailAsync(email, userSubject, userMessage);
+                
+                _logger.LogInformation($"İletişim formu e-postaları başarıyla gönderildi: {email}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"İletişim formu e-postası gönderilirken hata oluştu: {ex.Message}");
+                _logger.LogError($"Hata detayları: {ex.ToString()}");
+                
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"İç hata: {ex.InnerException.Message}");
+                    _logger.LogError($"Stack trace: {ex.InnerException.StackTrace}");
+                }
+                
+                throw new Exception($"İletişim formu e-postası gönderilirken hata: {ex.Message}", ex);
+            }
         }
     }
 } 

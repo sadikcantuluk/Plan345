@@ -79,3 +79,4 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\MimeKit.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\obj\Debug\net6.0\PlanYonetimAraclari.sourcelink.json

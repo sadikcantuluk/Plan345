@@ -596,6 +596,42 @@
                 }
             });
             
+            // Tamamlanma yüzdesini güncelleme fonksiyonu
+            function updateCompletionPercentage() {
+                // Görev sayılarını al
+                const todoCount = $('#todo-tasks .task-card').length;
+                const inProgressCount = $('#in-progress-tasks .task-card').length;
+                const doneCount = $('#done-tasks .task-card').length;
+                
+                // Toplam görev sayısı
+                const totalTasks = todoCount + inProgressCount + doneCount;
+                
+                // Eğer hiç görev yoksa, yüzde 0 olarak ayarla
+                if (totalTasks === 0) {
+                    setCompletionBar(0);
+                    return;
+                }
+                
+                // Tamamlanma yüzdesini hesapla (sadece Done durumundaki görevler tamamlanmış sayılır)
+                const completionPercentage = Math.round((doneCount / totalTasks) * 100);
+                
+                // İlerleme çubuğunu güncelle
+                setCompletionBar(completionPercentage);
+            }
+            
+            // İlerleme çubuğunu ayarlama fonksiyonu
+            function setCompletionBar(percentage) {
+                // İlerleme çubuğu elementini seç
+                const progressBar = $('.bg-primary-500.h-2.rounded-full');
+                const percentageText = progressBar.parent().next('.text-sm.text-gray-500');
+                
+                // Genişliği güncelle
+                progressBar.css('width', percentage + '%');
+                
+                // Yüzde metnini güncelle
+                percentageText.text('%' + percentage);
+            }
+
             // Görev durumu güncelleme fonksiyonu
             function updateTaskStatus(taskId, newStatus, taskElement = null) {
                 $.ajax({
@@ -641,6 +677,13 @@
                                 
                                 // Konteynır sayaçlarını güncelle
                                 updateTaskCounters();
+                                
+                                // Tamamlanma yüzdesini güncelle
+                                updateCompletionPercentage();
+                            } else {
+                                // Eğer taskElement null ise (sürükle-bırak kullanıldığında)
+                                // Sadece tamamlanma yüzdesini güncellememiz gerekiyor
+                                updateCompletionPercentage();
                             }
                         } else {
                             // Hata mesajı göster

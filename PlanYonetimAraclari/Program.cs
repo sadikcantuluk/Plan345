@@ -15,6 +15,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+// Proje servisi ekle
+builder.Services.AddScoped<IProjectService, ProjectService>();
+
 // Identity yapılandırması
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {

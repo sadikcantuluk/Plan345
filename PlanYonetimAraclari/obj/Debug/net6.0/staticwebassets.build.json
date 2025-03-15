@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "BhEUhOCdkNeVliDBzO8JykjY+e4tGKWFvxBye8ub/4Y=",
+  "Hash": "EMB2YlR1UfwmdfG5LWsjgAnEuL9ulajICEEM8OTRo9I=",
   "Source": "PlanYonetimAraclari",
   "BasePath": "_content/PlanYonetimAraclari",
   "Mode": "Default",
@@ -122,6 +122,27 @@
       "OriginalItemSpec": "wwwroot\\images\\profiles\\0c3f0d8d-4f7d-4026-87da-e1cb705ac21a_Ekran görüntüsü 2024-06-22 225953.png"
     },
     {
+      "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg",
+      "SourceId": "PlanYonetimAraclari",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\",
+      "BasePath": "_content/PlanYonetimAraclari",
+      "RelativePath": "images/profiles/12aee449-2050-426c-9dc8-00dedaa235a1_foto#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "oousmnc7su",
+      "Integrity": "qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\profiles\\12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg"
+    },
+    {
       "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.jpg",
       "SourceId": "PlanYonetimAraclari",
       "SourceType": "Discovered",
@@ -141,6 +162,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\profiles\\1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\793f0d03-42db-453b-8998-692413ac2385_sadık.jpg",
+      "SourceId": "PlanYonetimAraclari",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\",
+      "BasePath": "_content/PlanYonetimAraclari",
+      "RelativePath": "images/profiles/793f0d03-42db-453b-8998-692413ac2385_sadık#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "vk403x59ti",
+      "Integrity": "0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\profiles\\793f0d03-42db-453b-8998-692413ac2385_sadık.jpg"
     },
     {
       "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\839878bd-d7b4-44a8-bd27-e9d5f078d8f9_Ekran görüntüsü 2024-06-22 225953.png",
@@ -2071,6 +2113,88 @@
       ]
     },
     {
+      "Route": "images/profiles/12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "49570"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 15 Mar 2025 08:03:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/12aee449-2050-426c-9dc8-00dedaa235a1_foto.oousmnc7su.jpg",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "49570"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 15 Mar 2025 08:03:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "oousmnc7su"
+        },
+        {
+          "Name": "label",
+          "Value": "images/profiles/12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI="
+        }
+      ]
+    },
+    {
       "Route": "images/profiles/1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.hqlbf66g8v.jpg",
       "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.jpg",
       "Selectors": [],
@@ -2149,6 +2273,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-NxYlhPtZ06qLTXF5AHOFARN+JMyqp8SfRtJHk0ewvnM="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/793f0d03-42db-453b-8998-692413ac2385_sadık.jpg",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\793f0d03-42db-453b-8998-692413ac2385_sadık.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6089"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 14 Mar 2025 15:49:48 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/793f0d03-42db-453b-8998-692413ac2385_sadık.vk403x59ti.jpg",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\793f0d03-42db-453b-8998-692413ac2385_sadık.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6089"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 14 Mar 2025 15:49:48 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vk403x59ti"
+        },
+        {
+          "Name": "label",
+          "Value": "images/profiles/793f0d03-42db-453b-8998-692413ac2385_sadık.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk="
         }
       ]
     },

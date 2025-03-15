@@ -304,7 +304,7 @@ namespace PlanYonetimAraclari.Controllers
                             HttpContext.Session.SetString("UserRole", "User");
                             
                             // TempData da sakla
-                            TempData["SuccessMessage"] = "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın.";
+                            TempData["RegisterSuccess"] = "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın.";
                             
                             _logger.LogInformation($"Kullanıcı başarıyla oluşturuldu, giriş sayfasına yönlendiriliyor: {user.Email}");
                             return RedirectToAction("Login", "Account");

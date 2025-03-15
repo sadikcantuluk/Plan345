@@ -9,6 +9,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
+    <!-- jQuery Kütüphanesi -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -90,6 +92,22 @@
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 15;
+        }
+        
+        /* Sidebar proje stilleri */
+        #sidebar-projects-list .truncate {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        #sidebar-projects-list li {
+            transition: all 0.2s ease;
+        }
+        
+        #sidebar-projects-list li:hover {
+            transform: translateX(2px);
         }
     </style>
 </head>
@@ -202,10 +220,11 @@
                             <i class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
                         </button>
                         <div id="projects-dropdown-content" class="hidden px-3 py-2 mt-1">
-                            <ul class="space-y-1 pl-5 border-l border-gray-200">
-                                <li class="text-sm">
+                            <ul id="sidebar-projects-list" class="space-y-1 pl-5 border-l border-gray-200">
+                                <li id="sidebar-no-projects" class="text-sm">
                                     <span class="text-gray-500 italic">Henüz proje bulunmuyor</span>
                                 </li>
+                                <!-- Projeler AJAX ile burada listelenecek -->
                             </ul>
                         </div>
                     </div>
@@ -267,8 +286,7 @@
     </footer>
 
     <script>
-        // DOM yüklendikten sonra çalışacak fonksiyonlar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Sidebar toggle işlevi
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('main-content');
@@ -366,7 +384,81 @@
 
             window.addEventListener('resize', handleResize);
             handleResize();
+            
+            // Kullanıcının projelerini yükle ve sidebar'a ekle
+            loadUserProjects();
         });
+        
+        // Kullanıcının projelerini getir ve sidebar'a ekle
+        function loadUserProjects() {
+            // AJAX ile projeleri getir
+            $.ajax({
+                url: '/Dashboard/GetProjects',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.data && response.data.length > 0) {
+                        // Projeleri sidebar'a ekle
+                        const projectsList = $('#sidebar-projects-list');
+                        
+                        // Mevcut projeleri temizle - duplicate önleme için bu satırları ekledim
+                        projectsList.find('li:not(#sidebar-no-projects)').remove();
+                        
+                        $('#sidebar-no-projects').hide(); // "Henüz proje bulunmuyor" yazısını gizle
+                        
+                        // Her projeyi listeye ekle
+                        response.data.forEach(function(project) {
+                            const statusColor = getStatusColor(project.status);
+                            const statusText = getStatusText(project.status);
+                            
+                            // Projeyi listeye ekle
+                            projectsList.append(`
+                                <li class="text-sm mb-2">
+                                    <a href="#" class="flex items-center text-gray-700 hover:text-primary-600">
+                                        <span class="w-2 h-2 rounded-full ${statusColor} mr-2"></span>
+                                        <span class="truncate">${project.name}</span>
+                                    </a>
+                                </li>
+                            `);
+                        });
+                    } else {
+                        // Eğer proje yoksa, no-projects mesajını göster
+                        $('#sidebar-no-projects').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Projeler alınırken hata oluştu:', error);
+                    // Hata durumunda no-projects mesajını göster
+                    $('#sidebar-no-projects').show();
+                }
+            });
+        }
+        
+        // Proje durumuna göre renk sınıfı döndür
+        function getStatusColor(status) {
+            switch(status) {
+                case 0: return 'bg-blue-500'; // Planlama
+                case 1: return 'bg-amber-500'; // Devam Ediyor
+                case 2: return 'bg-green-500'; // Tamamlandı
+                case 3: return 'bg-gray-500'; // Beklemede
+                case 4: return 'bg-red-500'; // İptal Edildi
+                default: return 'bg-blue-500';
+            }
+        }
+        
+        // Proje durumuna göre metin döndür
+        function getStatusText(status) {
+            switch(status) {
+                case 0: return 'Planlama';
+                case 1: return 'Devam Ediyor';
+                case 2: return 'Tamamlandı';
+                case 3: return 'Beklemede';
+                case 4: return 'İptal Edildi';
+                default: return 'Bilinmiyor';
+            }
+        }
     </script>
+    
+    @RenderSection("Scripts", required: false)
 </body>
 </html> 

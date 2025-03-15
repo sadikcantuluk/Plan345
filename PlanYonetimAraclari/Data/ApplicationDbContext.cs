@@ -10,6 +10,8 @@ namespace PlanYonetimAraclari.Data
             : base(options)
         {
         }
+        
+        public DbSet<ProjectModel> Projects { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

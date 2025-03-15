@@ -1,4 +1,4 @@
-@model PlanYonetimAraclari.Models.ProfileViewModel
+@model PlanYonetimAraclari.Models.DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard - Plan345";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -11,6 +11,35 @@
         <p class="text-sm text-gray-600">Projelerinizi ve görevlerinizi kolayca yönetin</p>
     </div>
 
+    <!-- Bildirim Mesajları -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Özet Kartları -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Aktif Projeler -->
@@ -22,25 +51,25 @@
                 </span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-3xl font-bold text-gray-900">12</span>
+                <span class="text-3xl font-bold text-gray-900">@Model.ActiveProjectsCount</span>
                 <span class="text-sm font-medium text-green-500 flex items-center">
-                    <i class="fas fa-arrow-up mr-1"></i> 8%
+                    <i class="fas fa-arrow-up mr-1"></i> Aktif
                 </span>
             </div>
         </div>
 
-        <!-- Bekleyen Görevler -->
+        <!-- Tüm Projeler -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900">Bekleyen Görevler</h3>
+                <h3 class="font-semibold text-gray-900">Tüm Projeler</h3>
                 <span class="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 text-amber-500">
                     <i class="fas fa-clipboard-list"></i>
                 </span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-3xl font-bold text-gray-900">28</span>
-                <span class="text-sm font-medium text-red-500 flex items-center">
-                    <i class="fas fa-arrow-up mr-1"></i> 12%
+                <span class="text-3xl font-bold text-gray-900">@Model.TotalProjectsCount</span>
+                <span class="text-sm font-medium text-amber-500 flex items-center">
+                    <i class="fas fa-list mr-1"></i> Toplam
                 </span>
             </div>
         </div>
@@ -54,25 +83,25 @@
                 </span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-3xl font-bold text-gray-900">64</span>
+                <span class="text-3xl font-bold text-gray-900">@Model.CompletedProjectsCount</span>
                 <span class="text-sm font-medium text-green-500 flex items-center">
-                    <i class="fas fa-arrow-up mr-1"></i> 25%
+                    <i class="fas fa-check mr-1"></i> Proje
                 </span>
             </div>
         </div>
 
-        <!-- Yaklaşan Tarihler -->
+        <!-- Bekleyen Görevler -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900">Yaklaşan Tarihler</h3>
+                <h3 class="font-semibold text-gray-900">Bekleyen</h3>
                 <span class="h-10 w-10 flex items-center justify-center rounded-full bg-red-50 text-red-500">
                     <i class="fas fa-calendar-alt"></i>
                 </span>
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-3xl font-bold text-gray-900">7</span>
+                <span class="text-3xl font-bold text-gray-900">@Model.PendingProjectsCount</span>
                 <span class="text-sm font-medium text-red-500 flex items-center">
-                    <i class="fas fa-arrow-down mr-1"></i> 3%
+                    <i class="fas fa-clock mr-1"></i> Proje
                 </span>
             </div>
         </div>
@@ -80,474 +109,123 @@
 
     <!-- Projelerim ve Görevlerim -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Aktif Projelerim -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-1">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900">Aktif Projelerim</h3>
-                <a href="#" class="text-sm text-primary-600 hover:text-primary-800">Tümünü Gör</a>
-            </div>
-            
-            <div class="space-y-4">
-                <!-- Proje 1 -->
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-gray-800">Web Sitesi Yenileme</h4>
-                        <span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">Devam Ediyor</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">Kurumsal web sitesinin tamamen yenilenmesi projesi</p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1 text-gray-500 text-sm">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>25 Ağustos 2023</span>
-                        </div>
-                        <div class="flex -space-x-2">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                            <img src="https://randomuser.me/api/portraits/women/31.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                            <img src="https://randomuser.me/api/portraits/men/33.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Proje 2 -->
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-gray-800">Mobil Uygulama</h4>
-                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Planlama</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">Yeni mobil uygulama geliştirme projesi başlatıldı</p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1 text-gray-500 text-sm">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>10 Eylül 2023</span>
-                        </div>
-                        <div class="flex -space-x-2">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                            <img src="https://randomuser.me/api/portraits/men/30.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Proje 3 -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-gray-800">SEO Optimizasyonu</h4>
-                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Tamamlandı</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">Web sitesi SEO iyileştirmeleri ve analiz</p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1 text-gray-500 text-sm">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>5 Ağustos 2023</span>
-                        </div>
-                        <div class="flex -space-x-2">
-                            <img src="https://randomuser.me/api/portraits/men/29.jpg" class="w-6 h-6 rounded-full border border-white" alt="Team Member" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Görevlerim -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-1">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900">Görevlerim</h3>
-                <a href="#" class="text-sm text-primary-600 hover:text-primary-800">Tümünü Gör</a>
-            </div>
-            
-            <div class="space-y-3">
-                <!-- Görev 1 -->
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="h-4 w-4 text-primary-600 border-gray-300 rounded mr-3" />
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Mockup tasarımlarını tamamla</h4>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded mr-2">Yüksek</span>
-                            <span class="text-xs text-gray-500">Bugün</span>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-                
-                <!-- Görev 2 -->
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="h-4 w-4 text-primary-600 border-gray-300 rounded mr-3" />
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Müşteri toplantısına hazırlan</h4>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded mr-2">Kritik</span>
-                            <span class="text-xs text-gray-500">Yarın, 14:00</span>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-                
-                <!-- Görev 3 -->
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="h-4 w-4 text-primary-600 border-gray-300 rounded mr-3" />
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Raporları hazırla</h4>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded mr-2">Normal</span>
-                            <span class="text-xs text-gray-500">2 gün içinde</span>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-                
-                <!-- Görev 4 -->
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="h-4 w-4 text-primary-600 border-gray-300 rounded mr-3" />
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">İçerik güncellemelerini yap</h4>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded mr-2">Normal</span>
-                            <span class="text-xs text-gray-500">3 gün içinde</span>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-                
-                <!-- Görev 5 -->
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="h-4 w-4 text-primary-600 border-gray-300 rounded mr-3" />
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Haftalık takım toplantısı</h4>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded mr-2">Yüksek</span>
-                            <span class="text-xs text-gray-500">Cuma, 10:00</span>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Etkinlik ve Son Aktivite -->
-        <div class="lg:col-span-1">
-            <!-- Etkinlik Grafiği -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900">Son 7 Gün Etkinliği</h3>
-                </div>
-                
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Pazartesi</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 80%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">8s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Salı</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 65%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">6.5s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Çarşamba</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">9s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Perşembe</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">8.5s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Cuma</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 70%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">7s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Cumartesi</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 35%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">3.5s</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Pazar</span>
-                        <div class="w-3/4">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill bg-primary-500" style="width: 20%;"></div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">2s</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Son Aktiviteler -->
+        <!-- "Projeler" Bölümü -->
+        <div class="lg:col-span-2">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900">Son Aktiviteler</h3>
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-lg text-gray-900">Projelerim</h3>
+                    <button id="create-project-btn" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg flex items-center transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i> Yeni Proje Oluştur
+                    </button>
                 </div>
                 
-                <div class="space-y-4">
-                    <!-- Aktivite 1 -->
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" class="h-8 w-8 rounded-full" alt="User" />
+                <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Proje yok ise gösterilecek alan -->
+                    @if (Model.Projects == null || Model.Projects.Count == 0)
+                    {
+                        <div id="no-projects-message" class="md:col-span-2 text-center py-8">
+                            <div class="mb-4 text-gray-400">
+                                <i class="fas fa-folder-open text-5xl"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-2">Henüz hiç projeniz yok</h4>
+                            <p class="text-gray-500 mb-4">İlk projenizi oluşturun ve görevlerinizi yönetmeye başlayın.</p>
+                            <button class="create-project-btn px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg inline-flex items-center transition-colors duration-200">
+                                <i class="fas fa-plus mr-2"></i> Yeni Proje Oluştur
+                            </button>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-gray-800">
-                                <span class="font-medium">Ayşe Yılmaz</span> yeni bir görev oluşturdu: 
-                                <span class="font-medium">Wireframe tasarımları</span>
-                            </p>
-                            <p class="text-xs text-gray-500">10 dk önce</p>
-                        </div>
-                    </div>
+                    }
                     
-                    <!-- Aktivite 2 -->
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="h-8 w-8 rounded-full" alt="User" />
+                    <!-- Projeler buraya dinamik olarak eklenecek -->
+                    @foreach (var project in Model.Projects)
+                    {
+                        <div class="project-card bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium text-gray-800">@project.Name</h4>
+                                <span class="px-2 py-1 @(project.Status == ProjectStatus.Planning ? "bg-blue-100 text-blue-800" : 
+                                                       project.Status == ProjectStatus.InProgress ? "bg-amber-100 text-amber-800" : 
+                                                       project.Status == ProjectStatus.Completed ? "bg-green-100 text-green-800" :
+                                                       project.Status == ProjectStatus.OnHold ? "bg-gray-100 text-gray-800" :
+                                                       "bg-red-100 text-red-800") text-xs rounded-full">
+                                    @(project.Status == ProjectStatus.Planning ? "Planlama" : 
+                                     project.Status == ProjectStatus.InProgress ? "Devam Ediyor" : 
+                                     project.Status == ProjectStatus.Completed ? "Tamamlandı" :
+                                     project.Status == ProjectStatus.OnHold ? "Beklemede" :
+                                     "İptal Edildi")
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-2">@(string.IsNullOrEmpty(project.Description) ? "Açıklama yok" : project.Description)</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-1 text-gray-500 text-sm">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>@project.CreatedDate.ToString("dd MMMM yyyy")</span>
+                                </div>
+                                <div>
+                                    <a href="#" class="text-primary-500 hover:text-primary-700 transition-colors duration-200">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-gray-800">
-                                <span class="font-medium">Mehmet Demir</span> 
-                                <span class="font-medium">Mobile App Projesi</span>'ne bir yorum ekledi
-                            </p>
-                            <p class="text-xs text-gray-500">25 dk önce</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Aktivite 3 -->
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <img src="https://randomuser.me/api/portraits/men/33.jpg" class="h-8 w-8 rounded-full" alt="User" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-gray-800">
-                                <span class="font-medium">Ali Yıldız</span> 
-                                <span class="font-medium">SEO Analizi</span> görevini tamamladı
-                            </p>
-                            <p class="text-xs text-gray-500">1 saat önce</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Aktivite 4 -->
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <img src="https://randomuser.me/api/portraits/women/31.jpg" class="h-8 w-8 rounded-full" alt="User" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-gray-800">
-                                <span class="font-medium">Zeynep Kaya</span> 
-                                <span class="font-medium">Müşteri Raporları</span> dosyasını güncelledi
-                            </p>
-                            <p class="text-xs text-gray-500">3 saat önce</p>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Alt Grafik ve İstatistikler -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Takım Performansı -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-semibold text-gray-900">Takım Performansı</h3>
-                <div class="relative">
-                    <select class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-1 px-3 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-sm">
-                        <option>Bu Hafta</option>
-                        <option>Bu Ay</option>
-                        <option>Son 3 Ay</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
+
+        <!-- "Son Etkinlikler" Bölümü -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-1">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Son Etkinlikler</h3>
             </div>
             
             <div class="space-y-4">
-                <!-- Üye 1 -->
-                <div>
-                    <div class="flex items-center mb-1">
-                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="h-6 w-6 rounded-full mr-2" alt="Team Member" />
-                        <span class="text-sm font-medium text-gray-800">Ayşe Yılmaz</span>
-                        <span class="ml-auto text-sm font-semibold text-gray-700">92%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill bg-green-500" style="width: 92%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Üye 2 -->
-                <div>
-                    <div class="flex items-center mb-1">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="h-6 w-6 rounded-full mr-2" alt="Team Member" />
-                        <span class="text-sm font-medium text-gray-800">Mehmet Demir</span>
-                        <span class="ml-auto text-sm font-semibold text-gray-700">87%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill bg-green-500" style="width: 87%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Üye 3 -->
-                <div>
-                    <div class="flex items-center mb-1">
-                        <img src="https://randomuser.me/api/portraits/men/33.jpg" class="h-6 w-6 rounded-full mr-2" alt="Team Member" />
-                        <span class="text-sm font-medium text-gray-800">Ali Yıldız</span>
-                        <span class="ml-auto text-sm font-semibold text-gray-700">78%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill bg-green-500" style="width: 78%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Üye 4 -->
-                <div>
-                    <div class="flex items-center mb-1">
-                        <img src="https://randomuser.me/api/portraits/women/31.jpg" class="h-6 w-6 rounded-full mr-2" alt="Team Member" />
-                        <span class="text-sm font-medium text-gray-800">Zeynep Kaya</span>
-                        <span class="ml-auto text-sm font-semibold text-gray-700">85%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill bg-green-500" style="width: 85%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Üye 5 -->
-                <div>
-                    <div class="flex items-center mb-1">
-                        <img src="https://randomuser.me/api/portraits/men/30.jpg" class="h-6 w-6 rounded-full mr-2" alt="Team Member" />
-                        <span class="text-sm font-medium text-gray-800">Kemal Öztürk</span>
-                        <span class="ml-auto text-sm font-semibold text-gray-700">75%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill bg-amber-500" style="width: 75%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Yaklaşan Tarihler Takvimi -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-semibold text-gray-900">Yaklaşan Son Tarihler</h3>
-                <a href="#" class="text-sm text-primary-600 hover:text-primary-800">Takvimi Aç</a>
-            </div>
-            
-            <div class="space-y-4">
-                <!-- Tarih 1 -->
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-12 text-center">
-                        <span class="block text-lg font-bold text-gray-900">15</span>
-                        <span class="block text-xs font-medium text-gray-500">Ağustos</span>
-                    </div>
-                    <div class="ml-4 bg-gray-50 p-3 rounded-lg flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Logo Tasarım Son Onay</h4>
-                        <p class="text-xs text-gray-600 mt-1">Web sitesi yenileme projesinin logo tasarımı onayı için son tarih.</p>
-                        <div class="mt-2 flex items-center">
-                            <span class="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded mr-2">Kritik</span>
-                            <span class="text-xs text-gray-500 flex-1">3 gün kaldı</span>
-                            <div class="flex items-center space-x-1">
-                                <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                            </div>
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0 h-8 w-8 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Proje oluşturuldu</p>
+                            <p class="text-xs text-gray-500">Web Sitesi Yenileme</p>
+                            <p class="text-xs text-gray-400 mt-1">2 saat önce</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Tarih 2 -->
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-12 text-center">
-                        <span class="block text-lg font-bold text-gray-900">18</span>
-                        <span class="block text-xs font-medium text-gray-500">Ağustos</span>
-                    </div>
-                    <div class="ml-4 bg-gray-50 p-3 rounded-lg flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">İçerik Teslim Tarihi</h4>
-                        <p class="text-xs text-gray-600 mt-1">Tüm içerik metinlerinin teslim tarihi.</p>
-                        <div class="mt-2 flex items-center">
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded mr-2">Yüksek</span>
-                            <span class="text-xs text-gray-500 flex-1">6 gün kaldı</span>
-                            <div class="flex items-center space-x-1">
-                                <img src="https://randomuser.me/api/portraits/women/31.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/men/30.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                            </div>
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0 h-8 w-8 bg-green-100 text-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Görev tamamlandı</p>
+                            <p class="text-xs text-gray-500">Logo tasarımı</p>
+                            <p class="text-xs text-gray-400 mt-1">5 saat önce</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Tarih 3 -->
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-12 text-center">
-                        <span class="block text-lg font-bold text-gray-900">22</span>
-                        <span class="block text-xs font-medium text-gray-500">Ağustos</span>
-                    </div>
-                    <div class="ml-4 bg-gray-50 p-3 rounded-lg flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">Müşteri Demo</h4>
-                        <p class="text-xs text-gray-600 mt-1">Üst yönetim ile demo toplantısı.</p>
-                        <div class="mt-2 flex items-center">
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded mr-2">Yüksek</span>
-                            <span class="text-xs text-gray-500 flex-1">10 gün kaldı</span>
-                            <div class="flex items-center space-x-1">
-                                <img src="https://randomuser.me/api/portraits/men/33.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                            </div>
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0 h-8 w-8 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-pencil-alt text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Görev güncellendi</p>
+                            <p class="text-xs text-gray-500">İçerik düzenleme</p>
+                            <p class="text-xs text-gray-400 mt-1">1 gün önce</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Tarih 4 -->
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 w-12 text-center">
-                        <span class="block text-lg font-bold text-gray-900">30</span>
-                        <span class="block text-xs font-medium text-gray-500">Ağustos</span>
-                    </div>
-                    <div class="ml-4 bg-gray-50 p-3 rounded-lg flex-1">
-                        <h4 class="text-sm font-medium text-gray-800">MVP Lansmanı</h4>
-                        <p class="text-xs text-gray-600 mt-1">Yeni web sitesi MVP lansmanı son tarihi.</p>
-                        <div class="mt-2 flex items-center">
-                            <span class="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded mr-2">Kritik</span>
-                            <span class="text-xs text-gray-500 flex-1">18 gün kaldı</span>
-                            <div class="flex items-center space-x-1">
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/women/31.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/men/33.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                                <img src="https://randomuser.me/api/portraits/women/32.jpg" class="w-5 h-5 rounded-full" alt="User" />
-                            </div>
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0 h-8 w-8 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-trash text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Görev silindi</p>
+                            <p class="text-xs text-gray-500">Test görevi</p>
+                            <p class="text-xs text-gray-400 mt-1">3 gün önce</p>
                         </div>
                     </div>
                 </div>
@@ -555,3 +233,207 @@
         </div>
     </div>
 </div>
+
+<!-- Proje Oluşturma Modal -->
+<div id="create-project-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Yeni Proje Oluştur</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="create-project-form" method="post" asp-controller="Dashboard" asp-action="CreateProject" onsubmit="return validateForm()">
+            @Html.AntiForgeryToken()
+            
+            <!-- Hata Mesajı -->
+            <div id="validation-error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 hidden">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="validation-error-message" class="text-sm text-red-700"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gizli CreatedDate alanı -->
+            <input type="hidden" name="CreatedDate" id="CreatedDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="Name" class="block text-sm font-medium text-gray-700 mb-1">Proje Adı *</label>
+                    <input type="text" name="Name" id="Name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <div>
+                    <label for="Description" class="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                    <textarea name="Description" id="Description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+                </div>
+                
+                <div>
+                    <label for="Status" class="block text-sm font-medium text-gray-700 mb-1">Durum *</label>
+                    <select name="Status" id="Status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                        <option value="0">Planlama</option>
+                        <option value="1">Devam Ediyor</option>
+                        <option value="2">Tamamlandı</option>
+                        <option value="3">Beklemede</option>
+                        <option value="4">İptal Edildi</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="DueDate" class="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi (İsteğe Bağlı)</label>
+                    <input type="date" name="DueDate" id="DueDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="cancel-project" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    İptal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md">
+                    Oluştur
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Yeni Proje Oluştur butonları
+            $("#create-project-btn, .create-project-btn").on("click", function () {
+                $("#create-project-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden"); // Arka planı kaydırmayı engelle
+            });
+
+            // Modal kapatma butonları
+            $("#close-modal, #cancel-project").on("click", function () {
+                $("#create-project-modal").addClass("hidden");
+                $("body").css("overflow", ""); // Kaydırmayı tekrar etkinleştir
+                $("#create-project-form")[0].reset(); // Formu sıfırla
+            });
+            
+            // Modal dışına tıklandığında kapatma
+            $("#create-project-modal").on("click", function(e) {
+                if (e.target === this) {
+                    $("#create-project-modal").addClass("hidden");
+                    $("body").css("overflow", "");
+                    $("#create-project-form")[0].reset();
+                }
+            });
+            
+            // ESC tuşu ile kapatma
+            $(document).on("keydown", function(e) {
+                if (e.key === "Escape" && !$("#create-project-modal").hasClass("hidden")) {
+                    $("#create-project-modal").addClass("hidden");
+                    $("body").css("overflow", "");
+                    $("#create-project-form")[0].reset();
+                }
+            });
+            
+            // Form submit edildiğinde
+            $("#create-project-form").on("submit", function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Form geçerli, yönlendirmeden önce bir önbellek oluştur
+                let formData = {
+                    name: $("#Name").val(),
+                    status: $("#Status").val()
+                };
+                
+                // Form başarıyla gönderilebilir
+                localStorage.setItem('projectFormSubmitted', 'true');
+                localStorage.setItem('projectFormData', JSON.stringify(formData));
+                return true;
+            });
+            
+            // Sayfa yüklendiğinde kontrol et - proje oluşturma sonrası mıyız?
+            if (localStorage.getItem('projectFormSubmitted') === 'true') {
+                // Yeni proje oluşturuldu, sidebar'daki projeleri yenile
+                setTimeout(function() {
+                    // Sayfanın tamamen yüklenmesi için biraz bekleyelim
+                    if (typeof loadUserProjects === 'function') {
+                        loadUserProjects();
+                        console.log("Projeler yenilendi");
+                    }
+                    
+                    // Tamamlandı bildirimi gösteriyorsak, ek mesaj ekleyebiliriz
+                    if ($(".bg-green-50").length > 0) {
+                        let projectData = JSON.parse(localStorage.getItem('projectFormData') || '{}');
+                        console.log("Yeni proje oluşturuldu:", projectData.name);
+                    }
+                    
+                    // Session'ı temizle
+                    localStorage.removeItem('projectFormSubmitted');
+                    localStorage.removeItem('projectFormData');
+                }, 1000);
+            }
+        });
+
+        function validateForm() {
+            console.log("Form validation başladı");
+            
+            const projectName = document.getElementById('Name').value;
+            const description = document.getElementById('Description').value;
+            const status = document.getElementById('Status').value;
+            const dueDate = document.getElementById('DueDate').value;
+            
+            // Form alanları değerlerini logla
+            console.log("Form değerleri:", {
+                projectName,
+                description,
+                status,
+                dueDate
+            });
+            
+            let isValid = true;
+            let errorMessages = [];
+            
+            // Proje adı kontrolü
+            if (!projectName || projectName.trim() === '') {
+                errorMessages.push('Proje adı zorunludur');
+                isValid = false;
+                
+                // Hata sınıfı ekle
+                document.getElementById('Name').classList.add('border-red-500');
+            } else {
+                document.getElementById('Name').classList.remove('border-red-500');
+            }
+            
+            // Status kontrolü
+            if (!status && status !== '0') {
+                errorMessages.push('Durum seçimi zorunludur');
+                isValid = false;
+                
+                // Hata sınıfı ekle
+                document.getElementById('Status').classList.add('border-red-500');
+            } else {
+                document.getElementById('Status').classList.remove('border-red-500');
+            }
+            
+            // Gizli alanın değerini güncelle
+            document.getElementById('CreatedDate').value = new Date().toISOString();
+            
+            // Hata varsa göster
+            if (!isValid) {
+                document.getElementById('validation-error').classList.remove('hidden');
+                document.getElementById('validation-error-message').textContent = errorMessages.join(', ');
+                return false;
+            } else {
+                document.getElementById('validation-error').classList.add('hidden');
+            }
+            
+            // Form verilerini konsola yazdırarak form submit edildiğini takip edebiliriz
+            console.log("Form başarıyla validate edildi, submit ediliyor...");
+            return true;
+        }
+    </script>
+}

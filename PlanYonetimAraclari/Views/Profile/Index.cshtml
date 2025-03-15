@@ -14,7 +14,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
         
         <!-- Bildirim Mesajları -->
-        @if (TempData["SuccessMessage"] != null)
+        @if (TempData["SuccessMessage"] != null && TempData["SuccessMessage"].ToString() != "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın.")
         {
             <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
                 <div class="flex">

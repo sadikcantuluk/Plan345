@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PlanYonetimAraclari.Models;
 using PlanYonetimAraclari.Data;
+using System.Linq;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -15,15 +16,18 @@ namespace PlanYonetimAraclari.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ProfileController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ApplicationDbContext _dbContext;
 
         public ProfileController(
             UserManager<ApplicationUser> userManager,
             ILogger<ProfileController> logger,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            ApplicationDbContext dbContext)
         {
             _userManager = userManager;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
+            _dbContext = dbContext;
         }
 
         // Profil görüntüleme sayfası
@@ -55,7 +59,9 @@ namespace PlanYonetimAraclari.Controllers
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
-                    ProfileImageUrl = user.ProfileImageUrl
+                    ProfileImageUrl = user.ProfileImageUrl,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    User = user
                 };
                 
                 // Session'dan kullanıcı bilgilerini al
@@ -413,6 +419,138 @@ namespace PlanYonetimAraclari.Controllers
                 _logger.LogError($"RedirectToProfilePage metodu hata: {ex.Message}");
                 TempData["ErrorMessage"] = "Bir hata oluştu, lütfen tekrar deneyin.";
                 return RedirectToAction("Index", "Dashboard");
+            }
+        }
+
+        // Hesap silme işlemi
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            // Session kontrolü
+            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+            
+            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
+            {
+                _logger.LogWarning("Yetkisiz erişim denemesi hesap silme işlemine");
+                return RedirectToAction("Login", "Account");
+            }
+
+            try 
+            {
+                // Kullanıcıyı veritabanından bulalım
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null) 
+                {
+                    _logger.LogWarning($"Hesap silme işlemi sırasında kullanıcı bulunamadı: {userEmail}");
+                    TempData["ErrorMessage"] = "Kullanıcı bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                // Kullanıcıya ait tüm projeleri bul
+                var userProjects = _dbContext.Projects.Where(p => p.UserId == user.Id).ToList();
+                
+                // Her bir proje için ilişkili görevleri sil
+                foreach (var project in userProjects)
+                {
+                    var projectTasks = _dbContext.Tasks.Where(t => t.ProjectId == project.Id).ToList();
+                    _dbContext.Tasks.RemoveRange(projectTasks);
+                    _logger.LogInformation($"Proje {project.Id} için {projectTasks.Count} görev silindi");
+                }
+                
+                // Projeleri sil
+                _dbContext.Projects.RemoveRange(userProjects);
+                _logger.LogInformation($"Kullanıcı {user.Id} için {userProjects.Count} proje silindi");
+                
+                // Veritabanındaki değişiklikleri kaydet
+                await _dbContext.SaveChangesAsync();
+                
+                // Kullanıcıyı sil
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation($"Kullanıcı hesabı başarıyla silindi: {userEmail}");
+                    
+                    // Session'ı temizle
+                    HttpContext.Session.Clear();
+                    
+                    // Kullanıcıyı çıkış yap sayfasına yönlendir
+                    return RedirectToAction("SimpleLogout", "Account");
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError($"Kullanıcı hesabı silinirken hata oluştu: {errors}");
+                    TempData["ErrorMessage"] = "Hesabınız silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+                    return RedirectToAction("Index", "Profile");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Hesap silme işlemi sırasında hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "Hesap silme işlemi sırasında bir hata oluştu.";
+                return RedirectToAction("Index", "Profile");
+            }
+        }
+
+        // İki Faktörlü Doğrulama ayarlarını güncelleme
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleTwoFactorAuth(bool enableTwoFactor)
+        {
+            // Session kontrolü
+            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+            
+            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
+            {
+                _logger.LogWarning("Yetkisiz erişim denemesi 2FA ayarlarına");
+                return RedirectToAction("Login", "Account");
+            }
+
+            try 
+            {
+                // Kullanıcıyı veritabanından bulalım
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null) 
+                {
+                    _logger.LogWarning($"2FA ayarı değiştirilirken kullanıcı bulunamadı: {userEmail}");
+                    TempData["ErrorMessage"] = "Kullanıcı bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                // 2FA ayarını güncelle
+                user.TwoFactorEnabled = enableTwoFactor;
+                
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (updateResult.Succeeded)
+                {
+                    _logger.LogInformation($"Kullanıcı {userEmail} için 2FA ayarı güncellendi: {enableTwoFactor}");
+                    
+                    if (enableTwoFactor)
+                    {
+                        TempData["SuccessMessage"] = "İki faktörlü doğrulama başarıyla etkinleştirildi.";
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "İki faktörlü doğrulama devre dışı bırakıldı.";
+                    }
+                }
+                else
+                {
+                    var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                    _logger.LogError($"2FA ayarı güncellenirken hata oluştu: {errors}");
+                    TempData["ErrorMessage"] = "İki faktörlü doğrulama ayarları güncellenirken bir hata oluştu.";
+                }
+                
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"2FA ayarları güncellenirken hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "İki faktörlü doğrulama ayarları güncellenirken bir hata oluştu.";
+                return RedirectToAction("Index");
             }
         }
     }

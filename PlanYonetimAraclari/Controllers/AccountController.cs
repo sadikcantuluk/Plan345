@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PlanYonetimAraclari.Models;
 using PlanYonetimAraclari.Services;
+using PlanYonetimAraclari.Data;
 using System.Diagnostics;
 using System.Security.Claims;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -20,19 +22,22 @@ namespace PlanYonetimAraclari.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
+        private readonly ApplicationDbContext _dbContext;
 
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            ApplicationDbContext dbContext)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _emailService = emailService;
+            _dbContext = dbContext;
         }
         
         // DirectLogin endpoint for POST requests
@@ -51,10 +56,6 @@ namespace PlanYonetimAraclari.Controllers
 
             _logger.LogInformation($"DirectLogin denemesi: {email}");
             
-            bool isValidLogin = false;
-            string userName = "";
-            string userRole = "User";
-            
             try
             {
                 // Kullanıcıyı e-posta adresine göre bul
@@ -71,62 +72,80 @@ namespace PlanYonetimAraclari.Controllers
                     {
                         _logger.LogInformation($"Şifre doğrulama başarılı: {email}");
                         
+                        // İki faktörlü doğrulama etkin mi kontrol et
+                        if (user.TwoFactorEnabled)
+                        {
+                            _logger.LogInformation($"Kullanıcı {email} için 2FA etkin, doğrulama kodu gönderiliyor");
+                            
+                            // Doğrulama kodu oluştur
+                            string verificationCode = GenerateRandomCode();
+                            
+                            // Doğrulama kodunu veritabanına kaydet
+                            await SaveVerificationCodeAsync(user.Id, verificationCode);
+                            
+                            // Doğrulama kodunu e-posta ile gönder
+                            await _emailService.SendTwoFactorCodeAsync(email, verificationCode);
+                            
+                            // Kullanıcıyı doğrulama sayfasına yönlendir
+                            TempData["RequiresTwoFactor"] = true;
+                            TempData["UserEmail"] = email;
+                            
+                            return RedirectToAction("VerifyCode");
+                        }
+                        
                         // Kullanıcı rollerini kontrol et
                         var roles = await _userManager.GetRolesAsync(user);
-                        
-                        isValidLogin = true;
-                        userName = $"{user.FirstName} {user.LastName}";
-                        userRole = roles.Contains("Admin") ? "Admin" : "User";
+                        string userRole = roles.Contains("Admin") ? "Admin" : "User";
+                        string userName = $"{user.FirstName} {user.LastName}";
                         
                         // Son giriş zamanını güncelle
                         user.LastLoginTime = DateTime.Now;
                         await _userManager.UpdateAsync(user);
+                        
+                        // Session ve TempData'da kullanıcı bilgilerini sakla
+                        HttpContext.Session.SetString("IsAuthenticated", "true");
+                        HttpContext.Session.SetString("UserEmail", email);
+                        HttpContext.Session.SetString("UserName", userName);
+                        HttpContext.Session.SetString("UserRole", userRole);
+                        HttpContext.Session.SetString("UserProfileImage", user.ProfileImageUrl ?? "/images/profiles/default.png");
+                        
+                        // TempData da sakla (ilk girişte yararlı olabilir)
+                        TempData["UserEmail"] = email;
+                        TempData["UserName"] = userName;
+                        TempData["UserRole"] = userRole;
+                        
+                        _logger.LogInformation($"Başarılı giriş: {email}, Rol: {userRole}");
+                        
+                        // Rol bazlı yönlendirme
+                        if (userRole == "Admin")
+                        {
+                            return RedirectToAction("Index", "Admin");
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index", "Dashboard");
+                        }
                     }
                     else
                     {
                         _logger.LogWarning($"Şifre doğrulama başarısız: {email}");
+                        TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
+                        return RedirectToAction("Login");
                     }
                 }
                 else
                 {
                     _logger.LogWarning($"Kullanıcı veritabanında bulunamadı: {email}");
+                    TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
+                    return RedirectToAction("Login");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Kullanıcı doğrulaması sırasında hata: {ex.Message}");
+                TempData["ErrorMessage"] = "Giriş sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+                return RedirectToAction("Login");
             }
-            
-            if (isValidLogin)
-            {
-                // Session ve TempData'da kullanıcı bilgilerini sakla
-                HttpContext.Session.SetString("IsAuthenticated", "true");
-                HttpContext.Session.SetString("UserEmail", email);
-                HttpContext.Session.SetString("UserName", userName);
-                HttpContext.Session.SetString("UserRole", userRole);
-                
-                // TempData da sakla (ilk girişte yararlı olabilir)
-                TempData["UserEmail"] = email;
-                TempData["UserName"] = userName;
-                TempData["UserRole"] = userRole;
-                
-                _logger.LogInformation($"Başarılı giriş: {email}, Rol: {userRole}");
-                
-                // Rol bazlı yönlendirme
-                if (userRole == "Admin")
-                {
-                    return RedirectToAction("Index", "Admin");
-                }
-                else
-                {
-                    return RedirectToAction("Index", "Dashboard");
-                }
-            }
-            
-            // Geçersiz giriş
-            TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
-            _logger.LogWarning($"Başarısız giriş denemesi: {email}");
-            return RedirectToAction("Login");
         }
 
         [HttpGet]
@@ -590,5 +609,147 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         #endregion
+
+        // Doğrulama kodu sayfası
+        [HttpGet]
+        public IActionResult VerifyCode()
+        {
+            // 2FA gerektiren bir giriş denemesi olup olmadığını kontrol et
+            if (TempData["RequiresTwoFactor"] == null || !(bool)TempData["RequiresTwoFactor"] || TempData["UserEmail"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+            
+            // TempData'yı korumak için
+            TempData.Keep("RequiresTwoFactor");
+            TempData.Keep("UserEmail");
+            
+            var model = new TwoFactorCodeVerificationModel
+            {
+                Email = TempData["UserEmail"].ToString()
+            };
+            
+            return View(model);
+        }
+
+        // Doğrulama kodu onaylama
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyCode(TwoFactorCodeVerificationModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    if (user == null)
+                    {
+                        _logger.LogWarning($"Doğrulama kodu kontrolü sırasında kullanıcı bulunamadı: {model.Email}");
+                        ModelState.AddModelError("", "Geçersiz doğrulama kodu veya oturum zaman aşımına uğradı.");
+                        return View(model);
+                    }
+                    
+                    // Doğrulama kodunu kontrol et
+                    bool isValid = await VerifyCodeAsync(user.Id, model.Code);
+                    
+                    if (isValid)
+                    {
+                        _logger.LogInformation($"Doğrulama kodu geçerli, kullanıcı giriş yapıyor: {model.Email}");
+                        
+                        // Kullanıcı rollerini kontrol et
+                        var roles = await _userManager.GetRolesAsync(user);
+                        string userRole = roles.Contains("Admin") ? "Admin" : "User";
+                        string userName = $"{user.FirstName} {user.LastName}";
+                        
+                        // Son giriş zamanını güncelle
+                        user.LastLoginTime = DateTime.Now;
+                        await _userManager.UpdateAsync(user);
+                        
+                        // Session ve TempData'da kullanıcı bilgilerini sakla
+                        HttpContext.Session.SetString("IsAuthenticated", "true");
+                        HttpContext.Session.SetString("UserEmail", model.Email);
+                        HttpContext.Session.SetString("UserName", userName);
+                        HttpContext.Session.SetString("UserRole", userRole);
+                        HttpContext.Session.SetString("UserProfileImage", user.ProfileImageUrl ?? "/images/profiles/default.png");
+                        
+                        // TempData temizle
+                        TempData.Remove("RequiresTwoFactor");
+                        TempData.Remove("UserEmail");
+                        
+                        _logger.LogInformation($"2FA ile başarılı giriş: {model.Email}, Rol: {userRole}");
+                        
+                        // Rol bazlı yönlendirme
+                        if (userRole == "Admin")
+                        {
+                            return RedirectToAction("Index", "Admin");
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index", "Dashboard");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Geçersiz doğrulama kodu: {model.Email}");
+                        ModelState.AddModelError("", "Geçersiz doğrulama kodu veya oturum zaman aşımına uğradı.");
+                        return View(model);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Doğrulama kodu kontrolü sırasında hata: {ex.Message}");
+                    ModelState.AddModelError("", "Doğrulama sırasında bir hata oluştu.");
+                    return View(model);
+                }
+            }
+            
+            return View(model);
+        }
+
+        // 6 haneli rastgele kod oluştur
+        private string GenerateRandomCode()
+        {
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+
+        // Doğrulama kodunu veritabanına kaydet
+        private async Task SaveVerificationCodeAsync(string userId, string code)
+        {
+            var twoFactorCode = new TwoFactorCode
+            {
+                UserId = userId,
+                Code = code,
+                ExpiresAt = DateTime.Now.AddMinutes(5),
+                IsUsed = false
+            };
+            
+            _dbContext.TwoFactorCodes.Add(twoFactorCode);
+            await _dbContext.SaveChangesAsync();
+            
+            _logger.LogInformation($"Kullanıcı {userId} için doğrulama kodu kaydedildi, son kullanma: {twoFactorCode.ExpiresAt}");
+        }
+
+        // Doğrulama kodunu kontrol et
+        private async Task<bool> VerifyCodeAsync(string userId, string code)
+        {
+            var storedCode = await _dbContext.TwoFactorCodes
+                .Where(c => c.UserId == userId && c.Code == code && !c.IsUsed && c.ExpiresAt > DateTime.Now)
+                .OrderByDescending(c => c.ExpiresAt)
+                .FirstOrDefaultAsync();
+            
+            if (storedCode != null)
+            {
+                // Kodu kullanıldı olarak işaretle
+                storedCode.IsUsed = true;
+                await _dbContext.SaveChangesAsync();
+                
+                _logger.LogInformation($"Kullanıcı {userId} için doğrulama kodu onaylandı");
+                return true;
+            }
+            
+            _logger.LogWarning($"Kullanıcı {userId} için geçersiz veya süresi dolmuş doğrulama kodu");
+            return false;
+        }
     }
 } 

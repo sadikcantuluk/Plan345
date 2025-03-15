@@ -13,6 +13,7 @@ namespace PlanYonetimAraclari.Data
         
         public DbSet<ProjectModel> Projects { get; set; }
         public DbSet<TaskModel> Tasks { get; set; }
+        public DbSet<TwoFactorCode> TwoFactorCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

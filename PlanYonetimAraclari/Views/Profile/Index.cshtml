@@ -173,13 +173,20 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-sm font-medium text-gray-900">İki Faktörlü Doğrulama</h3>
-                    <p class="text-sm text-gray-500">Hesabınızı daha güvenli hale getirmek için SMS doğrulama kullanın.</p>
+                    <p class="text-sm text-gray-500">Hesabınızı daha güvenli hale getirmek için e-posta doğrulama kullanın.</p>
                 </div>
                 <div class="flex items-center">
-                    <span class="mr-3 text-sm text-gray-500">Devre dışı</span>
-                    <button type="button" class="bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" role="switch" aria-checked="false">
-                        <span class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
-                    </button>
+                    <span id="2fa-status" class="mr-3 text-sm text-gray-500">@(Model.User?.TwoFactorEnabled == true ? "Etkin" : "Devre dışı")</span>
+                    <form id="toggle-2fa-form" asp-action="ToggleTwoFactorAuth" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="enableTwoFactor" name="enableTwoFactor" value="@(Model.User?.TwoFactorEnabled == true ? "false" : "true")" />
+                        <button type="button" id="toggle-2fa-btn" 
+                            class="@(Model.User?.TwoFactorEnabled == true ? "bg-primary-600" : "bg-gray-200") relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" 
+                            role="switch" 
+                            aria-checked="@(Model.User?.TwoFactorEnabled == true ? "true" : "false")">
+                            <span class="@(Model.User?.TwoFactorEnabled == true ? "translate-x-5" : "translate-x-0") pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                        </button>
+                    </form>
                 </div>
             </div>
             
@@ -197,11 +204,86 @@
             </div>
             
             <div class="border-t border-gray-200 pt-4 mt-4">
-                <button type="button" class="text-sm text-red-600 hover:text-red-700">
-                    <i class="fas fa-trash-alt mr-1"></i> Hesabımı Sil
-                </button>
+                <form id="deleteAccountForm" asp-action="DeleteAccount" method="post">
+                    @Html.AntiForgeryToken()
+                    <button id="deleteAccountBtn" type="button" class="text-sm text-red-600 hover:text-red-700">
+                        <i class="fas fa-trash-alt mr-1"></i> Hesabımı Sil
+                    </button>
+                </form>
                 <p class="mt-1 text-xs text-gray-500">Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.</p>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hesap Silme Modal -->
+<div id="delete-account-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-red-600">Hesabınızı Silmek İstediğinizden Emin Misiniz?</h3>
+            <button id="close-delete-account-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-6">
+            <p class="text-gray-700 mb-4">Bu işlem <span class="font-bold">geri alınamaz</span> ve tüm verileriniz kalıcı olarak silinecektir.</p>
+            
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">Bu işlem hesabınızı, tüm projelerinizi ve görevlerinizi kalıcı olarak silecektir.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-delete-account" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                İptal
+            </button>
+            <button type="button" id="confirm-delete-account" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
+                Hesabımı Sil
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 2FA Onay Modalı -->
+<div id="confirm-2fa-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-blue-600">İki Faktörlü Doğrulama</h3>
+            <button id="close-confirm-2fa-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-6">
+            <p id="confirm-2fa-message" class="text-gray-700 mb-4"></p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">İki faktörlü doğrulama, hesabınızın güvenliğini artıran bir önlemdir.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-confirm-2fa" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                İptal
+            </button>
+            <button type="button" id="confirm-2fa-action" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+                Onayla
+            </button>
         </div>
     </div>
 </div>
@@ -246,5 +328,133 @@
                 }
             });
         });
+        
+        // Hesap silme işlemleri
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        const deleteAccountModal = document.getElementById('delete-account-modal');
+        const closeDeleteAccountModal = document.getElementById('close-delete-account-modal');
+        const cancelDeleteAccount = document.getElementById('cancel-delete-account');
+        const confirmDeleteAccount = document.getElementById('confirm-delete-account');
+        
+        if (deleteAccountBtn) {
+            deleteAccountBtn.addEventListener('click', function() {
+                deleteAccountModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Arka planı kaydırmayı engelle
+            });
+        }
+        
+        if (closeDeleteAccountModal) {
+            closeDeleteAccountModal.addEventListener('click', function() {
+                deleteAccountModal.classList.add('hidden');
+                document.body.style.overflow = ''; // Kaydırmayı tekrar etkinleştir
+            });
+        }
+        
+        if (cancelDeleteAccount) {
+            cancelDeleteAccount.addEventListener('click', function() {
+                deleteAccountModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        if (confirmDeleteAccount) {
+            confirmDeleteAccount.addEventListener('click', function() {
+                document.getElementById('deleteAccountForm').submit();
+            });
+        }
+        
+        // ESC tuşuyla modalı kapatma
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && deleteAccountModal) {
+                deleteAccountModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 2FA toggle butonunu işlevsek hale getir
+        const toggle2faBtn = document.getElementById('toggle-2fa-btn');
+        const toggle2faForm = document.getElementById('toggle-2fa-form');
+        const enableTwoFactorInput = document.getElementById('enableTwoFactor');
+        const status2fa = document.getElementById('2fa-status');
+        
+        // 2FA modal öğeleri
+        const confirm2faModal = document.getElementById('confirm-2fa-modal');
+        const closeConfirm2faModal = document.getElementById('close-confirm-2fa-modal');
+        const cancelConfirm2fa = document.getElementById('cancel-confirm-2fa');
+        const confirm2faAction = document.getElementById('confirm-2fa-action');
+        const confirm2faMessage = document.getElementById('confirm-2fa-message');
+        
+        // 2FA onay modalını göster
+        function showConfirmModal(message, onConfirm) {
+            if (confirm2faModal) {
+                // Mesajı ayarla
+                confirm2faMessage.textContent = message;
+                
+                // Modalı göster
+                confirm2faModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                // Onay butonuna tıklandığında
+                if (confirm2faAction) {
+                    // Eski event listener'ları temizle
+                    const newConfirmBtn = confirm2faAction.cloneNode(true);
+                    confirm2faAction.parentNode.replaceChild(newConfirmBtn, confirm2faAction);
+                    
+                    // Yeni event listener ekle
+                    newConfirmBtn.addEventListener('click', function() {
+                        // Onay fonksiyonunu çağır
+                        if (typeof onConfirm === 'function') {
+                            onConfirm();
+                        }
+                        
+                        // Modalı kapat
+                        confirm2faModal.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    });
+                }
+            }
+        }
+        
+        // Modal kapatma işlemleri
+        if (closeConfirm2faModal) {
+            closeConfirm2faModal.addEventListener('click', function() {
+                confirm2faModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        if (cancelConfirm2fa) {
+            cancelConfirm2fa.addEventListener('click', function() {
+                confirm2faModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        // ESC tuşuyla 2FA modalını kapatma
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && confirm2faModal && !confirm2faModal.classList.contains('hidden')) {
+                confirm2faModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        if (toggle2faBtn) {
+            toggle2faBtn.addEventListener('click', function() {
+                // Kullanıcıya bildirim gösteriyoruz
+                const isEnabled = toggle2faBtn.getAttribute('aria-checked') === 'true';
+                let message = '';
+                
+                if (isEnabled) {
+                    message = 'İki faktörlü doğrulamayı etkinleştirmek üzeresiniz. Giriş yaparken e-postanıza bir doğrulama kodu gönderilecektir.';
+                } else {
+                     message = 'İki faktörlü doğrulamayı devre dışı bırakmak istediğinize emin misiniz? Bu, hesabınızın güvenliğini azaltacaktır.';
+                }
+                
+                // Form gönderme işlemini gerçekleştiren confirm modalı açılacak
+                showConfirmModal(message, function() {
+                    toggle2faForm.submit();
+                });
+            });
+        }
     });
 </script>

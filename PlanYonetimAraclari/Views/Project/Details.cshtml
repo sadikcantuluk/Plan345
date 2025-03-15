@@ -1,0 +1,928 @@
+@model PlanYonetimAraclari.Models.ProjectDetailViewModel
+@{
+    ViewData["Title"] = "Proje Detayları - " + Model.Project.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Üst Bilgi Alanı -->
+<div class="p-6">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <div class="flex items-center">
+                <a href="@Url.Action("Index", "Dashboard")" class="text-gray-500 hover:text-primary-500 mr-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900">@Model.Project.Name</h1>
+                <span class="ml-3 px-3 py-1 @(Model.Project.Status == ProjectStatus.Planning ? "bg-blue-100 text-blue-800" : 
+                                           Model.Project.Status == ProjectStatus.InProgress ? "bg-amber-100 text-amber-800" : 
+                                           Model.Project.Status == ProjectStatus.Completed ? "bg-green-100 text-green-800" :
+                                           Model.Project.Status == ProjectStatus.OnHold ? "bg-gray-100 text-gray-800" :
+                                           "bg-red-100 text-red-800") text-xs rounded-full">
+                    @(Model.Project.Status == ProjectStatus.Planning ? "Planlama" : 
+                     Model.Project.Status == ProjectStatus.InProgress ? "Devam Ediyor" : 
+                     Model.Project.Status == ProjectStatus.Completed ? "Tamamlandı" :
+                     Model.Project.Status == ProjectStatus.OnHold ? "Beklemede" :
+                     "İptal Edildi")
+                </span>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Oluşturulma: @Model.Project.CreatedDate.ToString("dd MMMM yyyy")</p>
+        </div>
+        
+        <div class="flex space-x-3">
+            <!-- Proje Durumu Değiştirme -->
+            <div class="relative" id="status-dropdown-container">
+                <button id="status-dropdown-button" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center">
+                    <i class="fas fa-exchange-alt mr-2"></i> Durum Değiştir <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                </button>
+                <div id="status-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-10">
+                    <a href="#" data-status="0" class="status-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2"></span> Planlama
+                    </a>
+                    <a href="#" data-status="1" class="status-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-2"></span> Devam Ediyor
+                    </a>
+                    <a href="#" data-status="2" class="status-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-green-500 inline-block mr-2"></span> Tamamlandı
+                    </a>
+                    <a href="#" data-status="3" class="status-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-gray-500 inline-block mr-2"></span> Beklemede
+                    </a>
+                    <a href="#" data-status="4" class="status-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2"></span> İptal Edildi
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Proje Silme -->
+            <button id="delete-project-btn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center transition-colors duration-200">
+                <i class="fas fa-trash-alt mr-2"></i> Projeyi Sil
+            </button>
+        </div>
+    </div>
+    
+    <!-- Bildirim Mesajları -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <!-- Proje Detayları -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Proje Detayları</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-500">Açıklama</h3>
+                    <p class="text-gray-700">@(string.IsNullOrEmpty(Model.Project.Description) ? "Açıklama yok" : Model.Project.Description)</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Bitiş Tarihi</h3>
+                    <p class="text-gray-700">@(Model.Project.DueDate.HasValue ? Model.Project.DueDate.Value.ToString("dd MMMM yyyy") : "Belirtilmemiş")</p>
+                </div>
+            </div>
+            
+            <div>
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-500">Son Güncelleme</h3>
+                    <p class="text-gray-700">@(Model.Project.LastUpdatedDate.HasValue ? Model.Project.LastUpdatedDate.Value.ToString("dd MMMM yyyy HH:mm") : "Güncellenmemiş")</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Tamamlanma Durumu</h3>
+                    <div class="mt-2 flex items-center">
+                        <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                            <div class="bg-primary-500 h-2 rounded-full" style="width: @Model.CompletionPercentage%"></div>
+                        </div>
+                        <span class="text-sm text-gray-500">%@Model.CompletionPercentage</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Görevler Bölümü (Trello-like) -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Görevler</h2>
+            
+            <!-- Yardım butonu ve ipucu -->
+            <div class="relative" id="tasks-help-container">
+                <button id="tasks-help-button" class="text-gray-500 hover:text-primary-500 focus:outline-none">
+                    <i class="fas fa-question-circle text-xl"></i>
+                </button>
+                <div id="tasks-help-content" class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-4 px-4 hidden z-10">
+                    <h3 class="font-medium text-gray-800 mb-2">Görevleri Taşıma ve Düzenleme Yardımı</h3>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-arrows-alt text-primary-500 mt-1 mr-2"></i>
+                            <span>Görevleri <strong>sürükleyip bırakarak</strong> farklı durumlara taşıyabilirsiniz.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-primary-500 mt-1 mr-2"></i>
+                            <span>Veya görev kartlarındaki <strong>ok butonlarını</strong> kullanarak taşıyabilirsiniz.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-trash-alt text-red-500 mt-1 mr-2"></i>
+                            <span>Görev silmek için kart üzerindeki <strong>çöp kutusu</strong> simgesine tıklayın.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Yapılacak -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-medium text-gray-800 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                        Yapılacak
+                    </h3>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">@Model.TodoTasks.Count</span>
+                </div>
+                
+                <div id="todo-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-blue-100 border-opacity-0 transition-all hover:border-opacity-100">
+                    @foreach (var task in Model.TodoTasks)
+                    {
+                        <div class="task-card bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing" data-task-id="@task.Id">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-gray-800 mb-1">@task.Name</h4>
+                                <div class="task-actions ml-2 flex items-center">
+                                    <button class="delete-task-btn text-red-500 hover:text-red-700" data-task-id="@task.Id">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">@task.Description</p>
+                            }
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex items-center">
+                                    <span class="text-xs @(task.Priority == TaskPriority.Low ? "bg-blue-100 text-blue-800" : 
+                                                     task.Priority == TaskPriority.Medium ? "bg-amber-100 text-amber-800" : 
+                                                     task.Priority == TaskPriority.High ? "bg-orange-100 text-orange-800" : 
+                                                     "bg-red-100 text-red-800") px-2 py-0.5 rounded-full">
+                                        @(task.Priority == TaskPriority.Low ? "Düşük" : 
+                                          task.Priority == TaskPriority.Medium ? "Orta" : 
+                                          task.Priority == TaskPriority.High ? "Yüksek" : 
+                                          "Acil")
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="@task.Id" data-status="1">
+                                        <i class="fas fa-arrow-right"></i> Devam Ediyor
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Yeni görev ekleme -->
+                    <div class="add-task-card bg-blue-50 rounded-lg border border-blue-200 p-3 cursor-pointer hover:bg-blue-100 transition-colors" id="add-todo-task">
+                        <div class="flex items-center justify-center text-blue-600">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Yeni Görev Ekle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Devam Ediyor -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-medium text-gray-800 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
+                        Devam Ediyor
+                    </h3>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">@Model.InProgressTasks.Count</span>
+                </div>
+                
+                <div id="in-progress-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-amber-100 border-opacity-0 transition-all hover:border-opacity-100">
+                    @foreach (var task in Model.InProgressTasks)
+                    {
+                        <div class="task-card bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing" data-task-id="@task.Id">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-gray-800 mb-1">@task.Name</h4>
+                                <div class="task-actions ml-2 flex items-center">
+                                    <button class="delete-task-btn text-red-500 hover:text-red-700" data-task-id="@task.Id">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">@task.Description</p>
+                            }
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex items-center">
+                                    <span class="text-xs @(task.Priority == TaskPriority.Low ? "bg-blue-100 text-blue-800" : 
+                                                     task.Priority == TaskPriority.Medium ? "bg-amber-100 text-amber-800" : 
+                                                     task.Priority == TaskPriority.High ? "bg-orange-100 text-orange-800" : 
+                                                     "bg-red-100 text-red-800") px-2 py-0.5 rounded-full">
+                                        @(task.Priority == TaskPriority.Low ? "Düşük" : 
+                                          task.Priority == TaskPriority.Medium ? "Orta" : 
+                                          task.Priority == TaskPriority.High ? "Yüksek" : 
+                                          "Acil")
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <button class="move-task-btn bg-blue-100 text-blue-800 hover:bg-blue-200 text-xs px-2 py-1 rounded" data-task-id="@task.Id" data-status="0">
+                                        <i class="fas fa-arrow-left"></i> Yapılacak
+                                    </button>
+                                    <button class="move-task-btn bg-green-100 text-green-800 hover:bg-green-200 text-xs px-2 py-1 rounded" data-task-id="@task.Id" data-status="2">
+                                        <i class="fas fa-arrow-right"></i> Tamamlandı
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Yeni görev ekleme (Devam Ediyor) -->
+                    <div class="add-task-card bg-amber-50 rounded-lg border border-amber-200 p-3 cursor-pointer hover:bg-amber-100 transition-colors" id="add-inprogress-task">
+                        <div class="flex items-center justify-center text-amber-600">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Yeni Görev Ekle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tamamlandı -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-medium text-gray-800 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                        Tamamlandı
+                    </h3>
+                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">@Model.DoneTasks.Count</span>
+                </div>
+                
+                <div id="done-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-green-100 border-opacity-0 transition-all hover:border-opacity-100">
+                    @foreach (var task in Model.DoneTasks)
+                    {
+                        <div class="task-card bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing" data-task-id="@task.Id">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-gray-800 mb-1">@task.Name</h4>
+                                <div class="task-actions ml-2 flex items-center">
+                                    <button class="delete-task-btn text-red-500 hover:text-red-700" data-task-id="@task.Id">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">@task.Description</p>
+                            }
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex items-center">
+                                    <span class="text-xs @(task.Priority == TaskPriority.Low ? "bg-blue-100 text-blue-800" : 
+                                                     task.Priority == TaskPriority.Medium ? "bg-amber-100 text-amber-800" : 
+                                                     task.Priority == TaskPriority.High ? "bg-orange-100 text-orange-800" : 
+                                                     "bg-red-100 text-red-800") px-2 py-0.5 rounded-full">
+                                        @(task.Priority == TaskPriority.Low ? "Düşük" : 
+                                          task.Priority == TaskPriority.Medium ? "Orta" : 
+                                          task.Priority == TaskPriority.High ? "Yüksek" : 
+                                          "Acil")
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="@task.Id" data-status="1">
+                                        <i class="fas fa-arrow-left"></i> Devam Ediyor
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Yeni görev ekleme (Tamamlandı) -->
+                    <div class="add-task-card bg-green-50 rounded-lg border border-green-200 p-3 cursor-pointer hover:bg-green-100 transition-colors" id="add-done-task">
+                        <div class="flex items-center justify-center text-green-600">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Yeni Görev Ekle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Görev Ekleme Modal -->
+<div id="add-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Yeni Görev Oluştur</h3>
+            <button id="close-task-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="create-task-form" method="post" asp-controller="Project" asp-action="CreateTask">
+            @Html.AntiForgeryToken()
+            
+            <!-- Hata Mesajı -->
+            <div id="task-validation-error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 hidden">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="task-validation-error-message" class="text-sm text-red-700"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ProjectId gizli alanı -->
+            <input type="hidden" name="ProjectId" id="ProjectId" value="@Model.Project.Id" />
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="Name" class="block text-sm font-medium text-gray-700 mb-1">Görev Adı *</label>
+                    <input type="text" name="Name" id="Name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <div>
+                    <label for="Description" class="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                    <textarea name="Description" id="Description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+                </div>
+                
+                <div>
+                    <label for="Priority" class="block text-sm font-medium text-gray-700 mb-1">Öncelik</label>
+                    <select name="Priority" id="Priority" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                        <option value="0">Düşük</option>
+                        <option value="1" selected>Orta</option>
+                        <option value="2">Yüksek</option>
+                        <option value="3">Acil</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="DueDate" class="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi (İsteğe Bağlı)</label>
+                    <input type="date" name="DueDate" id="DueDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <!-- Gizli status alanı -->
+                <input type="hidden" name="Status" id="Status" value="0">
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="cancel-task" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    İptal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md">
+                    Oluştur
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Proje Silme Modal -->
+<div id="delete-project-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-red-600">Projeyi Sil</h3>
+            <button id="close-delete-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-6">
+            <p class="text-gray-700 mb-4">Bu işlem projeyi ve tüm görevlerini <span class="font-bold">kalıcı olarak</span> silecektir. Bu işlem geri alınamaz.</p>
+            
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">Projeyi silmek istediğinizden emin misiniz?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                İptal
+            </button>
+            <button type="button" id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
+                Projeyi Sil
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Görev Silme Modal -->
+<div id="delete-task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-red-600">Görevi Sil</h3>
+            <button id="close-delete-task-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-6">
+            <p class="text-gray-700 mb-4">Bu görevi silmek istediğinizden emin misiniz?</p>
+            
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">Bu işlem geri alınamaz.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <input type="hidden" id="delete-task-id" value="" />
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-delete-task" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                İptal
+            </button>
+            <button type="button" id="confirm-delete-task" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
+                Görevi Sil
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- SortableJS kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Sürükle-bırak işlevini etkinleştir
+            const todoList = document.getElementById('todo-tasks');
+            const inProgressList = document.getElementById('in-progress-tasks');
+            const doneList = document.getElementById('done-tasks');
+            
+            // Todo listesi için Sortable başlat
+            new Sortable(todoList, {
+                group: 'tasks', // Gruplar arası taşıma için
+                animation: 150,
+                ghostClass: 'bg-blue-50',
+                dragClass: 'opacity-75',
+                chosenClass: 'shadow-lg',
+                onStart: function() {
+                    $('.task-container').addClass('border-opacity-100');
+                },
+                onEnd: function(evt) {
+                    $('.task-container').removeClass('border-opacity-100');
+                    
+                    if (evt.from !== evt.to) {
+                        const taskId = evt.item.getAttribute('data-task-id');
+                        let newStatus = 0; // Varsayılan Todo
+                        
+                        if (evt.to.id === 'in-progress-tasks') {
+                            newStatus = 1; // In Progress
+                        } else if (evt.to.id === 'done-tasks') {
+                            newStatus = 2; // Done
+                        }
+                        
+                        // AJAX ile görev durumunu güncelle
+                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
+                        updateTaskStatus(taskId, newStatus, null);
+                        
+                        // Butonları güncelle
+                        updateTaskButtons(evt.item, newStatus);
+                        
+                        // Sayaçları güncelle
+                        updateTaskCounters();
+                    }
+                }
+            });
+            
+            // In Progress listesi için Sortable başlat
+            new Sortable(inProgressList, {
+                group: 'tasks',
+                animation: 150,
+                ghostClass: 'bg-amber-50',
+                dragClass: 'opacity-75',
+                chosenClass: 'shadow-lg',
+                onStart: function() {
+                    $('.task-container').addClass('border-opacity-100');
+                },
+                onEnd: function(evt) {
+                    $('.task-container').removeClass('border-opacity-100');
+                    
+                    if (evt.from !== evt.to) {
+                        const taskId = evt.item.getAttribute('data-task-id');
+                        let newStatus = 1; // Varsayılan In Progress
+                        
+                        if (evt.to.id === 'todo-tasks') {
+                            newStatus = 0; // Todo
+                        } else if (evt.to.id === 'done-tasks') {
+                            newStatus = 2; // Done
+                        }
+                        
+                        // AJAX ile görev durumunu güncelle
+                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
+                        updateTaskStatus(taskId, newStatus, null);
+                        
+                        // Butonları güncelle
+                        updateTaskButtons(evt.item, newStatus);
+                        
+                        // Sayaçları güncelle
+                        updateTaskCounters();
+                    }
+                }
+            });
+            
+            // Done listesi için Sortable başlat
+            new Sortable(doneList, {
+                group: 'tasks',
+                animation: 150,
+                ghostClass: 'bg-green-50',
+                dragClass: 'opacity-75',
+                chosenClass: 'shadow-lg',
+                onStart: function() {
+                    $('.task-container').addClass('border-opacity-100');
+                },
+                onEnd: function(evt) {
+                    $('.task-container').removeClass('border-opacity-100');
+                    
+                    if (evt.from !== evt.to) {
+                        const taskId = evt.item.getAttribute('data-task-id');
+                        let newStatus = 2; // Varsayılan Done
+                        
+                        if (evt.to.id === 'todo-tasks') {
+                            newStatus = 0; // Todo
+                        } else if (evt.to.id === 'in-progress-tasks') {
+                            newStatus = 1; // In Progress
+                        }
+                        
+                        // AJAX ile görev durumunu güncelle
+                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
+                        updateTaskStatus(taskId, newStatus, null);
+                        
+                        // Butonları güncelle
+                        updateTaskButtons(evt.item, newStatus);
+                        
+                        // Sayaçları güncelle
+                        updateTaskCounters();
+                    }
+                }
+            });
+            
+            // Görev durumu güncelleme fonksiyonu
+            function updateTaskStatus(taskId, newStatus, taskElement = null) {
+                $.ajax({
+                    url: "@Url.Action("UpdateTaskStatus", "Project")",
+                    type: "POST",
+                    data: {
+                        taskId: taskId,
+                        newStatus: newStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılı olduğuna dair bildirim göster
+                            showNotification('Görev durumu güncellendi', 'success');
+                            
+                            // Eğer bir görev elementi gönderildiyse UI'ı güncelle
+                            if (taskElement) {
+                                // Görevi mevcut konteynırından kaldır
+                                $(taskElement).detach();
+                                
+                                // Hedef konteynıra ekle
+                                let targetContainer;
+                                if (newStatus === 0) {
+                                    targetContainer = $('#todo-tasks');
+                                    // Devam Ediyor ve Tamamlandı butonlarını güncelle/ekle
+                                    updateTaskButtons(taskElement, 0);
+                                } else if (newStatus === 1) {
+                                    targetContainer = $('#in-progress-tasks');
+                                    // Yapılacak ve Tamamlandı butonlarını güncelle/ekle
+                                    updateTaskButtons(taskElement, 1);
+                                } else {
+                                    targetContainer = $('#done-tasks');
+                                    // Devam Ediyor butonunu güncelle/ekle
+                                    updateTaskButtons(taskElement, 2);
+                                }
+                                
+                                // Yeni görev ekleme kartından önce görevi konteynıra ekle
+                                const addTaskCard = targetContainer.find('.add-task-card');
+                                if (addTaskCard.length) {
+                                    addTaskCard.before(taskElement);
+                                } else {
+                                    targetContainer.append(taskElement);
+                                }
+                                
+                                // Konteynır sayaçlarını güncelle
+                                updateTaskCounters();
+                            }
+                        } else {
+                            // Hata mesajı göster
+                            showNotification('Hata: ' + response.message, 'error');
+                            // Sayfayı yenile (durumu eski haline döndürmek için)
+                            window.location.reload();
+                        }
+                    },
+                    error: function() {
+                        showNotification('Bağlantı hatası oluştu', 'error');
+                        window.location.reload();
+                    }
+                });
+            }
+            
+            // Görev butonlarını güncelleme fonksiyonu
+            function updateTaskButtons(taskElement, newStatus) {
+                // Mevcut buton konteynerini temizle
+                const buttonContainer = $(taskElement).find('.flex.items-center.space-x-1');
+                buttonContainer.empty();
+                
+                // Yeni duruma göre doğru butonları ekle
+                if (newStatus === 0) { // Yapılacak
+                    buttonContainer.append(`
+                        <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="${$(taskElement).data('task-id')}" data-status="1">
+                            <i class="fas fa-arrow-right"></i> Devam Ediyor
+                        </button>
+                    `);
+                } else if (newStatus === 1) { // Devam Ediyor
+                    buttonContainer.append(`
+                        <button class="move-task-btn bg-blue-100 text-blue-800 hover:bg-blue-200 text-xs px-2 py-1 rounded" data-task-id="${$(taskElement).data('task-id')}" data-status="0">
+                            <i class="fas fa-arrow-left"></i> Yapılacak
+                        </button>
+                        <button class="move-task-btn bg-green-100 text-green-800 hover:bg-green-200 text-xs px-2 py-1 rounded" data-task-id="${$(taskElement).data('task-id')}" data-status="2">
+                            <i class="fas fa-arrow-right"></i> Tamamlandı
+                        </button>
+                    `);
+                } else { // Tamamlandı
+                    buttonContainer.append(`
+                        <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="${$(taskElement).data('task-id')}" data-status="1">
+                            <i class="fas fa-arrow-left"></i> Devam Ediyor
+                        </button>
+                    `);
+                }
+                
+                // Butonlara olay dinleyicisi ekle
+                $(taskElement).find('.move-task-btn').on('click', handleMoveTaskClick);
+            }
+            
+            // Görev sayaçlarını güncelleme fonksiyonu
+            function updateTaskCounters() {
+                // Her bir durum için görev sayısını güncelle
+                const todoCount = $('#todo-tasks .task-card').length;
+                const inProgressCount = $('#in-progress-tasks .task-card').length;
+                const doneCount = $('#done-tasks .task-card').length;
+                
+                // Sayaçları güncelle
+                $('#todo-tasks').closest('.bg-white').find('.bg-blue-100.text-blue-800.rounded-full').text(todoCount);
+                $('#in-progress-tasks').closest('.bg-white').find('.bg-amber-100.text-amber-800.rounded-full').text(inProgressCount);
+                $('#done-tasks').closest('.bg-white').find('.bg-green-100.text-green-800.rounded-full').text(doneCount);
+            }
+            
+            // Bildirim gösterme fonksiyonu
+            function showNotification(message, type) {
+                const notificationDiv = $('<div>').addClass('fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50')
+                    .css('transition', 'all 0.5s ease')
+                    .css('opacity', '0')
+                    .text(message);
+                
+                if (type === 'success') {
+                    notificationDiv.addClass('bg-green-500 text-white');
+                } else {
+                    notificationDiv.addClass('bg-red-500 text-white');
+                }
+                
+                $('body').append(notificationDiv);
+                
+                // Animasyon ile göster
+                setTimeout(() => {
+                    notificationDiv.css('opacity', '1');
+                }, 10);
+                
+                // 3 saniye sonra kaldır
+                setTimeout(() => {
+                    notificationDiv.css('opacity', '0');
+                    setTimeout(() => {
+                        notificationDiv.remove();
+                    }, 500);
+                }, 3000);
+            }
+            
+            // Görev taşıma butonları için tıklama olay işleyicisi
+            function handleMoveTaskClick() {
+                const taskId = $(this).data("task-id");
+                const newStatus = $(this).data("status");
+                const taskCard = $(this).closest('.task-card');
+                
+                // Ortak updateTaskStatus fonksiyonunu kullan
+                updateTaskStatus(taskId, newStatus, taskCard);
+            }
+            
+            // Görev durumunu güncelleme (butonlar)
+            $(".move-task-btn").on("click", handleMoveTaskClick);
+            
+            // Görev silme
+            $(".delete-task-btn").on("click", function() {
+                const taskId = $(this).data("task-id");
+                $("#delete-task-id").val(taskId);
+                $("#delete-task-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden");
+            });
+            
+            // Görev silme modalı kapatma
+            $("#close-delete-task-modal, #cancel-delete-task").on("click", function() {
+                $("#delete-task-modal").addClass("hidden");
+                $("body").css("overflow", "");
+            });
+            
+            // Görev silme işlemi
+            $("#confirm-delete-task").on("click", function() {
+                const taskId = $("#delete-task-id").val();
+                
+                $.ajax({
+                    url: "@Url.Action("DeleteTask", "Project")",
+                    type: "POST",
+                    data: {
+                        taskId: taskId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Sayfayı yenile
+                            window.location.reload();
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            });
+            
+            // Görev ekleme modalı
+            $("#add-todo-task").on("click", function() {
+                $("#Status").val("0"); // Todo
+                $("#add-task-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden"); // Arka planı kaydırmayı engelle
+            });
+            
+            // Devam Eden görev ekleme
+            $("#add-inprogress-task").on("click", function() {
+                $("#Status").val("1"); // In Progress
+                $("#add-task-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden");
+            });
+            
+            // Tamamlanmış görev ekleme
+            $("#add-done-task").on("click", function() {
+                $("#Status").val("2"); // Done
+                $("#add-task-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden");
+            });
+            
+            // Modal kapatma
+            $("#close-task-modal, #cancel-task").on("click", function() {
+                $("#add-task-modal").addClass("hidden");
+                $("body").css("overflow", ""); // Kaydırmayı tekrar etkinleştir
+                $("#create-task-form")[0].reset();
+                $("#Status").val("0"); // Reset status to default
+            });
+            
+            // ESC tuşu ile kapatma
+            $(document).on("keydown", function(e) {
+                if (e.key === "Escape") {
+                    $("#add-task-modal").addClass("hidden");
+                    $("#delete-project-modal").addClass("hidden");
+                    $("#tasks-help-content").addClass("hidden");
+                    $("#delete-task-modal").addClass("hidden");
+                    $("body").css("overflow", "");
+                }
+            });
+            
+            // Görev yardım paneli gösterme/gizleme
+            $("#tasks-help-button").on("click", function() {
+                $("#tasks-help-content").toggleClass("hidden");
+            });
+            
+            // Görev yardım dışına tıklandığında gizle
+            $(document).on("click", function(e) {
+                if (!$(e.target).closest("#tasks-help-container").length) {
+                    $("#tasks-help-content").addClass("hidden");
+                }
+            });
+            
+            // Görev formunu doğrulama
+            $("#create-task-form").on("submit", function(e) {
+                const taskName = $("#Name").val();
+                
+                if (!taskName || taskName.trim() === "") {
+                    e.preventDefault();
+                    $("#task-validation-error").removeClass("hidden");
+                    $("#task-validation-error-message").text("Görev adı zorunludur");
+                    return false;
+                }
+                
+                $("#task-validation-error").addClass("hidden");
+                return true;
+            });
+            
+            // Proje silme modalı
+            $("#delete-project-btn").on("click", function() {
+                $("#delete-project-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden");
+            });
+            
+            // Proje silme modalı kapatma
+            $("#close-delete-modal, #cancel-delete").on("click", function() {
+                $("#delete-project-modal").addClass("hidden");
+                $("body").css("overflow", "");
+            });
+            
+            // Proje silme
+            $("#confirm-delete").on("click", function() {
+                $.ajax({
+                    url: "@Url.Action("Delete", "Project")",
+                    type: "POST",
+                    data: {
+                        id: @Model.Project.Id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılı silme, dashboard'a yönlendir
+                            window.location.href = "@Url.Action("Index", "Dashboard")";
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            });
+            
+            // Durum dropdown açma/kapama
+            $("#status-dropdown-button").on("click", function() {
+                $("#status-dropdown").toggleClass("hidden");
+            });
+            
+            // Dropdown dışına tıklandığında kapatma
+            $(document).on("click", function(e) {
+                if (!$(e.target).closest("#status-dropdown-container").length) {
+                    $("#status-dropdown").addClass("hidden");
+                }
+            });
+            
+            // Durum değiştirme
+            $(".status-option").on("click", function(e) {
+                e.preventDefault();
+                const statusId = $(this).data("status");
+                
+                $.ajax({
+                    url: "@Url.Action("UpdateStatus", "Project")",
+                    type: "POST",
+                    data: {
+                        id: @Model.Project.Id,
+                        status: statusId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Sayfayı yenile
+                            window.location.reload();
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            });
+        });
+    </script>
+} 

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TaskStatus = PlanYonetimAraclari.Models.TaskStatus;
 
 namespace PlanYonetimAraclari.Services
 {
@@ -134,17 +135,35 @@ namespace PlanYonetimAraclari.Services
             }
         }
 
-        public async Task<bool> DeleteProjectAsync(int projectId)
+        public async Task<bool> DeleteProjectAsync(int projectId, bool forceDelete = false)
         {
             try
             {
-                _logger.LogInformation($"Proje siliniyor: {projectId}");
+                _logger.LogInformation($"Proje siliniyor: {projectId}, Force Delete: {forceDelete}");
                 
                 var project = await _context.Projects.FindAsync(projectId);
                 if (project == null)
                 {
                     _logger.LogWarning($"Silinecek proje bulunamadı: {projectId}");
                     return false;
+                }
+                
+                // Projeye ait görevleri kontrol et
+                var hasRelatedTasks = await _context.Tasks.AnyAsync(t => t.ProjectId == projectId);
+                
+                if (hasRelatedTasks && !forceDelete)
+                {
+                    _logger.LogWarning($"Projeye ait görevler olduğu için silme işlemi iptal edildi: {projectId}");
+                    return false;
+                }
+                
+                // Eğer forceDelete true ise veya görevler yoksa, projeyi sil
+                if (forceDelete && hasRelatedTasks)
+                {
+                    // Önce projeye ait tüm görevleri sil
+                    var projectTasks = await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
+                    _context.Tasks.RemoveRange(projectTasks);
+                    _logger.LogInformation($"Projeye ait {projectTasks.Count} görev silindi: {projectId}");
                 }
                 
                 _context.Projects.Remove(project);
@@ -217,13 +236,166 @@ namespace PlanYonetimAraclari.Services
                 _logger.LogInformation($"Kullanıcı beklemedeki proje sayısı alınıyor: {userId}");
                 return await _context.Projects
                     .Where(p => p.UserId == userId && 
-                           (p.Status == ProjectStatus.OnHold || 
-                            p.Status == ProjectStatus.Cancelled))
+                           p.Status == ProjectStatus.OnHold)
                     .CountAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Kullanıcı beklemedeki proje sayısı alınırken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<ProjectModel> GetProjectDetailsByIdAsync(int projectId)
+        {
+            try
+            {
+                _logger.LogInformation($"Proje detayları alınıyor: {projectId}");
+                return await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje detayları alınırken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<bool> UpdateProjectStatusAsync(int projectId, ProjectStatus newStatus)
+        {
+            try
+            {
+                _logger.LogInformation($"Proje durumu güncelleniyor: {projectId} - Yeni durum: {newStatus}");
+                
+                var project = await _context.Projects.FindAsync(projectId);
+                if (project == null)
+                {
+                    _logger.LogWarning($"Güncellenecek proje bulunamadı: {projectId}");
+                    return false;
+                }
+                
+                project.Status = newStatus;
+                project.LastUpdatedDate = DateTime.Now;
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation($"Proje durumu başarıyla güncellendi: {projectId} - Yeni durum: {newStatus}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje durumu güncellenirken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<List<TaskModel>> GetProjectTasksAsync(int projectId)
+        {
+            try
+            {
+                _logger.LogInformation($"Proje görevleri alınıyor: {projectId}");
+                return await _context.Tasks
+                    .Where(t => t.ProjectId == projectId)
+                    .OrderBy(t => t.Status)
+                    .ThenBy(t => t.Priority)
+                    .ThenByDescending(t => t.CreatedDate)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje görevleri alınırken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<List<TaskModel>> GetProjectTasksByStatusAsync(int projectId, TaskStatus status)
+        {
+            try
+            {
+                _logger.LogInformation($"Proje görevleri duruma göre alınıyor: {projectId} - Durum: {status}");
+                return await _context.Tasks
+                    .Where(t => t.ProjectId == projectId && t.Status == status)
+                    .OrderBy(t => t.Priority)
+                    .ThenByDescending(t => t.CreatedDate)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje görevleri duruma göre alınırken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<TaskModel> CreateTaskAsync(TaskModel task)
+        {
+            try
+            {
+                _logger.LogInformation($"Yeni görev oluşturuluyor: {task.Name} | Proje ID: {task.ProjectId}");
+                
+                if (string.IsNullOrEmpty(task.Name))
+                {
+                    _logger.LogWarning("Görev adı boş, kaydetme işlemi iptal ediliyor.");
+                    throw new ArgumentException("Görev adı zorunludur.");
+                }
+                
+                task.CreatedDate = DateTime.Now;
+                
+                await _context.Tasks.AddAsync(task);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation($"Görev başarıyla oluşturuldu: {task.Id} - {task.Name}");
+                return task;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev oluşturulurken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<TaskModel> UpdateTaskAsync(TaskModel task)
+        {
+            try
+            {
+                _logger.LogInformation($"Görev güncelleniyor: {task.Id} - {task.Name}");
+                
+                task.LastUpdatedDate = DateTime.Now;
+                
+                _context.Entry(task).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation($"Görev başarıyla güncellendi: {task.Id} - {task.Name}");
+                return task;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev güncellenirken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task<bool> DeleteTaskAsync(int taskId)
+        {
+            try
+            {
+                _logger.LogInformation($"Görev siliniyor: {taskId}");
+                
+                var task = await _context.Tasks.FindAsync(taskId);
+                if (task == null)
+                {
+                    _logger.LogWarning($"Silinecek görev bulunamadı: {taskId}");
+                    return false;
+                }
+                
+                _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation($"Görev başarıyla silindi: {taskId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev silinirken hata oluştu: {ex.Message}");
                 throw;
             }
         }

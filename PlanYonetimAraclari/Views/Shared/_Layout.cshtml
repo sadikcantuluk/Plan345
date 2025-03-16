@@ -461,6 +461,27 @@
                 default: return 'Bilinmiyor';
             }
         }
+        
+        // Başarı ve hata mesajlarının otomatik kaybolması
+        document.addEventListener('DOMContentLoaded', function() {
+            // Otomatik kaybolacak mesaj elementlerini bul
+            const autoHideMessages = document.querySelectorAll('.auto-hide-message');
+            
+            // Her bir mesaj için zamanlayıcı başlat
+            autoHideMessages.forEach(function(messageElement) {
+                // 5 saniye sonra mesajı yumuşak bir şekilde gizle
+                setTimeout(function() {
+                    // Önce opasiteyi azaltarak geçiş efekti uygula
+                    messageElement.style.transition = 'opacity 1s ease-out';
+                    messageElement.style.opacity = '0';
+                    
+                    // Opasiteyi azalttıktan sonra elementi tamamen gizle
+                    setTimeout(function() {
+                        messageElement.style.display = 'none';
+                    }, 1000); // 1 saniye (geçiş süresi) sonra
+                }, 3000); // 5 saniye sonra
+            });
+        });
     </script>
     
     @RenderSection("Scripts", required: false)

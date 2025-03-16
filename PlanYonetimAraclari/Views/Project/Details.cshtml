@@ -63,7 +63,7 @@
     <!-- Bildirim Mesajları -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 auto-hide-message">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <i class="fas fa-check-circle text-green-500"></i>
@@ -77,7 +77,7 @@
     
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 auto-hide-message">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-circle text-red-500"></i>
@@ -511,15 +511,37 @@
                             newStatus = 2; // Done
                         }
                         
-                        // AJAX ile görev durumunu güncelle
-                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
-                        updateTaskStatus(taskId, newStatus, null);
-                        
-                        // Butonları güncelle
-                        updateTaskButtons(evt.item, newStatus);
-                        
-                        // Sayaçları güncelle
-                        updateTaskCounters();
+                        // AJAX ile görev durumunu güncelle ve öncelik bilgisini callback ile güncelleyecek şekilde ayarla
+                        $.ajax({
+                            url: "@Url.Action("UpdateTaskStatus", "Project")",
+                            type: "POST",
+                            data: {
+                                taskId: taskId,
+                                newStatus: newStatus
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Butonları güncelle
+                                    updateTaskButtons(evt.item, newStatus);
+                                    
+                                    // Eğer sunucudan yanıtta görev bilgisi varsa öncelik etiketini de güncelle
+                                    if (response.task && response.task.priority !== undefined) {
+                                        updateTaskPriority(evt.item, response.task.priority);
+                                    }
+                                    
+                                    // Sayaçları güncelle
+                                    updateTaskCounters();
+                                    // Tamamlanma yüzdesini güncelle
+                                    updateCompletionPercentage();
+                                } else {
+                                    // Hata durumunda sayfayı yenile
+                                    window.location.reload();
+                                }
+                            },
+                            error: function() {
+                                window.location.reload();
+                            }
+                        });
                     }
                 }
             });
@@ -547,15 +569,37 @@
                             newStatus = 2; // Done
                         }
                         
-                        // AJAX ile görev durumunu güncelle
-                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
-                        updateTaskStatus(taskId, newStatus, null);
-                        
-                        // Butonları güncelle
-                        updateTaskButtons(evt.item, newStatus);
-                        
-                        // Sayaçları güncelle
-                        updateTaskCounters();
+                        // AJAX ile görev durumunu güncelle ve öncelik bilgisini callback ile güncelleyecek şekilde ayarla
+                        $.ajax({
+                            url: "@Url.Action("UpdateTaskStatus", "Project")",
+                            type: "POST",
+                            data: {
+                                taskId: taskId,
+                                newStatus: newStatus
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Butonları güncelle
+                                    updateTaskButtons(evt.item, newStatus);
+                                    
+                                    // Eğer sunucudan yanıtta görev bilgisi varsa öncelik etiketini de güncelle
+                                    if (response.task && response.task.priority !== undefined) {
+                                        updateTaskPriority(evt.item, response.task.priority);
+                                    }
+                                    
+                                    // Sayaçları güncelle
+                                    updateTaskCounters();
+                                    // Tamamlanma yüzdesini güncelle
+                                    updateCompletionPercentage();
+                                } else {
+                                    // Hata durumunda sayfayı yenile
+                                    window.location.reload();
+                                }
+                            },
+                            error: function() {
+                                window.location.reload();
+                            }
+                        });
                     }
                 }
             });
@@ -583,15 +627,37 @@
                             newStatus = 1; // In Progress
                         }
                         
-                        // AJAX ile görev durumunu güncelle
-                        // burada UI güncellemesi yapmıyoruz çünkü Sortable zaten DOM'u güncelledi
-                        updateTaskStatus(taskId, newStatus, null);
-                        
-                        // Butonları güncelle
-                        updateTaskButtons(evt.item, newStatus);
-                        
-                        // Sayaçları güncelle
-                        updateTaskCounters();
+                        // AJAX ile görev durumunu güncelle ve öncelik bilgisini callback ile güncelleyecek şekilde ayarla
+                        $.ajax({
+                            url: "@Url.Action("UpdateTaskStatus", "Project")",
+                            type: "POST",
+                            data: {
+                                taskId: taskId,
+                                newStatus: newStatus
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Butonları güncelle
+                                    updateTaskButtons(evt.item, newStatus);
+                                    
+                                    // Eğer sunucudan yanıtta görev bilgisi varsa öncelik etiketini de güncelle
+                                    if (response.task && response.task.priority !== undefined) {
+                                        updateTaskPriority(evt.item, response.task.priority);
+                                    }
+                                    
+                                    // Sayaçları güncelle
+                                    updateTaskCounters();
+                                    // Tamamlanma yüzdesini güncelle
+                                    updateCompletionPercentage();
+                                } else {
+                                    // Hata durumunda sayfayı yenile
+                                    window.location.reload();
+                                }
+                            },
+                            error: function() {
+                                window.location.reload();
+                            }
+                        });
                     }
                 }
             });
@@ -632,73 +698,6 @@
                 percentageText.text('%' + percentage);
             }
 
-            // Görev durumu güncelleme fonksiyonu
-            function updateTaskStatus(taskId, newStatus, taskElement = null) {
-                $.ajax({
-                    url: "@Url.Action("UpdateTaskStatus", "Project")",
-                    type: "POST",
-                    data: {
-                        taskId: taskId,
-                        newStatus: newStatus
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // Başarılı olduğuna dair bildirim göster
-                            showNotification('Görev durumu güncellendi', 'success');
-                            
-                            // Eğer bir görev elementi gönderildiyse UI'ı güncelle
-                            if (taskElement) {
-                                // Görevi mevcut konteynırından kaldır
-                                $(taskElement).detach();
-                                
-                                // Hedef konteynıra ekle
-                                let targetContainer;
-                                if (newStatus === 0) {
-                                    targetContainer = $('#todo-tasks');
-                                    // Devam Ediyor ve Tamamlandı butonlarını güncelle/ekle
-                                    updateTaskButtons(taskElement, 0);
-                                } else if (newStatus === 1) {
-                                    targetContainer = $('#in-progress-tasks');
-                                    // Yapılacak ve Tamamlandı butonlarını güncelle/ekle
-                                    updateTaskButtons(taskElement, 1);
-                                } else {
-                                    targetContainer = $('#done-tasks');
-                                    // Devam Ediyor butonunu güncelle/ekle
-                                    updateTaskButtons(taskElement, 2);
-                                }
-                                
-                                // Yeni görev ekleme kartından önce görevi konteynıra ekle
-                                const addTaskCard = targetContainer.find('.add-task-card');
-                                if (addTaskCard.length) {
-                                    addTaskCard.before(taskElement);
-                                } else {
-                                    targetContainer.append(taskElement);
-                                }
-                                
-                                // Konteynır sayaçlarını güncelle
-                                updateTaskCounters();
-                                
-                                // Tamamlanma yüzdesini güncelle
-                                updateCompletionPercentage();
-                            } else {
-                                // Eğer taskElement null ise (sürükle-bırak kullanıldığında)
-                                // Sadece tamamlanma yüzdesini güncellememiz gerekiyor
-                                updateCompletionPercentage();
-                            }
-                        } else {
-                            // Hata mesajı göster
-                            showNotification('Hata: ' + response.message, 'error');
-                            // Sayfayı yenile (durumu eski haline döndürmek için)
-                            window.location.reload();
-                        }
-                    },
-                    error: function() {
-                        showNotification('Bağlantı hatası oluştu', 'error');
-                        window.location.reload();
-                    }
-                });
-            }
-            
             // Görev butonlarını güncelleme fonksiyonu
             function updateTaskButtons(taskElement, newStatus) {
                 // Mevcut buton konteynerini temizle
@@ -740,10 +739,11 @@
                 const inProgressCount = $('#in-progress-tasks .task-card').length;
                 const doneCount = $('#done-tasks .task-card').length;
                 
-                // Sayaçları güncelle
-                $('#todo-tasks').closest('.bg-white').find('.bg-blue-100.text-blue-800.rounded-full').text(todoCount);
-                $('#in-progress-tasks').closest('.bg-white').find('.bg-amber-100.text-amber-800.rounded-full').text(inProgressCount);
-                $('#done-tasks').closest('.bg-white').find('.bg-green-100.text-green-800.rounded-full').text(doneCount);
+                // Sayaçları güncelle - daha spesifik seçiciler kullanıyoruz
+                // Başlıktaki sayaç etiketlerini (span) hedefliyoruz, görev kartlarındaki öncelik etiketlerini değil
+                $('#todo-tasks').closest('.bg-white').find('h3 + .bg-blue-100.text-blue-800.rounded-full').text(todoCount);
+                $('#in-progress-tasks').closest('.bg-white').find('h3 + .bg-amber-100.text-amber-800.rounded-full').text(inProgressCount);
+                $('#done-tasks').closest('.bg-white').find('h3 + .bg-green-100.text-green-800.rounded-full').text(doneCount);
             }
             
             // Bildirim gösterme fonksiyonu
@@ -775,18 +775,115 @@
                 }, 3000);
             }
             
+            // Öncelik değerini metne dönüştüren fonksiyon
+            function getPriorityText(priority) {
+                switch(parseInt(priority)) {
+                    case 0: return "Düşük";
+                    case 1: return "Orta";
+                    case 2: return "Yüksek";
+                    case 3: return "Acil";
+                    default: return "Orta";
+                }
+            }
+
+            // Öncelik değerine göre stil sınıflarını döndüren fonksiyon
+            function getPriorityClasses(priority) {
+                switch(parseInt(priority)) {
+                    case 0: return "bg-blue-100 text-blue-800";
+                    case 1: return "bg-amber-100 text-amber-800";
+                    case 2: return "bg-orange-100 text-orange-800";
+                    case 3: return "bg-red-100 text-red-800";
+                    default: return "bg-amber-100 text-amber-800";
+                }
+            }
+
+            // Öncelik etiketini güncelleme fonksiyonu
+            function updateTaskPriority(taskElement, priority) {
+                // Daha spesifik bir seçici kullanarak öncelik etiketini doğru bir şekilde seçiyoruz
+                // .task-card içindeki ilk .flex.items-center içindeki span'i hedefliyoruz
+                // Böylece başlık alanındaki sayaç ile karışmıyor
+                const prioritySpan = $(taskElement).find('.flex.items-center:first span.text-xs').first();
+                if (prioritySpan.length) {
+                    // Tüm mevcut arka plan ve metin renk sınıflarını kaldır
+                    prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
+                    
+                    // Yeni önceliğe göre sınıfları ekle
+                    prioritySpan.addClass(getPriorityClasses(priority));
+                    
+                    // Metni güncelle
+                    prioritySpan.text(getPriorityText(priority));
+                }
+            }
+
             // Görev taşıma butonları için tıklama olay işleyicisi
             function handleMoveTaskClick() {
                 const taskId = $(this).data("task-id");
                 const newStatus = $(this).data("status");
                 const taskCard = $(this).closest('.task-card');
                 
-                // Ortak updateTaskStatus fonksiyonunu kullan
-                updateTaskStatus(taskId, newStatus, taskCard);
+                // AJAX ile görev durumunu güncelle
+                $.ajax({
+                    url: "@Url.Action("UpdateTaskStatus", "Project")",
+                    type: "POST",
+                    data: {
+                        taskId: taskId,
+                        newStatus: newStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılı olduğuna dair bildirim göster
+                            showNotification('Görev durumu güncellendi', 'success');
+                            
+                            // Görevi mevcut konteynırından kaldır
+                            $(taskCard).detach();
+                            
+                            // Hedef konteynıra ekle
+                            let targetContainer;
+                            if (newStatus === 0) {
+                                targetContainer = $('#todo-tasks');
+                                // Devam Ediyor ve Tamamlandı butonlarını güncelle/ekle
+                                updateTaskButtons(taskCard, 0);
+                            } else if (newStatus === 1) {
+                                targetContainer = $('#in-progress-tasks');
+                                // Yapılacak ve Tamamlandı butonlarını güncelle/ekle
+                                updateTaskButtons(taskCard, 1);
+                            } else {
+                                targetContainer = $('#done-tasks');
+                                // Devam Ediyor butonunu güncelle/ekle
+                                updateTaskButtons(taskCard, 2);
+                            }
+                            
+                            // Eğer sunucudan yanıtta görev bilgisi varsa öncelik etiketini de güncelle
+                            if (response.task && response.task.priority !== undefined) {
+                                updateTaskPriority(taskCard, response.task.priority);
+                            }
+                            
+                            // Yeni görev ekleme kartından önce görevi konteynıra ekle
+                            const addTaskCard = targetContainer.find('.add-task-card');
+                            if (addTaskCard.length) {
+                                addTaskCard.before(taskCard);
+                            } else {
+                                targetContainer.append(taskCard);
+                            }
+                            
+                            // Konteynır sayaçlarını güncelle
+                            updateTaskCounters();
+                            
+                            // Tamamlanma yüzdesini güncelle
+                            updateCompletionPercentage();
+                        } else {
+                            // Hata mesajı göster
+                            showNotification('Hata: ' + response.message, 'error');
+                            // Sayfayı yenile (durumu eski haline döndürmek için)
+                            window.location.reload();
+                        }
+                    },
+                    error: function() {
+                        showNotification('Bağlantı hatası oluştu', 'error');
+                        window.location.reload();
+                    }
+                });
             }
-            
-            // Görev durumunu güncelleme (butonlar)
-            $(".move-task-btn").on("click", handleMoveTaskClick);
             
             // Görev silme
             $(".delete-task-btn").on("click", function() {

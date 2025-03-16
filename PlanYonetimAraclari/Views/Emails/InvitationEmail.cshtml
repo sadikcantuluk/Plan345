@@ -1,0 +1,105 @@
+@model InvitationEmailModel
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Plan345 - Proje Daveti</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .content {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #4338ca;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="@Model.LogoUrl" alt="Plan345 Logo" class="logo" />
+    </div>
+
+    <div class="content">
+        <h1>Proje Daveti</h1>
+        <p>Merhaba,</p>
+        <p><strong>@Model.InviterName</strong> sizi <strong>@Model.ProjectName</strong> projesine davet ediyor.</p>
+        
+        <p>Proje hakkında:</p>
+        <ul>
+            <li>Proje: @Model.ProjectName</li>
+            <li>Davet eden: @Model.InviterName</li>
+            <li>Ekip üye sayısı: @Model.TeamMemberCount</li>
+        </ul>
+
+        <p>Daveti kabul etmek için aşağıdaki butona tıklayabilirsiniz:</p>
+        
+        <div style="text-align: center;">
+            <a href="@Model.AcceptUrl" class="button" style="background-color: #10b981;">
+                Daveti Kabul Et
+            </a>
+            <a href="@Model.DeclineUrl" class="button" style="background-color: #ef4444; margin-left: 10px;">
+                Daveti Reddet
+            </a>
+        </div>
+
+        <p style="margin-top: 20px;">
+            <small>
+                Bu davet 48 saat içinde geçerliliğini yitirecektir. Eğer butonlar çalışmıyorsa, 
+                aşağıdaki bağlantıları tarayıcınıza kopyalayabilirsiniz:
+            </small>
+        </p>
+        <p style="word-break: break-all;">
+            <small>
+                Kabul et: @Model.AcceptUrl<br />
+                Reddet: @Model.DeclineUrl
+            </small>
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>Bu e-posta Plan345 tarafından gönderilmiştir.</p>
+        <p>
+            <small>
+                Bu e-postayı yanlışlıkla aldıysanız lütfen dikkate almayınız ve siliniz. 
+                Herhangi bir işlem yapmanıza gerek yoktur.
+            </small>
+        </p>
+    </div>
+</body>
+</html> 

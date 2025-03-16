@@ -3,16 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\services\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:services\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\models\\contactviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:models\\contactviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\models\\userviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:models\\userviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,8 +14,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAACkEAAAAAAAAAAAnwEcEAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-16T10:17:11.428Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
@@ -59,45 +64,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "EmailService.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Services\\EmailService.cs",
-              "RelativeDocumentMoniker": "Services\\EmailService.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Services\\EmailService.cs",
-              "RelativeToolTip": "Services\\EmailService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T07:20:03.311Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ContactViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Models\\ContactViewModel.cs",
-              "RelativeDocumentMoniker": "Models\\ContactViewModel.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Models\\ContactViewModel.cs",
-              "RelativeToolTip": "Models\\ContactViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T07:19:44.876Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "UserViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Models\\UserViewModel.cs",
-              "RelativeDocumentMoniker": "Models\\UserViewModel.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Models\\UserViewModel.cs",
-              "RelativeToolTip": "Models\\UserViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T07:18:53.613Z",
-              "EditorCaption": ""
             }
           ]
         }

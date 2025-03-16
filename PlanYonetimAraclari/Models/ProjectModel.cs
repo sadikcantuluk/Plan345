@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -36,6 +37,16 @@ namespace PlanYonetimAraclari.Models
         
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }
+
+        // Team collaboration properties
+        public virtual ICollection<ProjectTeamMember> TeamMembers { get; set; }
+        public virtual ICollection<ProjectInvitation> Invitations { get; set; }
+
+        public ProjectModel()
+        {
+            TeamMembers = new HashSet<ProjectTeamMember>();
+            Invitations = new HashSet<ProjectInvitation>();
+        }
     }
     
     public enum ProjectStatus

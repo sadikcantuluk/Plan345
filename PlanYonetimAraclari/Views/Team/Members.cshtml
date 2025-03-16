@@ -1,0 +1,261 @@
+@using PlanYonetimAraclari.Models
+@using PlanYonetimAraclari.Extensions
+@model TeamMembersViewModel
+@{
+    ViewData["Title"] = $"{Model.Project.Name} - Ekip Üyeleri - Plan345";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUserId = ViewData["CurrentUserId"] as string;
+}
+
+<div class="p-6">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <div class="flex items-center">
+                <a href="@Url.Action("Details", "Project", new { id = Model.Project.Id })" class="text-gray-500 hover:text-primary-500 mr-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900">@Model.Project.Name</h1>
+                <span class="ml-3 text-gray-500">Ekip Üyeleri</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Proje ekibini ve davetleri yönetin</p>
+        </div>
+        
+        @if (Model.IsOwner)
+        {
+            <button type="button" onclick="showInviteModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <i class="fas fa-user-plus mr-2"></i>
+                Üye Davet Et
+            </button>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-4 p-4 rounded-md bg-green-50 border border-green-200 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Ekip Üyeleri -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Ekip Üyeleri</h2>
+            </div>
+            <div class="space-y-4">
+                @foreach (var member in Model.TeamMembers.Where(m => m.Status == "Accepted"))
+                {
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            @if (!string.IsNullOrEmpty(member.User.ProfileImageUrl))
+                            {
+                                <img src="@member.User.ProfileImageUrl" alt="@member.User.FullName" class="w-10 h-10 rounded-full">
+                            }
+                            else
+                            {
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                            }
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">@member.User.FullName</p>
+                                <p class="text-sm text-gray-500">@member.User.Email</p>
+                                <p class="text-xs text-gray-400">@member.Role.GetDisplayName()</p>
+                            </div>
+                        </div>
+                        @if (Model.IsOwner && member.UserId != currentUserId)
+                        {
+                            <button type="button" onclick="confirmRemoveMember('@member.UserId', '@member.User.FullName')" class="text-red-600 hover:text-red-700">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        }
+                    </div>
+                }
+                @if (!Model.TeamMembers.Any(m => m.Status == "Accepted"))
+                {
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Henüz ekip üyesi bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Bekleyen Davetler -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Bekleyen Davetler</h2>
+            <div class="space-y-4">
+                @foreach (var invitation in Model.PendingInvitations)
+                {
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">@invitation.InvitedEmail</p>
+                            <p class="text-xs text-gray-500">
+                                Davet eden: @invitation.InvitedByUser.FullName<br />
+                                Davet tarihi: @invitation.InvitedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </p>
+                        </div>
+                        @if (Model.IsOwner)
+                        {
+                            <button type="button" onclick="confirmCancelInvitation('@invitation.Id', '@invitation.InvitedEmail')" class="text-red-600 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        }
+                    </div>
+                }
+                @if (!Model.PendingInvitations.Any())
+                {
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Bekleyen davet bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Üye Davet Modalı -->
+<div id="inviteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Yeni Üye Davet Et</h3>
+                <button type="button" onclick="hideInviteModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="inviteForm" method="post" action="@Url.Action("InviteMember", "Team")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="projectId" value="@Model.Project.Id" />
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700">E-posta Adresi</label>
+                    <input type="email" name="email" id="email" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideInviteModal()"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        İptal
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Davet Gönder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Üye Çıkarma Onay Modalı -->
+<div id="confirmRemoveModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Üyeyi Çıkar</h3>
+                <p class="mt-2 text-sm text-gray-500">
+                    <span id="removeMemberName"></span> adlı üyeyi projeden çıkarmak istediğinize emin misiniz?
+                </p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideConfirmRemoveModal()"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    İptal
+                </button>
+                <a href="#" id="confirmRemoveLink"
+                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Çıkar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Davet İptal Onay Modalı -->
+<div id="confirmCancelInvitationModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Daveti İptal Et</h3>
+                <p class="mt-2 text-sm text-gray-500">
+                    <span id="cancelInvitationEmail"></span> adresine gönderilen daveti iptal etmek istediğinize emin misiniz?
+                </p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideConfirmCancelInvitationModal()"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    İptal
+                </button>
+                <a href="#" id="confirmCancelInvitationLink"
+                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Daveti İptal Et
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Otomatik gizlenen mesajlar için JavaScript
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                var messages = document.querySelectorAll('.auto-hide-message');
+                messages.forEach(function (message) {
+                    message.style.display = 'none';
+                });
+            }, 5000);
+        });
+
+        // Üye davet modalı
+        function showInviteModal() {
+            document.getElementById('inviteModal').classList.remove('hidden');
+        }
+
+        function hideInviteModal() {
+            document.getElementById('inviteModal').classList.add('hidden');
+        }
+
+        // Üye çıkarma onay modalı
+        function confirmRemoveMember(userId, fullName) {
+            document.getElementById('removeMemberName').textContent = fullName;
+            document.getElementById('confirmRemoveLink').href = '@Url.Action("RemoveMember", "Team")?projectId=@Model.Project.Id&userId=' + userId;
+            document.getElementById('confirmRemoveModal').classList.remove('hidden');
+        }
+
+        function hideConfirmRemoveModal() {
+            document.getElementById('confirmRemoveModal').classList.add('hidden');
+        }
+
+        // Davet iptal onay modalı
+        function confirmCancelInvitation(invitationId, email) {
+            document.getElementById('cancelInvitationEmail').textContent = email;
+            document.getElementById('confirmCancelInvitationLink').href = '@Url.Action("CancelInvitation", "Team")?projectId=@Model.Project.Id&invitationId=' + invitationId;
+            document.getElementById('confirmCancelInvitationModal').classList.remove('hidden');
+        }
+
+        function hideConfirmCancelInvitationModal() {
+            document.getElementById('confirmCancelInvitationModal').classList.add('hidden');
+        }
+    </script>
+} 

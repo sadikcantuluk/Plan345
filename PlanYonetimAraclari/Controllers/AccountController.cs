@@ -12,6 +12,7 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -54,43 +55,32 @@ namespace PlanYonetimAraclari.Controllers
                 return RedirectToAction("Login");
             }
 
-            _logger.LogInformation($"DirectLogin denemesi: {email}");
-            
             try
             {
-                // Kullanıcıyı e-posta adresine göre bul
                 var user = await _userManager.FindByEmailAsync(email);
                 
                 if (user != null)
                 {
-                    _logger.LogInformation($"Kullanıcı veritabanında bulundu: {email}, şifre kontrolü yapılıyor");
-                    
-                    // Şifre kontrolü
                     var passwordValid = await _userManager.CheckPasswordAsync(user, password);
                     
                     if (passwordValid)
                     {
-                        _logger.LogInformation($"Şifre doğrulama başarılı: {email}");
-                        
-                        // İki faktörlü doğrulama etkin mi kontrol et
-                        if (user.TwoFactorEnabled)
+                        // Identity ile giriş yap
+                        if (rememberMe)
                         {
-                            _logger.LogInformation($"Kullanıcı {email} için 2FA etkin, doğrulama kodu gönderiliyor");
+                            // Kalıcı cookie oluştur (14 gün)
+                            AuthenticationProperties props = new AuthenticationProperties
+                            {
+                                IsPersistent = true,
+                                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
+                            };
                             
-                            // Doğrulama kodu oluştur
-                            string verificationCode = GenerateRandomCode();
-                            
-                            // Doğrulama kodunu veritabanına kaydet
-                            await SaveVerificationCodeAsync(user.Id, verificationCode);
-                            
-                            // Doğrulama kodunu e-posta ile gönder
-                            await _emailService.SendTwoFactorCodeAsync(email, verificationCode);
-                            
-                            // Kullanıcıyı doğrulama sayfasına yönlendir
-                            TempData["RequiresTwoFactor"] = true;
-                            TempData["UserEmail"] = email;
-                            
-                            return RedirectToAction("VerifyCode");
+                            await _signInManager.SignInAsync(user, props);
+                        }
+                        else
+                        {
+                            // Oturum cookie'si oluştur (tarayıcı kapanınca sona erer)
+                            await _signInManager.SignInAsync(user, isPersistent: false);
                         }
                         
                         // Kullanıcı rollerini kontrol et
@@ -102,17 +92,13 @@ namespace PlanYonetimAraclari.Controllers
                         user.LastLoginTime = DateTime.Now;
                         await _userManager.UpdateAsync(user);
                         
-                        // Session ve TempData'da kullanıcı bilgilerini sakla
+                        // Session bilgilerini ayarla
                         HttpContext.Session.SetString("IsAuthenticated", "true");
                         HttpContext.Session.SetString("UserEmail", email);
                         HttpContext.Session.SetString("UserName", userName);
                         HttpContext.Session.SetString("UserRole", userRole);
                         HttpContext.Session.SetString("UserProfileImage", user.ProfileImageUrl ?? "/images/profiles/default.png");
-                        
-                        // TempData da sakla (ilk girişte yararlı olabilir)
-                        TempData["UserEmail"] = email;
-                        TempData["UserName"] = userName;
-                        TempData["UserRole"] = userRole;
+                        HttpContext.Session.SetString("CurrentUserId", user.Id);
                         
                         _logger.LogInformation($"Başarılı giriş: {email}, Rol: {userRole}");
                         
@@ -126,19 +112,11 @@ namespace PlanYonetimAraclari.Controllers
                             return RedirectToAction("Index", "Dashboard");
                         }
                     }
-                    else
-                    {
-                        _logger.LogWarning($"Şifre doğrulama başarısız: {email}");
-                        TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
-                        return RedirectToAction("Login");
-                    }
                 }
-                else
-                {
-                    _logger.LogWarning($"Kullanıcı veritabanında bulunamadı: {email}");
-                    TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
-                    return RedirectToAction("Login");
-                }
+                
+                _logger.LogWarning($"Geçersiz giriş denemesi: {email}");
+                TempData["ErrorMessage"] = "Geçersiz e-posta veya şifre.";
+                return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
@@ -156,10 +134,21 @@ namespace PlanYonetimAraclari.Controllers
             try
             {
                 // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
-                if (User.Identity.IsAuthenticated)
+                // Hem Identity hem de Session kontrolü yapılır
+                string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+                if (User.Identity.IsAuthenticated && isAuthenticated == "true")
                 {
                     _logger.LogInformation("Kullanıcı zaten giriş yapmış, anasayfaya yönlendiriliyor.");
                     return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Eğer Identity doğrulaması var ama session yoksa, session'ı temizle
+                if (User.Identity.IsAuthenticated && isAuthenticated != "true")
+                {
+                    _logger.LogInformation("Identity doğrulaması var ama session yok, oturum kapatılıyor.");
+                    // SimpleLogout metodu asenkron olduğu için burada direkt çağıramayız
+                    // Session'ı temizle
+                    HttpContext.Session.Clear();
                 }
                 
                 ViewData["ReturnUrl"] = returnUrl;
@@ -378,21 +367,37 @@ namespace PlanYonetimAraclari.Controllers
             // Session temizle
             HttpContext.Session.Clear();
             
-            // Kullanıcıyı ana sayfaya yönlendir
-            return RedirectToAction("Index", "Home");
+            // Auth cookie'lerini temizle
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+            
+            // Kullanıcıyı giriş sayfasına yönlendir - 302 statü kodu ile yönlendirme
+            return RedirectToAction("Login", "Account");
         }
         
         // GET: Basit logout için
         [HttpGet]
-        public IActionResult SimpleLogout()
+        public async Task<IActionResult> SimpleLogout()
         {
+            // Identity logout işlemini çalıştır
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("Kullanıcı Identity ile oturumu kapatıldı.");
+            
             // Session temizle
             HttpContext.Session.Clear();
             
+            // Auth cookie'lerini temizle
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+            
             _logger.LogInformation("Kullanıcı basit session ile oturumu kapattı");
             
-            // Kullanıcıyı ana sayfaya yönlendir
-            return RedirectToAction("Index", "Home");
+            // Kullanıcıyı giriş sayfasına yönlendir
+            return RedirectToAction("Login", "Account");
         }
         
         [HttpGet]
@@ -543,7 +548,7 @@ namespace PlanYonetimAraclari.Controllers
                 // Şifre sıfırlama başarılı e-postası gönder
                 try
                 {
-                    string subject = "Şifre Sıfırlandı - Plan345";
+                    string subject = "Şifre Sıfırlama Başarılı";
                     string message = $@"
                         <html>
                         <head>

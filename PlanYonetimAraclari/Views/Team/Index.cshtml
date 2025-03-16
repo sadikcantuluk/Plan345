@@ -1,0 +1,153 @@
+@model List<ProjectModel>
+@{
+    ViewData["Title"] = "Ekip Yönetimi - Plan345";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userFullName = ViewData["UserFullName"] as string;
+    var userEmail = ViewData["UserEmail"] as string;
+    var userProfileImage = ViewData["UserProfileImage"] as string;
+    var currentUserId = ViewData["CurrentUserId"] as string;
+}
+
+<div class="p-6">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Ekip Yönetimi</h1>
+        <p class="mt-2 text-gray-600">Projelerinizin ekip üyelerini ve davetleri yönetin.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-4 p-4 rounded-md bg-green-50 border border-green-200 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <!-- Bildirimler Kartı -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Bildirimler</h2>
+                <a href="@Url.Action("Notifications", "Team")" class="text-primary-600 hover:text-primary-700">
+                    <i class="fas fa-bell mr-1"></i>
+                    Tümünü Gör
+                </a>
+            </div>
+            <div class="text-center p-4">
+                @if (ViewData["HasPendingInvitations"] != null && (bool)ViewData["HasPendingInvitations"])
+                {
+                    <div class="bg-blue-50 text-blue-800 p-3 rounded-lg">
+                        <p class="text-sm">Bekleyen davetleriniz var!</p>
+                        <a href="@Url.Action("Notifications", "Team")" class="inline-flex items-center mt-2 px-3 py-1.5 text-xs font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200">
+                            Davetleri Görüntüle
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-gray-500">
+                        <i class="fas fa-bell-slash text-3xl mb-2"></i>
+                        <p class="text-sm">Şu anda bildiriminiz bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Projelerim -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Projelerim</h2>
+            <div class="space-y-4">
+                @foreach (var project in Model.Where(p => p.UserId == currentUserId))
+                {
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-medium">@project.Name</h3>
+                            <a href="@Url.Action("Members", "Team", new { projectId = project.Id })" 
+                               class="text-primary-600 hover:text-primary-700">
+                                <i class="fas fa-users mr-1"></i>
+                                Ekibi Yönet
+                            </a>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <p>@(project.TeamMembers?.Count ?? 0) üye</p>
+                        </div>
+                    </div>
+                }
+                @if (!Model.Any(p => p.UserId == currentUserId))
+                {
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Henüz bir projeniz bulunmuyor.</p>
+                        <a href="/Project/Create" class="text-primary-600 hover:text-primary-700 mt-2 inline-block">
+                            <i class="fas fa-plus mr-1"></i>
+                            Yeni Proje Oluştur
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Üye Olduğum Projeler -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Üye Olduğum Projeler</h2>
+            <div class="space-y-4">
+                @foreach (var project in Model.Where(p => p.UserId != currentUserId))
+                {
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-medium">@project.Name</h3>
+                            <a href="@Url.Action("Members", "Team", new { projectId = project.Id })" 
+                               class="text-primary-600 hover:text-primary-700">
+                                <i class="fas fa-users mr-1"></i>
+                                Ekibi Görüntüle
+                            </a>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <p>Proje Sahibi: @project.User.FullName</p>
+                        </div>
+                    </div>
+                }
+                @if (!Model.Any(p => p.UserId != currentUserId))
+                {
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Henüz bir projeye üye değilsiniz.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Otomatik gizlenen mesajlar için JavaScript
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                var messages = document.querySelectorAll('.auto-hide-message');
+                messages.forEach(function (message) {
+                    message.style.display = 'none';
+                });
+            }, 5000);
+        });
+    </script>
+} 

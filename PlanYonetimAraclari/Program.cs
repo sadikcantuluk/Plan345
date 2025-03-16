@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PlanYonetimAraclari.Data;
 using PlanYonetimAraclari.Models;
 using PlanYonetimAraclari.Services;
+using PlanYonetimAraclari.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 
 // Proje servisi ekle
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 // Identity yapılandırması
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
@@ -47,15 +49,22 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromHours(5); // 5 saat oturum süresi
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromHours(5);
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
-    options.SlidingExpiration = true; // Her istek yapıldığında süre uzatılır
+    options.SlidingExpiration = true;
+    options.Cookie.Name = "Plan345Auth";
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => 
+{
+    // Global bildirim filtresini ekle
+    options.Filters.Add<NotificationActionFilter>();
+});
 
 // Session servisi ekle
 builder.Services.AddDistributedMemoryCache();

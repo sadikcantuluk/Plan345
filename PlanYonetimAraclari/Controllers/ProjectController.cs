@@ -9,9 +9,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using PlanYonetimAraclari.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PlanYonetimAraclari.Controllers
 {
+    [Authorize]
     public class ProjectController : Controller
     {
         private readonly ILogger<ProjectController> _logger;
@@ -34,50 +37,35 @@ namespace PlanYonetimAraclari.Controllers
         // Proje detayları sayfası
         public async Task<IActionResult> Details(int id)
         {
-            // Session kontrolü
-            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
-            
-            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
-            {
-                _logger.LogWarning("Yetkisiz erişim denemesi proje detaylarına");
-                return RedirectToAction("Login", "Account");
-            }
-            
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
-                // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
-                {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
                     return RedirectToAction("Login", "Account");
-                }
-                
-                // Proje detaylarını getir
+
+                var userEmail = await _userManager.GetEmailAsync(user);
                 var project = await _projectService.GetProjectByIdAsync(id);
+
                 if (project == null)
-                {
-                    _logger.LogWarning($"Proje bulunamadı: {id}");
-                    TempData["ErrorMessage"] = "Proje bulunamadı.";
-                    return RedirectToAction("Index", "Dashboard");
-                }
-                
-                // Projenin sahibi mi kontrol et
-                if (project.UserId != user.Id)
-                {
-                    _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının ({project.UserId}) projesine erişmeye çalışıyor.");
-                    TempData["ErrorMessage"] = "Bu projeye erişim yetkiniz yok.";
-                    return RedirectToAction("Index", "Dashboard");
-                }
-                
-                // Proje görevlerini getir
-                List<TaskModel> todoTasks = new List<TaskModel>();
-                List<TaskModel> inProgressTasks = new List<TaskModel>();
-                List<TaskModel> doneTasks = new List<TaskModel>();
-                
+                    return NotFound();
+
+                // Check if user has access to the project
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == id && m.UserId == user.Id);
+
+                if (!isTeamMember && project.UserId != user.Id)
+                    return Forbid();
+
+                // Get user's role in the project
+                bool isProjectOwner = project.UserId == user.Id;
+                ViewBag.IsProjectOwner = isProjectOwner;
+                ViewBag.IsTeamMember = isTeamMember;
+                ViewBag.CanModifyTasks = isProjectOwner || isTeamMember; // Both owners and team members can modify tasks
+
+                List<TaskModel> todoTasks = null;
+                List<TaskModel> inProgressTasks = null;
+                List<TaskModel> doneTasks = null;
+
                 try
                 {
                     todoTasks = await _projectService.GetProjectTasksByStatusAsync(id, PlanYonetimAraclari.Models.TaskStatus.Todo);
@@ -100,31 +88,18 @@ namespace PlanYonetimAraclari.Controllers
                     NewTask = new TaskModel { ProjectId = id, Status = PlanYonetimAraclari.Models.TaskStatus.Todo }
                 };
                 
-                // Session'da profil resmi varsa onu kullan
-                string profileImageUrl = user.ProfileImageUrl;
-                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
-                if (!string.IsNullOrEmpty(sessionProfileImage))
-                {
-                    profileImageUrl = sessionProfileImage;
-                }
-                
-                // Layout için gereken bilgileri ViewData'da sakla (DashboardController ile tutarlı)
+                // Layout için gereken bilgileri ViewData'da sakla
                 ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
                 ViewData["UserEmail"] = userEmail;
-                ViewData["UserProfileImage"] = profileImageUrl;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
+                ViewData["CurrentUserId"] = user.Id;
                 
                 return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Proje detayları görüntülenirken hata oluştu: {ex.Message}");
-                _logger.LogError($"Hata ayrıntıları: {ex.StackTrace}");
-                if (ex.InnerException != null)
-                {
-                    _logger.LogError($"İç hata: {ex.InnerException.Message}");
-                }
-                
-                TempData["ErrorMessage"] = "Proje detayları görüntülenirken bir hata oluştu.";
+                TempData["ErrorMessage"] = "Proje detayları yüklenirken bir hata oluştu.";
                 return RedirectToAction("Index", "Dashboard");
             }
         }
@@ -187,49 +162,33 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
-                // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
-                {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
-                    return Json(new { success = false, message = "Kullanıcı bilgileri bulunamadı." });
-                }
-                
-                // Projeyi getir
-                var project = await _projectService.GetProjectDetailsByIdAsync(id);
+                    return RedirectToAction("Login", "Account");
+
+                var project = await _projectService.GetProjectByIdAsync(id);
                 if (project == null)
-                {
-                    _logger.LogWarning($"Proje bulunamadı: {id}");
-                    return Json(new { success = false, message = "Proje bulunamadı." });
-                }
-                
-                // Projenin sahibi mi kontrol et
+                    return NotFound();
+
+                // Only project owner can delete the project
                 if (project.UserId != user.Id)
-                {
-                    _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının ({project.UserId}) projesini silmeye çalışıyor.");
-                    return Json(new { success = false, message = "Bu projeyi silme yetkiniz yok." });
-                }
-                
-                // Projeyi sil (tüm görevlerle birlikte)
-                var result = await _projectService.DeleteProjectAsync(id, true);
+                    return Forbid();
+
+                var result = await _projectService.DeleteProjectAsync(id);
                 if (result)
                 {
-                    _logger.LogInformation($"Proje başarıyla silindi: {id}");
-                    return Json(new { success = true, message = "Proje başarıyla silindi." });
+                    TempData["SuccessMessage"] = "Proje başarıyla silindi.";
+                    return RedirectToAction("Index", "Dashboard");
                 }
-                else
-                {
-                    _logger.LogWarning($"Proje silinirken bir hata oluştu: {id}");
-                    return Json(new { success = false, message = "Proje silinirken bir hata oluştu." });
-                }
+
+                TempData["ErrorMessage"] = "Proje silinirken bir hata oluştu.";
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Proje silinirken hata oluştu: {ex.Message}");
-                return Json(new { success = false, message = $"Proje silinirken bir hata oluştu: {ex.Message}" });
+                TempData["ErrorMessage"] = "Proje silinirken bir hata oluştu.";
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
         
@@ -261,10 +220,13 @@ namespace PlanYonetimAraclari.Controllers
                     return RedirectToAction("Index", "Dashboard");
                 }
                 
-                // Projenin sahibi mi kontrol et
-                if (project.UserId != user.Id)
+                // Projenin sahibi veya ekip üyesi olup olmadığını kontrol et
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == model.ProjectId && m.UserId == user.Id);
+                
+                if (project.UserId != user.Id && !isTeamMember)
                 {
-                    _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının ({project.UserId}) projesine görev eklemeye çalışıyor.");
+                    _logger.LogWarning($"Kullanıcı ({user.Id}) projeye görev ekleme yetkisine sahip değil.");
                     TempData["ErrorMessage"] = "Bu projeye görev ekleme yetkiniz yok.";
                     return RedirectToAction("Index", "Dashboard");
                 }
@@ -316,11 +278,13 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(new { success = false, message = "Görev bulunamadı." });
                 }
                 
-                // Proje sahibi kontrolü
-                var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
-                if (project.UserId != user.Id)
+                // Proje sahibi veya ekip üyesi kontrolü
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
+                    
+                if (!isTeamMember && !(await _projectService.GetProjectDetailsByIdAsync(task.ProjectId)).UserId.Equals(user.Id))
                 {
-                    _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının projesindeki görevi güncellemeye çalışıyor.");
+                    _logger.LogWarning($"Kullanıcı ({user.Id}) görevi güncelleme yetkisine sahip değil.");
                     return Json(new { success = false, message = "Bu görevi güncelleme yetkiniz yok." });
                 }
                 
@@ -338,7 +302,8 @@ namespace PlanYonetimAraclari.Controllers
                         name = updatedTask.Name,
                         description = updatedTask.Description,
                         status = updatedTask.Status,
-                        priority = updatedTask.Priority
+                        priority = updatedTask.Priority,
+                        dueDate = updatedTask.DueDate
                     }
                 });
             }
@@ -375,9 +340,12 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(new { success = false, message = "Görev bulunamadı." });
                 }
                 
-                // Proje sahibi kontrolü
+                // Proje sahibi veya ekip üyesi kontrolü
                 var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
-                if (project.UserId != user.Id)
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
+                
+                if (project.UserId != user.Id && !isTeamMember)
                 {
                     _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının projesindeki görevi silmeye çalışıyor.");
                     return Json(new { success = false, message = "Bu görevi silme yetkiniz yok." });
@@ -396,6 +364,86 @@ namespace PlanYonetimAraclari.Controllers
             {
                 _logger.LogError($"Görev silinirken hata oluştu: {ex.Message}");
                 return Json(new { success = false, message = $"Görev silinirken bir hata oluştu: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return RedirectToAction("Login", "Account");
+
+                var project = await _projectService.GetProjectByIdAsync(id);
+                if (project == null)
+                    return NotFound();
+
+                // Only project owner and managers can edit the project
+                if (project.UserId != user.Id)
+                {
+                    var teamMember = await _context.ProjectTeamMembers
+                        .FirstOrDefaultAsync(m => m.ProjectId == id && m.UserId == user.Id);
+
+                    if (teamMember == null || teamMember.Role != TeamMemberRole.Manager)
+                        return Forbid();
+                }
+
+                return View(project);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje düzenleme sayfası yüklenirken hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "Proje düzenleme sayfası yüklenirken bir hata oluştu.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ProjectModel model)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return RedirectToAction("Login", "Account");
+
+                var project = await _projectService.GetProjectByIdAsync(id);
+                if (project == null)
+                    return NotFound();
+
+                // Only project owner and managers can edit the project
+                if (project.UserId != user.Id)
+                {
+                    var teamMember = await _context.ProjectTeamMembers
+                        .FirstOrDefaultAsync(m => m.ProjectId == id && m.UserId == user.Id);
+
+                    if (teamMember == null || teamMember.Role != TeamMemberRole.Manager)
+                        return Forbid();
+                }
+
+                if (ModelState.IsValid)
+                {
+                    project.Name = model.Name;
+                    project.Description = model.Description;
+                    project.Status = model.Status;
+                    project.DueDate = model.DueDate;
+                    project.LastUpdatedDate = DateTime.UtcNow;
+
+                    await _projectService.UpdateProjectAsync(project);
+                    TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje güncellenirken hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "Proje güncellenirken bir hata oluştu.";
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
     }

@@ -30,76 +30,94 @@ namespace PlanYonetimAraclari.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Session'dan kullanıcı bilgilerini al
-            string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+            _logger.LogInformation("Dashboard Index metodu çağrıldı");
             
-            // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
-            if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
+            try
             {
-                _logger.LogWarning("Unauthorized access attempt to dashboard");
-                return RedirectToAction("Login", "Account");
-            }
-            
-            string userEmail = HttpContext.Session.GetString("UserEmail");
-            string userName = HttpContext.Session.GetString("UserName");
-            string userRole = HttpContext.Session.GetString("UserRole");
-            
-            _logger.LogInformation($"Dashboard açılıyor - Kullanıcı: {userEmail}, Rol: {userRole}");
-            
-            // Kullanıcı bilgilerini modele yükle
-            var user = await _userManager.FindByEmailAsync(userEmail);
-            
-            if (user == null)
-            {
-                _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
-                TempData["ErrorMessage"] = "Oturum bilgilerinizde bir hata oluştu. Lütfen tekrar giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            // Kullanıcının projelerini getir
-            var projects = await _projectService.GetUserProjectsAsync(user.Id);
-            
-            // Proje istatistiklerini al
-            int totalProjectsCount = await _projectService.GetUserProjectsCountAsync(user.Id);
-            int activeProjectsCount = await _projectService.GetUserActiveProjectsCountAsync(user.Id);
-            
-            // Tamamlanmış ve beklemedeki proje sayılarını al
-            int completedProjectsCount = await _projectService.GetUserCompletedProjectsCountAsync(user.Id);
-            int pendingProjectsCount = await _projectService.GetUserPendingProjectsCountAsync(user.Id);
-            
-            // Dashboard model oluştur
-            var dashboardModel = new DashboardViewModel
-            {
-                UserProfile = new ProfileViewModel
+                // Giriş yapmış bir kullanıcı olup olmadığını kontrol et
+                string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
+                
+                if (User.Identity == null || !User.Identity.IsAuthenticated || isAuthenticated != "true")
                 {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    ProfileImageUrl = user.ProfileImageUrl
-                },
-                Projects = projects ?? new List<ProjectModel>(),
-                TotalProjectsCount = totalProjectsCount,
-                ActiveProjectsCount = activeProjectsCount,
-                CompletedProjectsCount = completedProjectsCount,
-                PendingProjectsCount = pendingProjectsCount
-            };
-            
-            // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
-            string profileImageUrl = user.ProfileImageUrl;
-            string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
-            if (!string.IsNullOrEmpty(sessionProfileImage))
-            {
-                profileImageUrl = sessionProfileImage;
-                _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
+                    _logger.LogWarning("Unauthorized access attempt to dashboard");
+                    return RedirectToAction("Login", "Account");
+                }
+
+                string userEmail = HttpContext.Session.GetString("UserEmail");
+                string userName = HttpContext.Session.GetString("UserName");
+                string userRole = HttpContext.Session.GetString("UserRole");
+                
+                _logger.LogInformation($"Dashboard açılıyor - Kullanıcı: {userEmail}, Rol: {userRole}");
+                
+                // Kullanıcı bilgilerini modele yükle
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                
+                if (user == null)
+                {
+                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
+                    TempData["ErrorMessage"] = "Oturum bilgilerinizde bir hata oluştu. Lütfen tekrar giriş yapın.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Kullanıcının projelerini getir
+                var projects = await _projectService.GetUserProjectsAsync(user.Id);
+                
+                // Proje istatistiklerini al
+                int totalProjectsCount = await _projectService.GetUserProjectsCountAsync(user.Id);
+                int activeProjectsCount = await _projectService.GetUserActiveProjectsCountAsync(user.Id);
+                
+                // Tamamlanmış ve beklemedeki proje sayılarını al
+                int completedProjectsCount = await _projectService.GetUserCompletedProjectsCountAsync(user.Id);
+                int pendingProjectsCount = await _projectService.GetUserPendingProjectsCountAsync(user.Id);
+                
+                // Dashboard model oluştur
+                var dashboardModel = new DashboardViewModel
+                {
+                    UserProfile = new ProfileViewModel
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        ProfileImageUrl = user.ProfileImageUrl
+                    },
+                    Projects = projects ?? new List<ProjectModel>(),
+                    TotalProjectsCount = totalProjectsCount,
+                    ActiveProjectsCount = activeProjectsCount,
+                    CompletedProjectsCount = completedProjectsCount,
+                    PendingProjectsCount = pendingProjectsCount
+                };
+                
+                // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
+                string profileImageUrl = user.ProfileImageUrl;
+                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
+                if (!string.IsNullOrEmpty(sessionProfileImage))
+                {
+                    profileImageUrl = sessionProfileImage;
+                    _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
+                }
+                
+                // Layout için gereken bilgileri ViewData'da sakla (ProfileController ile tutarlı)
+                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = userEmail;
+                ViewData["UserProfileImage"] = profileImageUrl;
+                ViewBag.CurrentUserId = user.Id;
+                
+                return View(dashboardModel);
             }
-            
-            // Layout için gereken bilgileri ViewData'da sakla (ProfileController ile tutarlı)
-            ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
-            ViewData["UserEmail"] = userEmail;
-            ViewData["UserProfileImage"] = profileImageUrl;
-            
-            return View(dashboardModel);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Dashboard Index metodunda hata oluştu: {ex.Message}");
+                _logger.LogError($"Hata detayları: {ex.StackTrace}");
+                
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"Inner Exception: {ex.InnerException.Message}");
+                }
+                
+                TempData["ErrorMessage"] = $"Dashboard Index metodunda bir hata oluştu: {ex.Message}";
+                return RedirectToAction("Login", "Account");
+            }
         }
         
         [HttpPost]

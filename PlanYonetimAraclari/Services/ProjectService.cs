@@ -26,10 +26,19 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı projeleri alınıyor: {userId}");
-                return await _context.Projects
+                var ownedProjects = await _context.Projects
                     .Where(p => p.UserId == userId)
                     .OrderByDescending(p => p.CreatedDate)
                     .ToListAsync();
+
+                var teamProjects = await _context.ProjectTeamMembers
+                    .Where(m => m.UserId == userId)
+                    .Include(m => m.Project)
+                    .Select(m => m.Project)
+                    .OrderByDescending(p => p.CreatedDate)
+                    .ToListAsync();
+
+                return ownedProjects.Union(teamProjects).OrderByDescending(p => p.CreatedDate).ToList();
             }
             catch (Exception ex)
             {
@@ -43,7 +52,10 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Proje detayı alınıyor: {projectId}");
-                return await _context.Projects.FindAsync(projectId);
+                return await _context.Projects
+                    .Include(p => p.TeamMembers)
+                        .ThenInclude(m => m.User)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
             }
             catch (Exception ex)
             {
@@ -184,9 +196,17 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı proje sayısı alınıyor: {userId}");
-                return await _context.Projects
+                var ownedCount = await _context.Projects
                     .Where(p => p.UserId == userId)
                     .CountAsync();
+
+                var teamCount = await _context.ProjectTeamMembers
+                    .Where(m => m.UserId == userId)
+                    .Select(m => m.ProjectId)
+                    .Distinct()
+                    .CountAsync();
+
+                return ownedCount + teamCount;
             }
             catch (Exception ex)
             {
@@ -200,11 +220,21 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı aktif proje sayısı alınıyor: {userId}");
-                return await _context.Projects
+                var ownedCount = await _context.Projects
                     .Where(p => p.UserId == userId && 
                            (p.Status == ProjectStatus.Planning || 
-                           p.Status == ProjectStatus.InProgress))
+                            p.Status == ProjectStatus.InProgress))
                     .CountAsync();
+
+                var teamCount = await _context.ProjectTeamMembers
+                    .Where(m => m.UserId == userId)
+                    .Select(m => m.Project)
+                    .Where(p => p.Status == ProjectStatus.Planning || 
+                               p.Status == ProjectStatus.InProgress)
+                    .Distinct()
+                    .CountAsync();
+
+                return ownedCount + teamCount;
             }
             catch (Exception ex)
             {
@@ -217,14 +247,24 @@ namespace PlanYonetimAraclari.Services
         {
             try
             {
-                _logger.LogInformation($"Kullanıcı tamamlanmış proje sayısı alınıyor: {userId}");
-                return await _context.Projects
-                    .Where(p => p.UserId == userId && p.Status == ProjectStatus.Completed)
+                _logger.LogInformation($"Kullanıcı tamamlanan proje sayısı alınıyor: {userId}");
+                var ownedCount = await _context.Projects
+                    .Where(p => p.UserId == userId && 
+                           p.Status == ProjectStatus.Completed)
                     .CountAsync();
+
+                var teamCount = await _context.ProjectTeamMembers
+                    .Where(m => m.UserId == userId)
+                    .Select(m => m.Project)
+                    .Where(p => p.Status == ProjectStatus.Completed)
+                    .Distinct()
+                    .CountAsync();
+
+                return ownedCount + teamCount;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Kullanıcı tamamlanmış proje sayısı alınırken hata oluştu: {ex.Message}");
+                _logger.LogError($"Kullanıcı tamamlanan proje sayısı alınırken hata oluştu: {ex.Message}");
                 throw;
             }
         }
@@ -234,10 +274,19 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı beklemedeki proje sayısı alınıyor: {userId}");
-                return await _context.Projects
+                var ownedCount = await _context.Projects
                     .Where(p => p.UserId == userId && 
                            p.Status == ProjectStatus.OnHold)
                     .CountAsync();
+
+                var teamCount = await _context.ProjectTeamMembers
+                    .Where(m => m.UserId == userId)
+                    .Select(m => m.Project)
+                    .Where(p => p.Status == ProjectStatus.OnHold)
+                    .Distinct()
+                    .CountAsync();
+
+                return ownedCount + teamCount;
             }
             catch (Exception ex)
             {

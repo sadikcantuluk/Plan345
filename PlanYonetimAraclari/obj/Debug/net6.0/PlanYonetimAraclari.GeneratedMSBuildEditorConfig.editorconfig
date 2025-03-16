@@ -68,6 +68,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Emails/InvitationEmail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1haWxzXEludml0YXRpb25FbWFpbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -94,6 +98,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Team/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Team/Members.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxNZW1iZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Team/Notifications.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxOb3RpZmljYXRpb25zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/_ViewImports.cshtml]

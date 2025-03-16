@@ -1,6 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Dashboard - Plan345";
     Layout = null;
+    var userFullName = ViewData["UserFullName"] as string;
+    var userEmail = ViewData["UserEmail"] as string;
+    var userProfileImage = ViewData["UserProfileImage"] as string;
+    var currentUserId = ViewData["CurrentUserId"] as string;
 }
 
 <!DOCTYPE html>
@@ -110,6 +114,11 @@
             transform: translateX(2px);
         }
     </style>
+    <!-- Kullanıcı bilgilerini JavaScript için global değişkenlere ata -->
+    <script>
+        window.currentUserId = '@currentUserId';
+        window.isAuthenticated = '@(currentUserId != null)' === 'True';
+    </script>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -135,10 +144,13 @@
             <!-- Sağ Taraf: Bildirimler ve Kullanıcı Menüsü -->
             <div class="flex items-center space-x-4">
                 <!-- Bildirimler -->
-                <button class="relative p-2 text-gray-500 hover:text-primary-500 focus:outline-none">
+                <a href="@Url.Action("Notifications", "Team")" class="relative p-2 text-gray-500 hover:text-primary-500 focus:outline-none">
                     <i class="fas fa-bell text-xl"></i>
-                    <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-                </button>
+                    @if (ViewData["HasPendingInvitations"] != null && (bool)ViewData["HasPendingInvitations"])
+                    {
+                        <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                    }
+                </a>
 
                 <!-- Kullanıcı Menüsü -->
                 <div class="relative" id="user-menu">
@@ -236,9 +248,22 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <a href="/Team" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Team") && !Context.Request.Path.Value.Contains("Notifications") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
                         <i class="fas fa-users text-lg"></i>
                         <span>Ekip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Team/Notifications" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Team/Notifications") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span>Bildirimler</span>
+                        @if (ViewData["HasPendingInvitations"] != null && (bool)ViewData["HasPendingInvitations"])
+                        {
+                            <span class="flex h-2 w-2 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                            </span>
+                        }
                     </a>
                 </li>
                 <li>
@@ -386,54 +411,60 @@
             handleResize();
             
             // Kullanıcının projelerini yükle ve sidebar'a ekle
-            loadUserProjects();
+            loadProjects();
         });
         
         // Kullanıcının projelerini getir ve sidebar'a ekle
-        function loadUserProjects() {
-            // AJAX ile projeleri getir
+        function loadProjects() {
             $.ajax({
-                url: '/Dashboard/GetProjects',
+                url: '/api/Api/GetUserProjects',
                 type: 'GET',
-                dataType: 'json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
                 success: function(response) {
-                    if (response.success && response.data && response.data.length > 0) {
-                        // Projeleri sidebar'a ekle
+                    if (response && response.length > 0) {
                         const projectsList = $('#sidebar-projects-list');
-                        
-                        // Mevcut projeleri temizle - duplicate önleme için bu satırları ekledim
                         projectsList.find('li:not(#sidebar-no-projects)').remove();
+                        $('#sidebar-no-projects').hide();
                         
-                        $('#sidebar-no-projects').hide(); // "Henüz proje bulunmuyor" yazısını gizle
-                        
-                        // Her projeyi listeye ekle
-                        response.data.forEach(function(project) {
+                        response.forEach(function(project) {
                             const statusColor = getStatusColor(project.status);
-                            const statusText = getStatusText(project.status);
+                            const isCurrentProject = window.location.pathname.includes('/Project/Details/' + project.id);
+                            const isTeamMember = !project.isOwner;
                             
-                            // Projeyi listeye ekle
                             projectsList.append(`
                                 <li class="text-sm mb-2">
                                     <a href="/Project/Details/${project.id}" 
-                                       class="flex items-center ${window.location.pathname.includes('/Project/Details/' + project.id) ? 
+                                       class="flex items-center ${isCurrentProject ? 
                                            'text-primary-600 font-medium' : 'text-gray-700 hover:text-primary-600'}">
                                         <span class="w-2 h-2 rounded-full ${statusColor} mr-2"></span>
                                         <span class="truncate">${project.name}</span>
-                                        ${window.location.pathname.includes('/Project/Details/' + project.id) ? 
+                                        ${isTeamMember ? 
+                                            '<span class="ml-1 text-xs text-blue-600"><i class="fas fa-users"></i></span>' : ''}
+                                        ${isCurrentProject ? 
                                             '<i class="fas fa-circle text-xs ml-2 text-primary-500"></i>' : ''}
                                     </a>
                                 </li>
                             `);
                         });
+                        
+                        if (window.location.pathname.includes('/Project/')) {
+                            $('#projects-dropdown-content').removeClass('hidden');
+                            $('#projects-dropdown-btn .fa-chevron-down').addClass('rotate-180');
+                        }
                     } else {
-                        // Eğer proje yoksa, no-projects mesajını göster
                         $('#sidebar-no-projects').show();
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Projeler alınırken hata oluştu:', error);
-                    // Hata durumunda no-projects mesajını göster
-                    $('#sidebar-no-projects').show();
+                    if (xhr.status === 401) {
+                        window.location.href = '/Account/Login';
+                    } else {
+                        $('#sidebar-no-projects').show();
+                        $('#sidebar-no-projects').find('span').text('Projeler yüklenirken bir hata oluştu.');
+                    }
                 }
             });
         }
@@ -482,6 +513,14 @@
                 }, 3000); // 5 saniye sonra
             });
         });
+
+        // Sayfa yüklendiğinde projeleri yükle
+        $(document).ready(function() {
+            loadProjects();
+        });
+
+        // Her 30 saniyede bir projeleri güncelle
+        setInterval(loadProjects, 30000);
     </script>
     
     @RenderSection("Scripts", required: false)

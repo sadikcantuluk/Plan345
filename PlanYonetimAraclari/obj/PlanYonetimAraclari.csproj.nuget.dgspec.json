@@ -52,7 +52,7 @@
           "dependencies": {
             "MailKit": {
               "target": "Package",
-              "version": "[4.0.0, )"
+              "version": "[4.3.0, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
@@ -74,7 +74,7 @@
             },
             "MimeKit": {
               "target": "Package",
-              "version": "[4.0.0, )"
+              "version": "[4.11.0, )"
             }
           },
           "imports": [

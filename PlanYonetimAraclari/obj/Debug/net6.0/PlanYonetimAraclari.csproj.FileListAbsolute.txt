@@ -247,7 +247,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Drawing.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Drawing.Primitives.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Dynamic.Runtime.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Formats.Asn1.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Globalization.Calendars.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Globalization.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Globalization.Extensions.dll
@@ -336,7 +335,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Security.SecureString.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.ServiceModel.Web.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.ServiceProcess.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Encoding.CodePages.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Encoding.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Encoding.Extensions.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Encodings.Web.dll
@@ -402,3 +400,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\obj\Debug\net6.0\PlanYonetimAraclari.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Formats.Asn1.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Text.Encoding.CodePages.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Text.Encoding.CodePages.dll

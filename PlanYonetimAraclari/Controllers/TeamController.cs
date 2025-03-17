@@ -324,5 +324,48 @@ namespace PlanYonetimAraclari.Controllers
                 ViewData["HasPendingInvitations"] = hasPendingInvitations;
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> LeaveProject(int projectId)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                    return RedirectToAction("Login", "Account");
+
+                var project = await _projectService.GetProjectByIdAsync(projectId);
+                if (project == null)
+                    return NotFound();
+
+                // Proje sahibi projeden ayrılamaz
+                if (project.UserId == currentUser.Id)
+                {
+                    return Json(new { success = false, message = "Proje sahibi projeden ayrılamaz" });
+                }
+
+                // Kullanıcının projede üye olup olmadığını kontrol et
+                var isTeamMember = await _teamService.IsUserProjectMember(projectId, currentUser.Id);
+                if (!isTeamMember)
+                {
+                    return Json(new { success = false, message = "Bu projenin bir üyesi değilsiniz" });
+                }
+
+                // Projeden ayrıl
+                var result = await _teamService.RemoveTeamMember(projectId, currentUser.Id);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Projeden başarıyla ayrıldınız" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Projeden ayrılırken bir hata oluştu" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Hata: {ex.Message}" });
+            }
+        }
     }
 } 

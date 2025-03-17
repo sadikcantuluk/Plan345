@@ -50,6 +50,13 @@
                 </button>
                 @Html.AntiForgeryToken()
             }
+            else if (ViewBag.CanModifyTasks && Model.Project.UserId != ViewBag.CurrentUserId)
+            {
+                <button type="button" id="leave-project-btn" class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Projeden Ayrıl
+                </button>
+            }
         </div>
     </div>
     
@@ -183,8 +190,7 @@
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-arrow-right text-primary-500 mt-1 mr-2"></i>
-                            <span>Veya görev kartlarındaki <strong>ok butonlarını</strong> kullanarak taşıyabilirsiniz.</span>
-                        </li>
+                            Veya görev kartlarındaki <strong>ok butonlarını</strong> kullanarak taşıyabilirsiniz.</li>
                         <li class="flex items-start">
                             <i class="fas fa-trash-alt text-red-500 mt-1 mr-2"></i>
                             <span>Görev silmek için kart üzerindeki <strong>çöp kutusu</strong> simgesine tıklayın.</span>
@@ -520,11 +526,52 @@
     </div>
 </div>
 
+<!-- Projeden Ayrılma Modal -->
+<div id="leave-project-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all scale-95 opacity-0" id="leave-modal-content">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-yellow-600">Projeden Ayrıl</h3>
+            <button id="close-leave-modal" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-6">
+            <p class="text-gray-700 mb-4">Bu projeden ayrılmak istediğinize emin misiniz?</p>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">Projeden ayrıldıktan sonra tüm proje erişiminizi kaybedeceksiniz. Bu işlem geri alınamaz.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-leave" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
+                İptal
+            </button>
+            <button type="button" id="confirm-leave" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1">
+                Projeden Ayrıl
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <!-- SortableJS kütüphanesi -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <script>
+        // Mesajları otomatik gizleme
+        setTimeout(function() {
+            $(".alert").fadeOut(500);
+        }, 5000);
+        
         // Yeni görev ekleme modalını göster
         function showAddTaskModal(projectId, status) {
             // Form alanlarını sıfırla
@@ -1204,6 +1251,64 @@
                     },
                     error: function() {
                         showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
+                    }
+                });
+            });
+            
+            // Projeden ayrılma modalı
+            $("#leave-project-btn").on("click", function() {
+                $("#leave-project-modal").removeClass("hidden");
+                setTimeout(function() {
+                    $("#leave-modal-content").removeClass("scale-95 opacity-0").addClass("scale-100 opacity-100");
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Projeden ayrılma modalı kapatma
+            $("#close-leave-modal, #cancel-leave").on("click", function() {
+                $("#leave-modal-content").removeClass("scale-100 opacity-100").addClass("scale-95 opacity-0");
+                setTimeout(function() {
+                    $("#leave-project-modal").addClass("hidden");
+                    document.body.style.overflow = 'auto';
+                }, 200);
+            });
+            
+            // Projeden ayrılma onaylama
+            $("#confirm-leave").on("click", function() {
+                // Ayrılma işlemi başladığında butonları devre dışı bırakalım
+                $("#confirm-leave").prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> İşleniyor...');
+                $("#cancel-leave").prop('disabled', true);
+                
+                $.ajax({
+                    url: "@Url.Action("LeaveProject", "Team")",
+                    type: "POST",
+                    data: {
+                        projectId: @Model.Project.Id
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Başarılı ayrılma, dashboard'a yönlendir
+                            showNotification(response.message, "success");
+                            setTimeout(function() {
+                                window.location.href = "@Url.Action("Index", "Dashboard")";
+                            }, 1500);
+                        } else {
+                            // Hata mesajı göster
+                            $("#leave-project-modal").addClass("hidden");
+                            document.body.style.overflow = 'auto';
+                            showNotification("Hata: " + response.message, "error");
+                            // Butonları tekrar aktifleştir
+                            $("#confirm-leave").prop('disabled', false).html('Projeden Ayrıl');
+                            $("#cancel-leave").prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $("#leave-project-modal").addClass("hidden");
+                        document.body.style.overflow = 'auto';
+                        showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
+                        // Butonları tekrar aktifleştir
+                        $("#confirm-leave").prop('disabled', false).html('Projeden Ayrıl');
+                        $("#cancel-leave").prop('disabled', false);
                     }
                 });
             });

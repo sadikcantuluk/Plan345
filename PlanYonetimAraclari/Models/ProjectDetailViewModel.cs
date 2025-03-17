@@ -10,6 +10,9 @@ namespace PlanYonetimAraclari.Models
         public List<TaskModel> InProgressTasks { get; set; } = new List<TaskModel>();
         public List<TaskModel> DoneTasks { get; set; } = new List<TaskModel>();
         
+        // Ekip üyeleri
+        public List<ProjectTeamMemberViewModel> TeamMembers { get; set; } = new List<ProjectTeamMemberViewModel>();
+        
         // Yeni görev oluşturmak için kullanılacak özellik
         public TaskModel NewTask { get; set; } = new TaskModel();
         

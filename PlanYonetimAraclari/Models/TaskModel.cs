@@ -66,5 +66,11 @@ namespace PlanYonetimAraclari.Models
         
         [Display(Name = "Önem Derecesi")]
         public TaskPriority Priority { get; set; } = TaskPriority.Medium;
+        
+        [Display(Name = "Atanan Üye")]
+        public string? AssignedMemberId { get; set; }
+        
+        [ForeignKey("AssignedMemberId")]
+        public virtual ApplicationUser? AssignedMember { get; set; }
     }
 } 

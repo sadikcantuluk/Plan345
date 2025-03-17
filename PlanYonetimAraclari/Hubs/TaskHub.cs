@@ -101,5 +101,10 @@ namespace PlanYonetimAraclari.Hubs
         {
             await Clients.Group($"project_{projectId}").SendAsync("ReceiveTaskDelete", taskId);
         }
+
+        public async Task TaskUpdated(int projectId, int taskId, TaskModel task)
+        {
+            await Clients.Group($"project_{projectId}").SendAsync("ReceiveTaskUpdate", taskId, task);
+        }
     }
 } 

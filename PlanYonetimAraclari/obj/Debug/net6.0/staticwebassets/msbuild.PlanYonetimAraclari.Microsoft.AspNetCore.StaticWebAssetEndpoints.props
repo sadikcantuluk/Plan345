@@ -868,13 +868,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\PlanYonetimAraclari.x2f71caavt.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-50Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1136"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u002250Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 13 Mar 2025 14:25:49 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1136"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u002250Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw=\u0022"},{"Name":"Last-Modified","Value":"Mon, 17 Mar 2025 18:42:38 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/PlanYonetimAraclari.x2f71caavt.bundle.scp.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\PlanYonetimAraclari.x2f71caavt.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"x2f71caavt"},{"Name":"integrity","Value":"sha256-50Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw="},{"Name":"label","Value":"_content/PlanYonetimAraclari/PlanYonetimAraclari.bundle.scp.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1136"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u002250Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 13 Mar 2025 14:25:49 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1136"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u002250Z5PH\u002BXmrmNJhvGtb7KAHQkf9K5l\u002BYTjp1JCBzk\u002Bzw=\u0022"},{"Name":"Last-Modified","Value":"Mon, 17 Mar 2025 18:42:38 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/Template/index.hce2qgelx9.html">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Template\index.html'))</AssetFile>

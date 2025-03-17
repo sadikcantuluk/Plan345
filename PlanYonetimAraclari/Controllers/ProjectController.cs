@@ -48,69 +48,102 @@ namespace PlanYonetimAraclari.Controllers
                 if (user == null)
                     return RedirectToAction("Login", "Account");
 
-                var userEmail = await _userManager.GetEmailAsync(user);
-                var project = await _projectService.GetProjectByIdAsync(id);
-
-                if (project == null)
-                    return NotFound();
-
-                // Check if user has access to the project
+                var projectDetails = await _projectService.GetProjectDetailsByIdAsync(id);
+                if (projectDetails == null)
+                {
+                    TempData["ErrorMessage"] = "Proje bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Kullanıcı projenin sahibi veya ekip üyesi mi kontrol et
                 var isTeamMember = await _context.ProjectTeamMembers
                     .AnyAsync(m => m.ProjectId == id && m.UserId == user.Id);
 
-                if (!isTeamMember && project.UserId != user.Id)
-                    return Forbid();
-
-                // Get user's role in the project
-                bool isProjectOwner = project.UserId == user.Id;
-                ViewBag.IsProjectOwner = isProjectOwner;
-                ViewBag.IsTeamMember = isTeamMember;
-                ViewBag.CanModifyTasks = isProjectOwner || isTeamMember; // Both owners and team members can modify tasks
-
-                // StartDate'in değeri CreatedDate olmadıysa eşitle
-                if (project.StartDate.Date != project.CreatedDate.Date)
+                // Ekip üyeleri bilgisini getir
+                var teamMembers = await _context.ProjectTeamMembers
+                    .Where(m => m.ProjectId == id)
+                    .Select(m => new ProjectTeamMemberViewModel
+                    {
+                        MemberId = m.Id,
+                        ProjectId = m.ProjectId,
+                        UserId = m.UserId,
+                        UserName = m.User.UserName,
+                        UserEmail = m.User.Email,
+                        UserFullName = m.User.FullName,
+                        UserProfileImage = m.User.ProfileImageUrl,
+                        Role = m.Role
+                    })
+                    .ToListAsync();
+                
+                // Eğer kullanıcı proje sahibi ise onu da listeye ekle
+                if (!teamMembers.Any(m => m.UserId == projectDetails.UserId))
                 {
-                    project.StartDate = project.CreatedDate;
-                    await _projectService.UpdateProjectAsync(project);
-                }
-
-                List<TaskModel> todoTasks = null;
-                List<TaskModel> inProgressTasks = null;
-                List<TaskModel> doneTasks = null;
-
-                try
-                {
-                    todoTasks = await _projectService.GetProjectTasksByStatusAsync(id, PlanYonetimAraclari.Models.TaskStatus.Todo);
-                    inProgressTasks = await _projectService.GetProjectTasksByStatusAsync(id, PlanYonetimAraclari.Models.TaskStatus.InProgress);
-                    doneTasks = await _projectService.GetProjectTasksByStatusAsync(id, PlanYonetimAraclari.Models.TaskStatus.Done);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Proje görevleri alınırken hata oluştu: {ex.Message}");
-                    // Hata olsa bile boş listelerle devam ediyoruz, tamamen durdurmuyoruz
+                    var projectOwner = await _userManager.FindByIdAsync(projectDetails.UserId);
+                    if (projectOwner != null)
+                    {
+                        teamMembers.Add(new ProjectTeamMemberViewModel
+                        {
+                            ProjectId = id,
+                            UserId = projectOwner.Id,
+                            UserName = projectOwner.UserName,
+                            UserEmail = projectOwner.Email,
+                            UserFullName = projectOwner.FullName,
+                            UserProfileImage = projectOwner.ProfileImageUrl,
+                            Role = TeamMemberRole.Manager
+                        });
+                    }
                 }
                 
-                // View model oluştur
-                var model = new ProjectDetailViewModel
+                if (projectDetails.UserId != user.Id && !isTeamMember)
                 {
-                    Project = project,
-                    TodoTasks = todoTasks ?? new List<TaskModel>(),
-                    InProgressTasks = inProgressTasks ?? new List<TaskModel>(),
-                    DoneTasks = doneTasks ?? new List<TaskModel>(),
-                    NewTask = new TaskModel { ProjectId = id, Status = PlanYonetimAraclari.Models.TaskStatus.Todo }
+                    TempData["ErrorMessage"] = "Bu projeyi görüntüleme yetkiniz yok.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Kullanıcının rolünü belirle
+                var userRole = TeamMemberRole.Member; // Varsayılan
+                if (projectDetails.UserId == user.Id)
+                {
+                    userRole = TeamMemberRole.Owner; // Proje sahibi - Owner olarak düzeltildi
+                }
+                else if (isTeamMember)
+                {
+                    // Kullanıcının rolünü DB'den al
+                    var member = await _context.ProjectTeamMembers
+                        .FirstOrDefaultAsync(m => m.ProjectId == id && m.UserId == user.Id);
+                    if (member != null)
+                    {
+                        userRole = member.Role;
+                    }
+                }
+                
+                // View model'i doldur
+                var viewModel = new ProjectDetailViewModel
+                {
+                    Project = projectDetails,
+                    TodoTasks = await _context.Tasks.Where(t => t.ProjectId == id && t.Status == Models.TaskStatus.Todo).ToListAsync(),
+                    InProgressTasks = await _context.Tasks.Where(t => t.ProjectId == id && t.Status == Models.TaskStatus.InProgress).ToListAsync(),
+                    DoneTasks = await _context.Tasks.Where(t => t.ProjectId == id && t.Status == Models.TaskStatus.Done).ToListAsync(),
+                    TeamMembers = teamMembers
                 };
                 
+                // Düzenleme yetkisi kontrolü (Proje sahibi, Owner, Manager ve Member rolüne sahip üyeler)
+                bool canModifyTasks = true; // Tüm üyelere ve sahiplere izin ver
+                ViewBag.CanModifyTasks = canModifyTasks;
+                ViewBag.UserRole = userRole;
+                ViewBag.CurrentUserId = user.Id;
+                
                 // Layout için gereken bilgileri ViewData'da sakla
-                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
-                ViewData["UserEmail"] = userEmail;
+                ViewData["UserFullName"] = user.FullName;
+                ViewData["UserEmail"] = user.Email;
                 ViewData["UserProfileImage"] = user.ProfileImageUrl;
                 ViewData["CurrentUserId"] = user.Id;
                 
-                return View(model);
+                return View(viewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Proje detayları görüntülenirken hata oluştu: {ex.Message}");
+                _logger.LogError($"Proje detayları görüntülenirken hata: {ex.Message}");
                 TempData["ErrorMessage"] = "Proje detayları yüklenirken bir hata oluştu.";
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -123,14 +156,11 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
                 // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
                     return Json(new { success = false, message = "Kullanıcı bilgileri bulunamadı." });
                 }
                 
@@ -221,14 +251,11 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
                 // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
                     TempData["ErrorMessage"] = "Kullanıcı bilgileri bulunamadı.";
                     return RedirectToAction("Details", new { id = model.ProjectId });
                 }
@@ -242,10 +269,11 @@ namespace PlanYonetimAraclari.Controllers
                     return RedirectToAction("Index", "Dashboard");
                 }
                 
-                // Projenin sahibi veya ekip üyesi olup olmadığını kontrol et
+                // Projenin sahibi veya ekip üyesi olup olmadığını kontrol et - Tüm ekip üyelerine izin ver
                 var isTeamMember = await _context.ProjectTeamMembers
                     .AnyAsync(m => m.ProjectId == model.ProjectId && m.UserId == user.Id);
                 
+                // Proje sahibi veya herhangi bir ekip üyesi görev ekleyebilir
                 if (project.UserId != user.Id && !isTeamMember)
                 {
                     _logger.LogWarning($"Kullanıcı ({user.Id}) projeye görev ekleme yetkisine sahip değil.");
@@ -263,8 +291,37 @@ namespace PlanYonetimAraclari.Controllers
                 // Görev oluştur
                 var task = await _projectService.CreateTaskAsync(model);
                 
+                // Atanan üye bilgilerini getir (eğer atanmışsa)
+                ProjectTeamMemberViewModel assignedMember = null;
+                if (!string.IsNullOrEmpty(task.AssignedMemberId))
+                {
+                    var memberRecord = await _context.ProjectTeamMembers
+                        .Include(m => m.User)
+                        .FirstOrDefaultAsync(m => m.Id.ToString() == task.AssignedMemberId);
+                        
+                    if (memberRecord != null)
+                    {
+                        assignedMember = new ProjectTeamMemberViewModel
+                        {
+                            MemberId = memberRecord.Id,
+                            UserId = memberRecord.UserId,
+                            UserName = memberRecord.User.UserName,
+                            UserFullName = memberRecord.User.FullName,
+                            UserEmail = memberRecord.User.Email,
+                            UserProfileImage = memberRecord.User.ProfileImageUrl,
+                            Role = memberRecord.Role
+                        };
+                    }
+                }
+                
                 // SignalR ile yeni görevi tüm bağlı kullanıcılara bildir
-                await _taskHub.Clients.Group($"project_{model.ProjectId}").SendAsync("ReceiveNewTask", task);
+                var taskForSignalR = new 
+                {
+                    task = task,
+                    assignedMember = assignedMember
+                };
+                
+                await _taskHub.Clients.Group($"project_{model.ProjectId}").SendAsync("ReceiveNewTask", taskForSignalR);
                 
                 TempData["SuccessMessage"] = "Görev başarıyla oluşturuldu.";
                 return RedirectToAction("Details", new { id = model.ProjectId });
@@ -283,14 +340,11 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
                 // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
                     return Json(new { success = false, message = "Kullanıcı bilgileri bulunamadı." });
                 }
                 
@@ -303,11 +357,13 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(new { success = false, message = "Görev bulunamadı." });
                 }
                 
-                // Proje sahibi veya ekip üyesi kontrolü
+                // Proje sahibi veya ekip üyesi kontrolü - Tüm ekip üyelerine izin ver
+                var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
                 var isTeamMember = await _context.ProjectTeamMembers
                     .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
                     
-                if (!isTeamMember && !(await _projectService.GetProjectDetailsByIdAsync(task.ProjectId)).UserId.Equals(user.Id))
+                // Proje sahibi veya herhangi bir ekip üyesi görev güncelleyebilir
+                if (project.UserId != user.Id && !isTeamMember)
                 {
                     _logger.LogWarning($"Kullanıcı ({user.Id}) görevi güncelleme yetkisine sahip değil.");
                     return Json(new { success = false, message = "Bu görevi güncelleme yetkiniz yok." });
@@ -319,8 +375,37 @@ namespace PlanYonetimAraclari.Controllers
                 
                 var updatedTask = await _projectService.UpdateTaskAsync(task);
                 
+                // Atanan üye bilgilerini getir (eğer atanmışsa)
+                ProjectTeamMemberViewModel assignedMember = null;
+                if (!string.IsNullOrEmpty(updatedTask.AssignedMemberId))
+                {
+                    var memberRecord = await _context.ProjectTeamMembers
+                        .Include(m => m.User)
+                        .FirstOrDefaultAsync(m => m.Id.ToString() == updatedTask.AssignedMemberId);
+                        
+                    if (memberRecord != null)
+                    {
+                        assignedMember = new ProjectTeamMemberViewModel
+                        {
+                            MemberId = memberRecord.Id,
+                            UserId = memberRecord.UserId,
+                            UserName = memberRecord.User.UserName,
+                            UserFullName = memberRecord.User.FullName,
+                            UserEmail = memberRecord.User.Email,
+                            UserProfileImage = memberRecord.User.ProfileImageUrl,
+                            Role = memberRecord.Role
+                        };
+                    }
+                }
+                
                 // SignalR ile görev durumu değişikliğini tüm bağlı kullanıcılara bildir
-                await _taskHub.Clients.Group($"project_{task.ProjectId}").SendAsync("ReceiveTaskStatusChange", taskId, newStatus);
+                var taskForSignalR = new 
+                {
+                    task = updatedTask,
+                    assignedMember = assignedMember
+                };
+                
+                await _taskHub.Clients.Group($"project_{task.ProjectId}").SendAsync("ReceiveTaskStatusChange", taskId, newStatus, taskForSignalR);
                 
                 return Json(new { 
                     success = true, 
@@ -332,7 +417,8 @@ namespace PlanYonetimAraclari.Controllers
                         status = updatedTask.Status,
                         priority = updatedTask.Priority,
                         dueDate = updatedTask.DueDate
-                    }
+                    },
+                    assignedMember = assignedMember
                 });
             }
             catch (Exception ex)
@@ -348,14 +434,11 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
-                // Session'dan kullanıcı bilgilerini al
-                string userEmail = HttpContext.Session.GetString("UserEmail");
-                
                 // Kullanıcıyı bul
-                var user = await _userManager.FindByEmailAsync(userEmail);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    _logger.LogWarning($"Kullanıcı bulunamadı: {userEmail}");
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
                     return Json(new { success = false, message = "Kullanıcı bilgileri bulunamadı." });
                 }
                 
@@ -370,11 +453,12 @@ namespace PlanYonetimAraclari.Controllers
                 
                 int projectId = task.ProjectId; // SignalR bildiriminde kullanmak için projeId'yi sakla
                 
-                // Proje sahibi veya ekip üyesi kontrolü
+                // Proje sahibi veya ekip üyesi kontrolü - Tüm ekip üyelerine izin ver
                 var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
                 var isTeamMember = await _context.ProjectTeamMembers
                     .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
                 
+                // Proje sahibi veya herhangi bir ekip üyesi görev silebilir
                 if (project.UserId != user.Id && !isTeamMember)
                 {
                     _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının projesindeki görevi silmeye çalışıyor.");
@@ -387,11 +471,7 @@ namespace PlanYonetimAraclari.Controllers
                 // SignalR ile görev silme işlemini tüm bağlı kullanıcılara bildir
                 await _taskHub.Clients.Group($"project_{projectId}").SendAsync("ReceiveTaskDelete", taskId);
                 
-                return Json(new { 
-                    success = true, 
-                    message = "Görev başarıyla silindi.",
-                    taskId = taskId
-                });
+                return Json(new { success = true, message = "Görev başarıyla silindi." });
             }
             catch (Exception ex)
             {
@@ -476,11 +556,11 @@ namespace PlanYonetimAraclari.Controllers
                 _logger.LogInformation($"Form'dan gelen bitiş tarihi: {model.EndDate:yyyy-MM-dd}");
 
                 // ModelState.IsValid koşulu yerine modelimize değer atamalarını direkt yapalım
-                project.Name = model.Name;
-                project.Description = model.Description;
-                project.Status = model.Status;
+                    project.Name = model.Name;
+                    project.Description = model.Description;
+                    project.Status = model.Status;
                 project.EndDate = model.EndDate;
-                project.LastUpdatedDate = DateTime.UtcNow;
+                    project.LastUpdatedDate = DateTime.UtcNow;
                 project.Priority = model.Priority;
                 
                 if (string.IsNullOrEmpty(project.UserId))
@@ -490,10 +570,10 @@ namespace PlanYonetimAraclari.Controllers
 
                 _logger.LogInformation($"Proje güncelleniyor: Bitiş Tarihi={project.EndDate:yyyy-MM-dd}");
 
-                await _projectService.UpdateProjectAsync(project);
-                TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
-                return RedirectToAction(nameof(Details), new { id });
-            }
+                    await _projectService.UpdateProjectAsync(project);
+                    TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
             catch (Exception ex)
             {
                 _logger.LogError($"Proje düzenlenirken hata oluştu: {ex.Message}");
@@ -506,6 +586,171 @@ namespace PlanYonetimAraclari.Controllers
                 }
                 
                 return RedirectToAction(nameof(Edit), new { id });
+            }
+        }
+
+        // Görev güncelleme (AJAX)
+        [HttpPost]
+        public async Task<IActionResult> UpdateTask([FromBody] TaskModel model)
+        {
+            try
+            {
+                // Kullanıcıyı bul
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
+                    return Json(new { success = false, message = "Kullanıcı bilgileri bulunamadı." });
+                }
+                
+                // Görevi veritabanından ID'ye göre getir
+                var existingTask = await _context.Tasks.FindAsync(model.Id);
+                
+                if (existingTask == null)
+                {
+                    _logger.LogWarning($"Görev bulunamadı: {model.Id}");
+                    return Json(new { success = false, message = "Görev bulunamadı." });
+                }
+                
+                // Proje sahibi veya ekip üyesi kontrolü - Tüm ekip üyelerine izin ver
+                var project = await _projectService.GetProjectDetailsByIdAsync(existingTask.ProjectId);
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == existingTask.ProjectId && m.UserId == user.Id);
+                    
+                // Proje sahibi veya herhangi bir ekip üyesi görev güncelleyebilir
+                if (project.UserId != user.Id && !isTeamMember)
+                {
+                    _logger.LogWarning($"Kullanıcı ({user.Id}) görevi güncelleme yetkisine sahip değil.");
+                    return Json(new { success = false, message = "Bu görevi güncelleme yetkiniz yok." });
+                }
+                
+                // Görev özelliklerini güncelle
+                existingTask.Name = model.Name;
+                existingTask.Description = model.Description;
+                existingTask.Priority = model.Priority;
+                existingTask.DueDate = model.DueDate;
+                existingTask.AssignedMemberId = model.AssignedMemberId;
+                existingTask.LastUpdatedDate = DateTime.Now;
+                
+                // Görevi güncelle
+                var updatedTask = await _projectService.UpdateTaskAsync(existingTask);
+                
+                // Atanan üye bilgilerini getir (eğer atanmışsa)
+                ProjectTeamMemberViewModel assignedMember = null;
+                if (!string.IsNullOrEmpty(updatedTask.AssignedMemberId))
+                {
+                    var memberRecord = await _context.ProjectTeamMembers
+                        .Include(m => m.User)
+                        .FirstOrDefaultAsync(m => m.Id.ToString() == updatedTask.AssignedMemberId);
+                        
+                    if (memberRecord != null)
+                    {
+                        assignedMember = new ProjectTeamMemberViewModel
+                        {
+                            MemberId = memberRecord.Id,
+                            UserId = memberRecord.UserId,
+                            UserName = memberRecord.User.UserName,
+                            UserFullName = memberRecord.User.FullName,
+                            UserEmail = memberRecord.User.Email,
+                            UserProfileImage = memberRecord.User.ProfileImageUrl,
+                            Role = memberRecord.Role
+                        };
+                    }
+                }
+                
+                // SignalR ile görev güncellemesini tüm bağlı kullanıcılara bildir
+                var taskForSignalR = new 
+                {
+                    task = updatedTask,
+                    assignedMember = assignedMember
+                };
+                
+                await _taskHub.Clients.Group($"project_{existingTask.ProjectId}").SendAsync("ReceiveTaskUpdate", updatedTask.Id, taskForSignalR);
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Görev başarıyla güncellendi.",
+                    task = new {
+                        id = updatedTask.Id,
+                        name = updatedTask.Name,
+                        description = updatedTask.Description,
+                        status = updatedTask.Status,
+                        priority = updatedTask.Priority,
+                        dueDate = updatedTask.DueDate,
+                        assignedMemberId = updatedTask.AssignedMemberId
+                    },
+                    assignedMember = assignedMember
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev güncellenirken hata oluştu: {ex.Message}");
+                return Json(new { success = false, message = $"Görev güncellenirken bir hata oluştu: {ex.Message}" });
+            }
+        }
+
+        // Görev getirme (AJAX)
+        [HttpGet]
+        public async Task<IActionResult> GetTask(int taskId)
+        {
+            try
+            {
+                _logger.LogInformation($"GetTask çağrıldı: TaskId={taskId}");
+                
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    _logger.LogWarning("GetTask: Kullanıcı bulunamadı");
+                    return Json(null);
+                }
+                
+                _logger.LogInformation($"GetTask: Kullanıcı bilgisi: UserId={user.Id}, Email={user.Email}");
+                
+                // Görevi veritabanından ID'ye göre getir
+                var task = await _context.Tasks.FindAsync(taskId);
+                
+                if (task == null)
+                {
+                    _logger.LogWarning($"GetTask: Görev bulunamadı: {taskId}");
+                    return Json(null);
+                }
+                
+                _logger.LogInformation($"GetTask: Görev bilgisi: TaskId={task.Id}, ProjectId={task.ProjectId}, Name={task.Name}");
+                
+                // Proje sahibi veya ekip üyesi kontrolü - Tüm ekip üyelerine izin ver
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
+                    
+                var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
+                
+                _logger.LogInformation($"GetTask: İzin kontrolü: IsTeamMember={isTeamMember}, ProjectOwnerId={project.UserId}, CurrentUserId={user.Id}");
+                
+                // Proje sahibi veya herhangi bir ekip üyesi görev detaylarını görebilir
+                if (project.UserId != user.Id && !isTeamMember)
+                {
+                    _logger.LogWarning($"GetTask: Kullanıcı ({user.Id}) görev görüntüleme yetkisine sahip değil");
+                    return Json(null);
+                }
+                
+                // Görevi döndür
+                var result = new { 
+                    id = task.Id,
+                    projectId = task.ProjectId,
+                    name = task.Name,
+                    description = task.Description,
+                    status = (int)task.Status,
+                    priority = (int)task.Priority,
+                    dueDate = task.DueDate,
+                    assignedMemberId = task.AssignedMemberId
+                };
+                
+                _logger.LogInformation($"GetTask: Görev bilgisi başarıyla döndürüldü: {task.Id}");
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev bilgileri alınırken hata oluştu: {ex.Message}");
+                return Json(null);
             }
         }
     }

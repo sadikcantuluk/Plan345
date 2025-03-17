@@ -1,12 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\emails\\invitationemail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\emails\\invitationemail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -14,21 +9,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "InvitationEmail.cshtml",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Emails\\InvitationEmail.cshtml",
-              "RelativeDocumentMoniker": "Views\\Emails\\InvitationEmail.cshtml",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Emails\\InvitationEmail.cshtml",
-              "RelativeToolTip": "Views\\Emails\\InvitationEmail.cshtml",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAADYAAABEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-03-17T12:51:27.54Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"

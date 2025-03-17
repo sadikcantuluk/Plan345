@@ -66,6 +66,9 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<NotificationActionFilter>();
 });
 
+// SignalR servisini ekle
+builder.Services.AddSignalR();
+
 // Session servisi ekle
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -135,5 +138,8 @@ app.MapControllerRoute(
     name: "dashboard",
     pattern: "Dashboard/{action=Index}/{id?}",
     defaults: new { controller = "Dashboard" });
+
+// SignalR Hub endpoint'i
+app.MapHub<PlanYonetimAraclari.Hubs.TaskHub>("/taskHub");
 
 app.Run();

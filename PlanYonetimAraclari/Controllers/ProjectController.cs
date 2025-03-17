@@ -11,6 +11,8 @@ using System.Linq;
 using PlanYonetimAraclari.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using PlanYonetimAraclari.Hubs;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -21,17 +23,20 @@ namespace PlanYonetimAraclari.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IProjectService _projectService;
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<TaskHub> _taskHub;
 
         public ProjectController(
             ILogger<ProjectController> logger,
             UserManager<ApplicationUser> userManager,
             IProjectService projectService,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IHubContext<TaskHub> taskHub)
         {
             _logger = logger;
             _userManager = userManager;
             _projectService = projectService;
             _context = context;
+            _taskHub = taskHub;
         }
         
         // Proje detayları sayfası
@@ -258,6 +263,9 @@ namespace PlanYonetimAraclari.Controllers
                 // Görev oluştur
                 var task = await _projectService.CreateTaskAsync(model);
                 
+                // SignalR ile yeni görevi tüm bağlı kullanıcılara bildir
+                await _taskHub.Clients.Group($"project_{model.ProjectId}").SendAsync("ReceiveNewTask", task);
+                
                 TempData["SuccessMessage"] = "Görev başarıyla oluşturuldu.";
                 return RedirectToAction("Details", new { id = model.ProjectId });
             }
@@ -311,6 +319,9 @@ namespace PlanYonetimAraclari.Controllers
                 
                 var updatedTask = await _projectService.UpdateTaskAsync(task);
                 
+                // SignalR ile görev durumu değişikliğini tüm bağlı kullanıcılara bildir
+                await _taskHub.Clients.Group($"project_{task.ProjectId}").SendAsync("ReceiveTaskStatusChange", taskId, newStatus);
+                
                 return Json(new { 
                     success = true, 
                     message = "Görev durumu başarıyla güncellendi.",
@@ -357,6 +368,8 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(new { success = false, message = "Görev bulunamadı." });
                 }
                 
+                int projectId = task.ProjectId; // SignalR bildiriminde kullanmak için projeId'yi sakla
+                
                 // Proje sahibi veya ekip üyesi kontrolü
                 var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
                 var isTeamMember = await _context.ProjectTeamMembers
@@ -370,6 +383,9 @@ namespace PlanYonetimAraclari.Controllers
                 
                 // Görevi sil
                 var result = await _projectService.DeleteTaskAsync(taskId);
+                
+                // SignalR ile görev silme işlemini tüm bağlı kullanıcılara bildir
+                await _taskHub.Clients.Group($"project_{projectId}").SendAsync("ReceiveTaskDelete", taskId);
                 
                 return Json(new { 
                     success = true, 
@@ -406,6 +422,9 @@ namespace PlanYonetimAraclari.Controllers
                     if (teamMember == null || teamMember.Role != TeamMemberRole.Manager)
                         return Forbid();
                 }
+
+                // Projedeki bitiş tarihini loglayalım
+                _logger.LogInformation($"Edit sayfası açılıyor: ProjectId={id}, EndDate={project.EndDate:yyyy-MM-dd}");
 
                 // Layout için gereken bilgileri ViewData'da sakla
                 ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
@@ -453,6 +472,9 @@ namespace PlanYonetimAraclari.Controllers
                         return Forbid();
                 }
 
+                // Modeldeki değerleri loglayarak kontrol edelim
+                _logger.LogInformation($"Form'dan gelen bitiş tarihi: {model.EndDate:yyyy-MM-dd}");
+
                 // ModelState.IsValid koşulu yerine modelimize değer atamalarını direkt yapalım
                 project.Name = model.Name;
                 project.Description = model.Description;
@@ -466,7 +488,7 @@ namespace PlanYonetimAraclari.Controllers
                     project.UserId = user.Id;
                 }
 
-                _logger.LogInformation($"Proje güncelleniyor: Bitiş Tarihi={project.EndDate.ToString("yyyy-MM-dd")}");
+                _logger.LogInformation($"Proje güncelleniyor: Bitiş Tarihi={project.EndDate:yyyy-MM-dd}");
 
                 await _projectService.UpdateProjectAsync(project);
                 TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
@@ -474,9 +496,16 @@ namespace PlanYonetimAraclari.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Proje güncellenirken hata oluştu: {ex.Message}");
-                TempData["ErrorMessage"] = "Proje güncellenirken bir hata oluştu: " + ex.Message;
-                return View(model);
+                _logger.LogError($"Proje düzenlenirken hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "Proje düzenlenirken bir hata oluştu.";
+                
+                // Hata durumunda değerleri loglayalım
+                if (model != null)
+                {
+                    _logger.LogError($"Hata alınan form değerleri - EndDate: {model.EndDate:yyyy-MM-dd}");
+                }
+                
+                return RedirectToAction(nameof(Edit), new { id });
             }
         }
     }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PlanYonetimAraclari.Data;
 using PlanYonetimAraclari.Models;
 using System;
@@ -13,11 +14,13 @@ namespace PlanYonetimAraclari.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly EmailSettings _emailSettings;
 
-        public TeamService(ApplicationDbContext context, IEmailService emailService)
+        public TeamService(ApplicationDbContext context, IEmailService emailService, IOptions<EmailSettings> emailSettings)
         {
             _context = context;
             _emailService = emailService;
+            _emailSettings = emailSettings.Value;
         }
 
         public async Task<bool> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId)
@@ -59,6 +62,9 @@ namespace PlanYonetimAraclari.Services
                 _context.ProjectInvitations.Add(invitation);
                 await _context.SaveChangesAsync();
 
+                // Uygulama URL'sini yapılandırmadan alın veya varsayılan olarak localhost'u kullanın
+                var baseUrl = _emailSettings.ApplicationUrl ?? "https://localhost:7091";
+
                 // Send invitation email
                 var emailModel = new InvitationEmailModel
                 {
@@ -66,8 +72,8 @@ namespace PlanYonetimAraclari.Services
                     ProjectName = project.Name,
                     InviterName = invitedByUser.FullName,
                     TeamMemberCount = project.TeamMembers?.Count ?? 0,
-                    AcceptUrl = $"https://localhost:7066/Team/AcceptInvitation?token={token}",
-                    DeclineUrl = $"https://localhost:7066/Team/DeclineInvitation?token={token}"
+                    AcceptUrl = $"{baseUrl}/Team/AcceptInvitation?token={token}",
+                    DeclineUrl = $"{baseUrl}/Team/DeclineInvitation?token={token}"
                 };
 
                 var emailSubject = "Plan345 - Proje Daveti";
@@ -77,54 +83,87 @@ namespace PlanYonetimAraclari.Services
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Hata yönetimi ekleyebilirsiniz
+                System.Diagnostics.Debug.WriteLine($"Davet gönderme hatası: {ex.Message}");
                 return false;
             }
         }
 
         public async Task<bool> AcceptInvitation(string token)
         {
-            var invitation = await _context.ProjectInvitations
-                .Include(i => i.Project)
-                .FirstOrDefaultAsync(i => i.Token == token && i.Status == InvitationStatus.Pending);
-
-            if (invitation == null || invitation.ExpiryDate < DateTime.UtcNow)
-                return false;
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == invitation.InvitedEmail);
-            if (user == null)
-                return false;
-
-            var teamMember = new ProjectTeamMember
+            try
             {
-                ProjectId = invitation.ProjectId,
-                UserId = user.Id,
-                Status = "Accepted",
-                InvitedAt = invitation.InvitedDate,
-                JoinedAt = DateTime.UtcNow
-            };
+                var invitation = await _context.ProjectInvitations
+                    .Include(i => i.Project)
+                    .FirstOrDefaultAsync(i => i.Token == token && i.Status == InvitationStatus.Pending);
 
-            invitation.Status = InvitationStatus.Accepted;
+                if (invitation == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Davet bulunamadı veya beklemede değil. Token: {token}");
+                    return false;
+                }
 
-            _context.ProjectTeamMembers.Add(teamMember);
-            await _context.SaveChangesAsync();
+                if (invitation.ExpiryDate < DateTime.UtcNow)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Davet süresi dolmuş. Son tarih: {invitation.ExpiryDate}, Şu an: {DateTime.UtcNow}");
+                    return false;
+                }
 
-            return true;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == invitation.InvitedEmail);
+                if (user == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Kullanıcı bulunamadı. E-posta: {invitation.InvitedEmail}");
+                    return false;
+                }
+
+                var teamMember = new ProjectTeamMember
+                {
+                    ProjectId = invitation.ProjectId,
+                    UserId = user.Id,
+                    Status = "Accepted",
+                    InvitedAt = invitation.InvitedDate,
+                    JoinedAt = DateTime.UtcNow
+                };
+
+                invitation.Status = InvitationStatus.Accepted;
+
+                _context.ProjectTeamMembers.Add(teamMember);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Davet kabul edilirken hata: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> DeclineInvitation(string token)
         {
-            var invitation = await _context.ProjectInvitations
-                .FirstOrDefaultAsync(i => i.Token == token && i.Status == InvitationStatus.Pending);
+            try
+            {
+                var invitation = await _context.ProjectInvitations
+                    .FirstOrDefaultAsync(i => i.Token == token && i.Status == InvitationStatus.Pending);
 
-            if (invitation == null)
+                if (invitation == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Davet bulunamadı veya beklemede değil. Token: {token}");
+                    return false;
+                }
+
+                invitation.Status = InvitationStatus.Declined;
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Davet reddedilirken hata: {ex.Message}");
                 return false;
-
-            invitation.Status = InvitationStatus.Declined;
-            await _context.SaveChangesAsync();
-
-            return true;
+            }
         }
 
         public async Task<bool> CancelInvitation(int projectId, string userId)
@@ -214,9 +253,118 @@ namespace PlanYonetimAraclari.Services
 
         private async Task<string> RenderEmailTemplate(string templateName, object model)
         {
-            // Bu metot e-posta şablonunu render edecek
-            // Şimdilik basit bir şekilde InvitationEmail.cshtml içeriğini döndürüyoruz
-            return await Task.FromResult($"Views/Emails/{templateName}.cshtml");
+            // Davet e-posta şablonu için HTML içeriğini oluştur
+            if (templateName == "InvitationEmail" && model is InvitationEmailModel inviteModel)
+            {
+                return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"" />
+    <title>Plan345 - Proje Daveti</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        .logo {{
+            max-width: 150px;
+            height: auto;
+        }}
+        .content {{
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }}
+        .button {{
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4f46e5;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 20px 0;
+        }}
+        .button:hover {{
+            background-color: #4338ca;
+        }}
+        .footer {{
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }}
+    </style>
+</head>
+<body>
+    <div class=""header"">
+        <img src=""{inviteModel.LogoUrl}"" alt=""Plan345 Logo"" class=""logo"" />
+    </div>
+
+    <div class=""content"">
+        <h1>Proje Daveti</h1>
+        <p>Merhaba,</p>
+        <p><strong>{inviteModel.InviterName}</strong> sizi <strong>{inviteModel.ProjectName}</strong> projesine davet ediyor.</p>
+        
+        <p>Proje hakkında:</p>
+        <ul>
+            <li>Proje: {inviteModel.ProjectName}</li>
+            <li>Davet eden: {inviteModel.InviterName}</li>
+            <li>Ekip üye sayısı: {inviteModel.TeamMemberCount}</li>
+        </ul>
+
+        <p>Daveti kabul etmek için aşağıdaki butona tıklayabilirsiniz:</p>
+        
+        <div style=""text-align: center;"">
+            <a href=""{inviteModel.AcceptUrl}"" class=""button"" style=""background-color: #10b981; color: white !important;"">
+                Daveti Kabul Et
+            </a>
+            <a href=""{inviteModel.DeclineUrl}"" class=""button"" style=""background-color: #ef4444; margin-left: 10px; color: white !important;"">
+                Daveti Reddet
+            </a>
+        </div>
+
+        <p style=""margin-top: 20px;"">
+            <small>
+                Bu davet 48 saat içinde geçerliliğini yitirecektir. Eğer butonlar çalışmıyorsa, 
+                aşağıdaki bağlantıları tarayıcınıza kopyalayabilirsiniz:
+            </small>
+        </p>
+        <p style=""word-break: break-all;"">
+            <small>
+                Kabul et: {inviteModel.AcceptUrl}<br />
+                Reddet: {inviteModel.DeclineUrl}
+            </small>
+        </p>
+    </div>
+
+    <div class=""footer"">
+        <p>Bu e-posta Plan345 tarafından gönderilmiştir.</p>
+        <p>
+            <small>
+                Bu e-postayı yanlışlıkla aldıysanız lütfen dikkate almayınız ve siliniz. 
+                Herhangi bir işlem yapmanıza gerek yoktur.
+            </small>
+        </p>
+    </div>
+</body>
+</html>";
+            }
+            
+            // Diğer e-posta şablonları için basit bir HTML oluştur
+            return $@"<html><body><p>E-posta içeriği: {templateName}</p></body></html>";
         }
     }
 } 

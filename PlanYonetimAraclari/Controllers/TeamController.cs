@@ -8,6 +8,7 @@ using PlanYonetimAraclari.Services;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -187,15 +188,31 @@ namespace PlanYonetimAraclari.Controllers
         public async Task<IActionResult> AcceptInvitation(string token)
         {
             if (string.IsNullOrEmpty(token))
-                return BadRequest();
+                return BadRequest("Geçersiz davet tokenı");
+                
+            try
+            {
+                // Eğer kullanıcı giriş yapmamışsa, token bilgisini TempData'da saklayıp giriş sayfasına yönlendir
+                if (!User.Identity.IsAuthenticated)
+                {
+                    TempData["InvitationToken"] = token;
+                    TempData["InvitationAction"] = "Accept";
+                    return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("ProcessInvitation", "Team") });
+                }
 
-            var result = await _teamService.AcceptInvitation(token);
-            if (result)
-                TempData["SuccessMessage"] = "Davet başarıyla kabul edildi.";
-            else
-                TempData["ErrorMessage"] = "Davet kabul edilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
+                var result = await _teamService.AcceptInvitation(token);
+                if (result)
+                    TempData["SuccessMessage"] = "Davet başarıyla kabul edildi.";
+                else
+                    TempData["ErrorMessage"] = "Davet kabul edilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
 
-            return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("Index", "Dashboard");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Davet işlenirken bir hata oluştu: {ex.Message}";
+                return RedirectToAction("Index", "Dashboard");
+            }
         }
 
         [AllowAnonymous]
@@ -203,15 +220,70 @@ namespace PlanYonetimAraclari.Controllers
         public async Task<IActionResult> DeclineInvitation(string token)
         {
             if (string.IsNullOrEmpty(token))
-                return BadRequest();
+                return BadRequest("Geçersiz davet tokenı");
+                
+            try
+            {
+                // Eğer kullanıcı giriş yapmamışsa, token bilgisini TempData'da saklayıp giriş sayfasına yönlendir
+                if (!User.Identity.IsAuthenticated)
+                {
+                    TempData["InvitationToken"] = token;
+                    TempData["InvitationAction"] = "Decline";
+                    return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("ProcessInvitation", "Team") });
+                }
 
-            var result = await _teamService.DeclineInvitation(token);
-            if (result)
-                TempData["SuccessMessage"] = "Davet reddedildi.";
-            else
-                TempData["ErrorMessage"] = "Davet reddedilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
+                var result = await _teamService.DeclineInvitation(token);
+                if (result)
+                    TempData["SuccessMessage"] = "Davet reddedildi.";
+                else
+                    TempData["ErrorMessage"] = "Davet reddedilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
 
-            return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("Index", "Dashboard");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Davet işlenirken bir hata oluştu: {ex.Message}";
+                return RedirectToAction("Index", "Dashboard");
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> ProcessInvitation()
+        {
+            try
+            {
+                // Giriş yapıldıktan sonra davet işleme
+                var token = TempData["InvitationToken"] as string;
+                var action = TempData["InvitationAction"] as string;
+
+                if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(action))
+                    return RedirectToAction("Index", "Dashboard");
+
+                if (action == "Accept")
+                {
+                    var result = await _teamService.AcceptInvitation(token);
+                    if (result)
+                        TempData["SuccessMessage"] = "Davet başarıyla kabul edildi.";
+                    else
+                        TempData["ErrorMessage"] = "Davet kabul edilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
+                }
+                else if (action == "Decline")
+                {
+                    var result = await _teamService.DeclineInvitation(token);
+                    if (result)
+                        TempData["SuccessMessage"] = "Davet reddedildi.";
+                    else
+                        TempData["ErrorMessage"] = "Davet reddedilemedi. Davet geçersiz veya süresi dolmuş olabilir.";
+                }
+
+                return RedirectToAction("Index", "Dashboard");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Davet işlenirken bir hata oluştu: {ex.Message}";
+                return RedirectToAction("Index", "Dashboard");
+            }
         }
 
         [HttpGet]

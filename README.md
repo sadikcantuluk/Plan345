@@ -1,7 +1,5 @@
 # Plan345 - Modern Proje Yönetim Aracı
 
-![Project Logo](https://via.placeholder.com/150x150)
-
 ## Proje Tanıtımı
 
 Plan345, ekiplerin projelerini verimli bir şekilde yönetmelerini sağlayan kullanıcı dostu bir proje yönetim platformudur. Gerçek zamanlı güncellemeler, sürükle-bırak görev yönetimi ve ekip işbirliği özellikleriyle projelerin zamanında ve bütçe dahilinde tamamlanmasını kolaylaştırır.
@@ -65,17 +63,6 @@ Plan345, ekiplerin projelerini verimli bir şekilde yönetmelerini sağlayan kul
 4. Görevleri farklı durumlar arasında sürükleyip bırakarak durumlarını güncelleyin.
 5. Ekip üyelerinin güncellemelerini gerçek zamanlı olarak takip edin.
 
-## Ekran Görüntüleri
-
-![Dashboard](https://via.placeholder.com/800x450)
-*Proje Yönetim Paneli*
-
-![Tasks](https://via.placeholder.com/800x450)
-*Görev Kanban Tahtası*
-
-![Project Details](https://via.placeholder.com/800x450)
-*Proje Detayları*
-
 ## Katkıda Bulunma
 
 1. Bu depoyu forklayın
@@ -90,7 +77,7 @@ Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 
 ## İletişim
 
-Proje Destek - [email@example.com](mailto:plan345destek@gmail.com)
-Proje İletişim - [email@example.com](mailto:sadikcantuluk@gmail.com)
+Proje Destek - [plan345destek@gmail.com](mailto:plan345destek@gmail.com)
+Proje İletişim - [sadikcantuluk@gmail.com](mailto:sadikcantuluk@gmail.com)
 
-Proje Linki: [https://github.com/kullaniciadi/Plan345](https://github.com/sadikcantuluk/345Backend) 
+Proje Linki: [https://github.com/sadikcantuluk/345Backend](https://github.com/sadikcantuluk/345Backend) 

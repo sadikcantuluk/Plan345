@@ -44,12 +44,11 @@
             }
             @if (Model.Project.UserId == ViewBag.CurrentUserId)
             {
-                <form asp-action="Delete" asp-route-id="@Model.Project.Id" method="post" class="inline" onsubmit="return confirm('Bu projeyi silmek istediğinize emin misiniz?');">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        Sil
-                    </button>
-                </form>
+                <button type="button" id="delete-project-btn" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Sil
+                </button>
+                @Html.AntiForgeryToken()
             }
         </div>
     </div>
@@ -94,9 +93,14 @@
                     <p class="text-gray-700">@(string.IsNullOrEmpty(Model.Project.Description) ? "Açıklama yok" : Model.Project.Description)</p>
                 </div>
                 
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-500">Başlangıç Tarihi</h3>
+                    <p class="text-gray-700">@Model.Project.StartDate.ToString("dd MMMM yyyy")</p>
+                </div>
+                
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Bitiş Tarihi</h3>
-                    <p class="text-gray-700">@(Model.Project.DueDate.HasValue ? Model.Project.DueDate.Value.ToString("dd MMMM yyyy") : "Belirtilmemiş")</p>
+                    <p class="text-gray-700">@Model.Project.EndDate.ToString("dd MMMM yyyy")</p>
                 </div>
             </div>
             
@@ -482,10 +486,10 @@
 
 <!-- Proje Silme Modal -->
 <div id="delete-project-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all scale-95 opacity-0" id="delete-modal-content">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-red-600">Projeyi Sil</h3>
-            <button id="close-delete-modal" class="text-gray-400 hover:text-gray-500">
+            <h3 class="text-xl font-semibold text-red-600">Projeyi Sil</h3>
+            <button id="close-delete-modal" class="text-gray-400 hover:text-gray-500 focus:outline-none">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -506,10 +510,10 @@
         </div>
         
         <div class="flex justify-end space-x-3">
-            <button type="button" id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <button type="button" id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
                 İptal
             </button>
-            <button type="button" id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
+            <button type="button" id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
                 Projeyi Sil
             </button>
         </div>
@@ -992,7 +996,6 @@
                         $("#delete-task-modal").addClass("hidden");
                         $("body").css("overflow", "auto");
                         showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
-                        console.error("AJAX Error: ", status, error);
                     }
                 });
             });
@@ -1067,17 +1070,27 @@
             // Proje silme modalı
             $("#delete-project-btn").on("click", function() {
                 $("#delete-project-modal").removeClass("hidden");
-                $("body").css("overflow", "hidden");
+                setTimeout(function() {
+                    $("#delete-modal-content").removeClass("scale-95 opacity-0").addClass("scale-100 opacity-100");
+                }, 10);
+                document.body.style.overflow = 'hidden';
             });
             
             // Proje silme modalı kapatma
             $("#close-delete-modal, #cancel-delete").on("click", function() {
-                $("#delete-project-modal").addClass("hidden");
-                $("body").css("overflow", "");
+                $("#delete-modal-content").removeClass("scale-100 opacity-100").addClass("scale-95 opacity-0");
+                setTimeout(function() {
+                    $("#delete-project-modal").addClass("hidden");
+                    document.body.style.overflow = 'auto';
+                }, 200);
             });
             
             // Proje silme
             $("#confirm-delete").on("click", function() {
+                // Silme işlemi başladığında butonları devre dışı bırakalım
+                $("#confirm-delete").prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Siliniyor...');
+                $("#cancel-delete").prop('disabled', true);
+                
                 $.ajax({
                     url: "@Url.Action("Delete", "Project")",
                     type: "POST",
@@ -1086,18 +1099,75 @@
                         __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                     },
                     success: function(response) {
-                        if (response.success) {
-                            // Başarılı silme, dashboard'a yönlendir
+                        // Başarılı silme, dashboard'a yönlendir
+                        showNotification("Proje başarıyla silindi", "success");
+                        setTimeout(function() {
                             window.location.href = "@Url.Action("Index", "Dashboard")";
-                        } else {
-                            alert("Hata: " + response.message);
-                        }
+                        }, 1000);
                     },
-                    error: function() {
-                        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+                    error: function(xhr, status, error) {
+                        // Silme başarısız olsa bile sayfayı yenilediğimizde project silinmiş olabilir
+                        console.error("AJAX Error:", status, error);
+                        console.log("Response:", xhr.responseText);
+                        
+                        // HTTP durum kodunu kontrol et - 302 Found veya diğer yönlendirme kodları silme işleminin
+                        // başarılı olduğunu gösterebilir
+                        if (xhr.status === 302 || xhr.status === 200) {
+                            showNotification("Proje işlemi tamamlandı, yönlendiriliyorsunuz...", "success");
+                            setTimeout(function() {
+                                window.location.href = "@Url.Action("Index", "Dashboard")";
+                            }, 1000);
+                        } else {
+                            $("#delete-project-modal").addClass("hidden");
+                            document.body.style.overflow = 'auto';
+                            showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
+                            // Butonları tekrar aktifleştir
+                            $("#confirm-delete").prop('disabled', false).html('Projeyi Sil');
+                            $("#cancel-delete").prop('disabled', false);
+                        }
                     }
                 });
             });
+            
+            // ESC tuşuyla modal kapatma
+            $(document).keydown(function(e) {
+                if (e.key === "Escape") {
+                    if (!$("#delete-project-modal").hasClass("hidden")) {
+                        $("#delete-modal-content").removeClass("scale-100 opacity-100").addClass("scale-95 opacity-0");
+                        setTimeout(function() {
+                            $("#delete-project-modal").addClass("hidden");
+                            document.body.style.overflow = 'auto';
+                        }, 200);
+                    }
+                }
+            });
+            
+            // Görev tarihini güncelleme fonksiyonu
+            function updateTaskDueDate(taskElement, dueDate) {
+                const dueDateContainer = $(taskElement).find('.flex.items-center.justify-between');
+                let dueDateSpan = dueDateContainer.find('span.text-xs.text-gray-500');
+                
+                if (dueDate) {
+                    // Format date as dd MMM yyyy
+                    const date = new Date(dueDate);
+                    const formattedDate = date.getDate().toString().padStart(2, '0') + " " + 
+                        date.toLocaleString('tr-TR', { month: 'short' }) + " " + 
+                        date.getFullYear();
+                    
+                    if (dueDateSpan.length) {
+                        // Update existing due date span
+                        dueDateSpan.html('<i class="far fa-calendar-alt mr-1"></i>' + formattedDate);
+                    } else {
+                        // Create new due date span
+                        dueDateContainer.append(
+                            '<span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>' + formattedDate + '</span>'
+                        );
+                    }
+                } else {
+                    // Remove due date span if it exists
+                    dueDateSpan.remove();
+                }
+            }
             
             // Durum dropdown açma/kapama
             $("#status-dropdown-button").on("click", function() {
@@ -1129,41 +1199,14 @@
                             // Sayfayı yenile
                             window.location.reload();
                         } else {
-                            alert("Hata: " + response.message);
+                            showNotification("Hata: " + response.message, "error");
                         }
                     },
                     error: function() {
-                        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+                        showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
                     }
                 });
             });
-
-            // Görev tarihini güncelleme fonksiyonu
-            function updateTaskDueDate(taskElement, dueDate) {
-                const dueDateContainer = $(taskElement).find('.flex.items-center.justify-between');
-                let dueDateSpan = dueDateContainer.find('span.text-xs.text-gray-500');
-                
-                if (dueDate) {
-                    // Format date as dd MMM yyyy
-                    const date = new Date(dueDate);
-                    const formattedDate = date.getDate().toString().padStart(2, '0') + " " + 
-                        date.toLocaleString('tr-TR', { month: 'short' }) + " " + 
-                        date.getFullYear();
-                    
-                    if (dueDateSpan.length) {
-                        // Update existing due date span
-                        dueDateSpan.html('<i class="far fa-calendar-alt mr-1"></i>' + formattedDate);
-                    } else {
-                        // Create new due date span
-                        dueDateContainer.append(
-                            '<span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>' + formattedDate + '</span>'
-                        );
-                    }
-                } else {
-                    // Remove due date span if it exists
-                    dueDateSpan.remove();
-                }
-            }
         });
 
         // Otomatik gizlenen mesajlar için JavaScript

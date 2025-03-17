@@ -25,12 +25,24 @@ namespace PlanYonetimAraclari.Models
         [Display(Name = "Son Güncelleme Tarihi")]
         public DateTime? LastUpdatedDate { get; set; }
         
+        [Required]
+        [Display(Name = "Başlangıç Tarihi")]
+        public DateTime StartDate { get; set; }
+        
+        [Required]
+        [Display(Name = "Bitiş Tarihi")]
+        public DateTime EndDate { get; set; }
+        
         [Display(Name = "Bitiş Tarihi")]
         public DateTime? DueDate { get; set; }
         
         [Required]
         [Display(Name = "Durum")]
         public ProjectStatus Status { get; set; }
+        
+        [Required]
+        [Display(Name = "Öncelik")]
+        public ProjectPriority Priority { get; set; }
         
         [Display(Name = "Kullanıcı ID")]
         public string UserId { get; set; }
@@ -46,6 +58,11 @@ namespace PlanYonetimAraclari.Models
         {
             TeamMembers = new HashSet<ProjectTeamMember>();
             Invitations = new HashSet<ProjectInvitation>();
+            CreatedDate = DateTime.Now;
+            StartDate = DateTime.Now;
+            EndDate = DateTime.Now.AddMonths(1);
+            Status = ProjectStatus.Planning;
+            Priority = ProjectPriority.Normal;
         }
     }
     
@@ -65,5 +82,20 @@ namespace PlanYonetimAraclari.Models
         
         [Display(Name = "İptal Edildi")]
         Cancelled = 4
+    }
+    
+    public enum ProjectPriority
+    {
+        [Display(Name = "Düşük")]
+        Low = 0,
+        
+        [Display(Name = "Normal")]
+        Normal = 1,
+        
+        [Display(Name = "Yüksek")]
+        High = 2,
+        
+        [Display(Name = "Acil")]
+        Urgent = 3
     }
 } 

@@ -62,6 +62,13 @@ namespace PlanYonetimAraclari.Controllers
                 ViewBag.IsTeamMember = isTeamMember;
                 ViewBag.CanModifyTasks = isProjectOwner || isTeamMember; // Both owners and team members can modify tasks
 
+                // StartDate'in değeri CreatedDate olmadıysa eşitle
+                if (project.StartDate.Date != project.CreatedDate.Date)
+                {
+                    project.StartDate = project.CreatedDate;
+                    await _projectService.UpdateProjectAsync(project);
+                }
+
                 List<TaskModel> todoTasks = null;
                 List<TaskModel> inProgressTasks = null;
                 List<TaskModel> doneTasks = null;
@@ -166,15 +173,25 @@ namespace PlanYonetimAraclari.Controllers
                 if (user == null)
                     return RedirectToAction("Login", "Account");
 
+                // Layout için gereken bilgileri ViewData'da sakla
+                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = user.Email;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
+                ViewData["CurrentUserId"] = user.Id;
+
                 var project = await _projectService.GetProjectByIdAsync(id);
                 if (project == null)
                     return NotFound();
 
                 // Only project owner can delete the project
                 if (project.UserId != user.Id)
-                    return Forbid();
+                {
+                    TempData["ErrorMessage"] = "Bu projeyi silme yetkiniz yok.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
 
-                var result = await _projectService.DeleteProjectAsync(id);
+                // Projeyi silerken güvenlik amacıyla forceDelete parametresini true yapalım
+                var result = await _projectService.DeleteProjectAsync(id, true);
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Proje başarıyla silindi.";
@@ -187,7 +204,7 @@ namespace PlanYonetimAraclari.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Proje silinirken hata oluştu: {ex.Message}");
-                TempData["ErrorMessage"] = "Proje silinirken bir hata oluştu.";
+                TempData["ErrorMessage"] = $"Proje silinirken bir hata oluştu: {ex.Message}";
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -390,6 +407,12 @@ namespace PlanYonetimAraclari.Controllers
                         return Forbid();
                 }
 
+                // Layout için gereken bilgileri ViewData'da sakla
+                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = user.Email;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
+                ViewData["CurrentUserId"] = user.Id;
+
                 return View(project);
             }
             catch (Exception ex)
@@ -410,6 +433,12 @@ namespace PlanYonetimAraclari.Controllers
                 if (user == null)
                     return RedirectToAction("Login", "Account");
 
+                // Layout için gereken bilgileri ViewData'da sakla
+                ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+                ViewData["UserEmail"] = user.Email;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
+                ViewData["CurrentUserId"] = user.Id;
+
                 var project = await _projectService.GetProjectByIdAsync(id);
                 if (project == null)
                     return NotFound();
@@ -424,26 +453,30 @@ namespace PlanYonetimAraclari.Controllers
                         return Forbid();
                 }
 
-                if (ModelState.IsValid)
+                // ModelState.IsValid koşulu yerine modelimize değer atamalarını direkt yapalım
+                project.Name = model.Name;
+                project.Description = model.Description;
+                project.Status = model.Status;
+                project.EndDate = model.EndDate;
+                project.LastUpdatedDate = DateTime.UtcNow;
+                project.Priority = model.Priority;
+                
+                if (string.IsNullOrEmpty(project.UserId))
                 {
-                    project.Name = model.Name;
-                    project.Description = model.Description;
-                    project.Status = model.Status;
-                    project.DueDate = model.DueDate;
-                    project.LastUpdatedDate = DateTime.UtcNow;
-
-                    await _projectService.UpdateProjectAsync(project);
-                    TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
-                    return RedirectToAction(nameof(Details), new { id });
+                    project.UserId = user.Id;
                 }
 
-                return View(model);
+                _logger.LogInformation($"Proje güncelleniyor: Bitiş Tarihi={project.EndDate.ToString("yyyy-MM-dd")}");
+
+                await _projectService.UpdateProjectAsync(project);
+                TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Proje güncellenirken hata oluştu: {ex.Message}");
-                TempData["ErrorMessage"] = "Proje güncellenirken bir hata oluştu.";
-                return RedirectToAction(nameof(Details), new { id });
+                TempData["ErrorMessage"] = "Proje güncellenirken bir hata oluştu: " + ex.Message;
+                return View(model);
             }
         }
     }

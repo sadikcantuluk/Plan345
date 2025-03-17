@@ -1,58 +1,49 @@
-# Plan Yönetim Araçları
+# Plan345 - Modern Proje Yönetim Aracı
 
-Plan Yönetim Araçları, projelerinizi ve görevlerinizi kolayca yönetmenize yardımcı olan modern, kullanıcı dostu bir web uygulamasıdır. Trello benzeri bir arayüz ile görevlerinizi sürükle-bırak şeklinde düzenleyebilir ve proje iş akışınızı verimli bir şekilde organize edebilirsiniz.
+![Project Logo](https://via.placeholder.com/150x150)
 
-## Özellikler
+## Proje Tanıtımı
 
-### Proje Yönetimi
-- Sınırsız proje oluşturma ve yönetme
-- Projeler için durumlar: Planlama, Devam Ediyor, Tamamlandı, Beklemede, İptal Edildi
-- Proje açıklamaları, bitiş tarihleri ve tamamlanma yüzdeleri
-- Dashboard üzerinden proje istatistiklerini görüntüleme
+Plan345, ekiplerin projelerini verimli bir şekilde yönetmelerini sağlayan kullanıcı dostu bir proje yönetim platformudur. Gerçek zamanlı güncellemeler, sürükle-bırak görev yönetimi ve ekip işbirliği özellikleriyle projelerin zamanında ve bütçe dahilinde tamamlanmasını kolaylaştırır.
 
-### Görev Yönetimi
-- Her proje için görevler oluşturma
-- Trello benzeri kanban görünümü: Yapılacak, Devam Ediyor, Tamamlandı
-- Görevleri sürükle-bırak ile kolayca taşıma
-- Öncelik seviyeleri: Düşük, Orta, Yüksek, Acil
-- Görev açıklamaları ve bitiş tarihleri
+## Temel Özellikler
 
-### Kullanıcı Dostu Arayüz
-- Responsive tasarım - mobil cihazlarda da çalışır
-- Modern ve temiz arayüz
-- Gerçek zamanlı güncellemeler
-- Kullanıcı profili ve ayarları
-- Kolay gezinme için sidebar menüsü
+- **Kullanıcı Dostu Arayüz**: Sezgisel bir kullanıcı arayüzü ile projeleri ve görevleri hızlıca yönetin
+- **Görev Yönetimi**: Görevleri oluşturun, düzenleyin ve farklı durumlara sürükleyip bırakın (Yapılacak, Devam Ediyor, Tamamlandı)
+- **Gerçek Zamanlı Güncellemeler**: SignalR teknolojisi ile ekip üyeleri arasında anlık güncellemeler
+- **Ekip İşbirliği**: Projelere ekip üyelerini ekleyin ve izinleri yönetin
+- **İş Akışı Takibi**: Görsel proje ilerleme ve tamamlanma durumu takibi
+- **Bildirim Sistemi**: Önemli proje etkinlikleri için bildirimler
+- **Responsive Tasarım**: Masaüstü, tablet ve mobil cihazlarda kusursuz deneyim
 
-## Kullanılan Teknolojiler
+## Teknolojiler
 
-- **Backend**: ASP.NET Core 6.0 MVC
-- **Veritabanı**: Entity Framework Core & MSSQL Server
-- **Frontend**: HTML, CSS, JavaScript, jQuery
-- **CSS Framework**: Tailwind CSS
-- **İkonlar**: Font Awesome
-- **Sürükle-Bırak**: SortableJS
+- **Backend**: ASP.NET Core MVC
+- **Frontend**: HTML5, CSS3, JavaScript, jQuery
+- **Veritabanı**: SQL Server
 - **Kimlik Doğrulama**: ASP.NET Core Identity
+- **Gerçek Zamanlı İletişim**: SignalR
+- **UI Framework**: Tailwind CSS
+- **Sürükle-Bırak**: SortableJS
+- **AJAX**: Asynchronous JavaScript
 
-## Kurulum
+## Kurulum ve Çalıştırma
 
 ### Gereksinimler
+
 - .NET 6.0 SDK veya üzeri
-- Veritabanı (SQLite veya SQL Server)
-- Güncel bir web tarayıcısı
+- SQL Server
+- Visual Studio 2022 veya VS Code
 
 ### Adımlar
 
-1. Repo'yu klonlayın:
+1. Projeyi klonlayın:
    ```
-   git clone https://github.com/sadikcantuluk/345Backend.git
-   cd 345Backend
+   git clone https://github.com/kullaniciadi/Plan345.git
+   cd Plan345
    ```
 
-2. Bağımlılıkları yükleyin:
-   ```
-   dotnet restore
-   ```
+2. Veritabanı bağlantı dizesini `appsettings.json` dosyasında ayarlayın.
 
 3. Veritabanını oluşturun:
    ```
@@ -64,50 +55,42 @@ Plan Yönetim Araçları, projelerinizi ve görevlerinizi kolayca yönetmenize y
    dotnet run
    ```
 
-5. Tarayıcınızda aşağıdaki URL'i açın:
-   ```
-   http://localhost:7091
-   ```
+5. Tarayıcınızda `https://localhost:7091` adresini açın.
 
 ## Kullanım
 
-### Hesap Oluşturma ve Giriş
-1. "Kayıt Ol" sayfasından yeni bir hesap oluşturun
-2. E-posta ve şifrenizle giriş yapın
-3. Profil sayfasından kişisel bilgilerinizi ve profil resminizi güncelleyin
+1. Hesap oluşturun veya mevcut hesabınızla giriş yapın.
+2. Yeni bir proje oluşturun ve ekip üyelerini davet edin.
+3. Projelere görevler ekleyin ve durumlarını güncelleyin.
+4. Görevleri farklı durumlar arasında sürükleyip bırakarak durumlarını güncelleyin.
+5. Ekip üyelerinin güncellemelerini gerçek zamanlı olarak takip edin.
 
-### Proje Oluşturma
-1. Dashboard üzerinden "Yeni Proje Oluştur" butonuna tıklayın
-2. Proje adı, açıklaması, durumu ve bitiş tarihini girin
-3. "Oluştur" butonuna tıklayarak projenizi kaydedin
+## Ekran Görüntüleri
 
-### Görev Yönetimi
-1. Proje sayfasına giderek görevlerinizi yönetin
-2. "Yeni Görev Ekle" butonuyla görev oluşturun
-3. Görevleri kanban paneli üzerinde sürükleyerek durumlarını değiştirin
-4. Görev kartlarındaki butonları kullanarak görevleri farklı durumlara taşıyın
+![Dashboard](https://via.placeholder.com/800x450)
+*Proje Yönetim Paneli*
 
-### Proje İstatistikleri
-1. Dashboard üzerinden projelerinizin istatistiklerini görüntüleyin
-2. Tamamlanmış, devam eden ve bekleyen projelerin sayılarını takip edin
+![Tasks](https://via.placeholder.com/800x450)
+*Görev Kanban Tahtası*
+
+![Project Details](https://via.placeholder.com/800x450)
+*Proje Detayları*
 
 ## Katkıda Bulunma
 
-Katkılarınızı bekliyoruz! Eğer projeye katkıda bulunmak isterseniz:
-
-1. Repo'yu forklayın
-2. Yeni bir feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-5. Pull Request açın
+1. Bu depoyu forklayın
+2. Yeni özellik dalınızı oluşturun (`git checkout -b feature/AmazingFeature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some AmazingFeature'`)
+4. Dalınıza push yapın (`git push origin feature/AmazingFeature`)
+5. Pull request oluşturun
 
 ## Lisans
 
-Bu proje MIT lisansı altında lisanslanmıştır. Daha fazla bilgi için `LICENSE` dosyasına bakınız.
+Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 
 ## İletişim
 
-Destek - [Plan345 Destek](mailto:plan345destek@gmail.com)
-Destek - [Sadık Can Tuluk](mailto:sadikcantuluk@gmail.com)
+Proje Destek - [email@example.com](mailto:plan345destek@gmail.com)
+Proje İletişim - [email@example.com](mailto:sadikcantuluk@gmail.com)
 
-Proje Linki: [https://github.com/sadikcantuluk/345Backend](https://github.com/sadikcantuluk/345Backend) 
+Proje Linki: [https://github.com/kullaniciadi/Plan345](https://github.com/sadikcantuluk/345Backend) 

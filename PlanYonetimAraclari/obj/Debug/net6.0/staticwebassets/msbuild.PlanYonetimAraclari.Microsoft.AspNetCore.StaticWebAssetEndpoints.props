@@ -84,6 +84,18 @@
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"vk403x59ti"},{"Name":"integrity","Value":"sha256-0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk="},{"Name":"label","Value":"_content/PlanYonetimAraclari/images/profiles/793f0d03-42db-453b-8998-692413ac2385_sad\u0131k.jpg"}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"6089"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00220VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=\u0022"},{"Name":"Last-Modified","Value":"Fri, 14 Mar 2025 15:49:48 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.j15mlyudpd.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"j15mlyudpd"},{"Name":"integrity","Value":"sha256-\u002BR9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="},{"Name":"label","Value":"_content/PlanYonetimAraclari/images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"776003"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022\u002BR9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\u0022"},{"Name":"Last-Modified","Value":"Mon, 17 Mar 2025 12:39:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-\u002BR9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"776003"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022\u002BR9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\u0022"},{"Name":"Last-Modified","Value":"Mon, 17 Mar 2025 12:39:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/839878bd-d7b4-44a8-bd27-e9d5f078d8f9_Ekran görüntüsü 2024-06-22 225953.96yy3qfj1v.png">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\839878bd-d7b4-44a8-bd27-e9d5f078d8f9_Ekran görüntüsü 2024-06-22 225953.png'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

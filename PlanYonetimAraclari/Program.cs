@@ -57,6 +57,22 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.Cookie.Name = "Plan345Auth";
     options.Cookie.SameSite = SameSiteMode.Lax;
+    
+    // Yönlendirme döngüsünü önlemek için
+    options.ReturnUrlParameter = "returnUrl";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // API istekleri için 401 döndür, normal sayfalar için yönlendirme yap
+        if (context.Request.Path.StartsWithSegments("/api") || 
+            context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+        
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 
 // Add services to the container.

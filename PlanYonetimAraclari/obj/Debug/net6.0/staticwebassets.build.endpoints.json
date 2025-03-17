@@ -1971,6 +1971,88 @@
       ]
     },
     {
+      "Route": "images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.j15mlyudpd.png",
+      "AssetFile": "images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "776003"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 17 Mar 2025 12:39:33 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "j15mlyudpd"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="
+        },
+        {
+          "Name": "label",
+          "Value": "images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png"
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png",
+      "AssetFile": "images/profiles/81c86924-ff3d-481e-8426-fb0144a7d0dc_sezar.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "776003"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 17 Mar 2025 12:39:33 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="
+        }
+      ]
+    },
+    {
       "Route": "images/profiles/839878bd-d7b4-44a8-bd27-e9d5f078d8f9_Ekran görüntüsü 2024-06-22 225953.96yy3qfj1v.png",
       "AssetFile": "images/profiles/839878bd-d7b4-44a8-bd27-e9d5f078d8f9_Ekran görüntüsü 2024-06-22 225953.png",
       "Selectors": [],

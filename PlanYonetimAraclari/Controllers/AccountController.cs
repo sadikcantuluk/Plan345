@@ -127,31 +127,26 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpGet]
+        [Route("Account/Login")]
         public IActionResult Login(string? returnUrl = null)
         {
             _logger.LogInformation("Login GET metodu çağrıldı.");
             
             try
             {
-                // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
-                // Hem Identity hem de Session kontrolü yapılır
-                string isAuthenticated = HttpContext.Session.GetString("IsAuthenticated");
-                if (User.Identity.IsAuthenticated && isAuthenticated == "true")
+                // Kullanıcı kimlik kontrolünü daha güvenli yapalım
+                // Request.Cookies koleksiyonundaki .AspNetCore.Identity.Application cookie'sini kontrol et
+                bool isAuthCookiePresent = Request.Cookies.Keys.Any(k => k.StartsWith(".AspNetCore.Identity.Application"));
+                
+                if (User.Identity.IsAuthenticated && isAuthCookiePresent)
                 {
                     _logger.LogInformation("Kullanıcı zaten giriş yapmış, anasayfaya yönlendiriliyor.");
                     return RedirectToAction("Index", "Dashboard");
                 }
                 
-                // Eğer Identity doğrulaması var ama session yoksa, session'ı temizle
-                if (User.Identity.IsAuthenticated && isAuthenticated != "true")
-                {
-                    _logger.LogInformation("Identity doğrulaması var ama session yok, oturum kapatılıyor.");
-                    // SimpleLogout metodu asenkron olduğu için burada direkt çağıramayız
-                    // Session'ı temizle
-                    HttpContext.Session.Clear();
-                }
-                
+                // Dönüş URL'ini sakla
                 ViewData["ReturnUrl"] = returnUrl;
+                
                 _logger.LogInformation("Login sayfası gösteriliyor.");
                 return View();
             }
@@ -163,6 +158,7 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpPost]
+        [Route("Account/Login")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
@@ -224,14 +220,17 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpGet]
+        [Route("Account/Register")]
         public IActionResult Register(string? returnUrl = null)
         {
             _logger.LogInformation("Register GET metodu çağrıldı.");
             
             try
             {
-                // Kullanıcı zaten giriş yapmışsa anasayfaya yönlendir
-                if (User.Identity.IsAuthenticated)
+                // Kullanıcı kimlik kontrolünü daha güvenli yapalım
+                bool isAuthCookiePresent = Request.Cookies.Keys.Any(k => k.StartsWith(".AspNetCore.Identity.Application"));
+                
+                if (User.Identity.IsAuthenticated && isAuthCookiePresent)
                 {
                     _logger.LogInformation("Kullanıcı zaten giriş yapmış, anasayfaya yönlendiriliyor.");
                     return RedirectToAction("Index", "Home");
@@ -249,6 +248,7 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpPost]
+        [Route("Account/Register")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = "")
         {
@@ -367,10 +367,16 @@ namespace PlanYonetimAraclari.Controllers
             // Session temizle
             HttpContext.Session.Clear();
             
-            // Auth cookie'lerini temizle
-            foreach (var cookie in Request.Cookies.Keys)
+            // Auth cookie'lerini özellikle temizle
+            foreach (var cookieName in HttpContext.Request.Cookies.Keys)
             {
-                Response.Cookies.Delete(cookie);
+                // Tüm auth ve session cookie'lerini temizle
+                if (cookieName.StartsWith(".AspNetCore.") || 
+                    cookieName.StartsWith("Plan345Auth") || 
+                    cookieName.StartsWith(".AspNet."))
+                {
+                    Response.Cookies.Delete(cookieName);
+                }
             }
             
             // Kullanıcıyı giriş sayfasına yönlendir - 302 statü kodu ile yönlendirme
@@ -388,10 +394,16 @@ namespace PlanYonetimAraclari.Controllers
             // Session temizle
             HttpContext.Session.Clear();
             
-            // Auth cookie'lerini temizle
-            foreach (var cookie in Request.Cookies.Keys)
+            // Auth cookie'lerini özellikle temizle
+            foreach (var cookieName in HttpContext.Request.Cookies.Keys)
             {
-                Response.Cookies.Delete(cookie);
+                // Tüm auth ve session cookie'lerini temizle
+                if (cookieName.StartsWith(".AspNetCore.") || 
+                    cookieName.StartsWith("Plan345Auth") || 
+                    cookieName.StartsWith(".AspNet."))
+                {
+                    Response.Cookies.Delete(cookieName);
+                }
             }
             
             _logger.LogInformation("Kullanıcı basit session ile oturumu kapattı");

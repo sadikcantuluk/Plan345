@@ -24,7 +24,7 @@
                     <a href="/" class="text-2xl font-bold tracking-tight text-gray-900 ml-2">Plan<span class="text-blue-500">345</span></a>
                 </div>
                 <h2 class="text-2xl font-semibold text-gray-900">Hesap Oluştur</h2>
-                <p class="text-gray-600 text-sm mt-2">Plan345'e hoş geldiniz</p>
+                <p class="text-gray-600 text-sm mt-2">Plan345'e kaydolun ve projelerinizi yönetin</p>
             </div>
 
             <!-- Manuel JS hata mesajı alanı -->
@@ -41,157 +41,159 @@
                 <div class="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
                     <div class="flex items-center">
                         <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-                        <div class="text-red-800">
-                            <div asp-validation-summary="All" class="text-red-800"></div>
+                        <div>
+                            <div asp-validation-summary="All" class="text-red-800 list-disc list-inside"></div>
                         </div>
                     </div>
                 </div>
             }
 
-            <form id="register-form" asp-controller="Account" asp-action="Register" method="post">
-                <!-- Anti-forgery token -->
-                @Html.AntiForgeryToken()
-                
-                <!-- viewmodel'de olmayan returnUrl alanını kaldıralım veya value boş bırakalım -->
-                @if (ViewData["ReturnUrl"] != null)
-                {
-                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-                }
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="FirstName" class="block text-sm font-medium text-gray-700">Ad</label>
-                        <input type="text" id="FirstName" name="FirstName" value="@Model?.FirstName"
+            <div>
+                <form id="register-form" action="/Account/Register" method="post" class="space-y-6">
+                    <!-- Anti-forgery token ekleyin -->
+                    @Html.AntiForgeryToken()
+
+                    <!-- ReturnUrl sakla -->
+                    @if (ViewData["ReturnUrl"] != null)
+                    {
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                    }
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="FirstName" class="block text-sm font-medium text-gray-700">Ad</label>
+                            <input type="text" id="FirstName" name="FirstName" value="@Model?.FirstName"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Adınız" required>
+                            <span asp-validation-for="FirstName" class="text-red-500 text-xs"></span>
+                        </div>
+                        <div>
+                            <label for="LastName" class="block text-sm font-medium text-gray-700">Soyad</label>
+                            <input type="text" id="LastName" name="LastName" value="@Model?.LastName"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Soyadınız" required>
+                            <span asp-validation-for="LastName" class="text-red-500 text-xs"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
+                        <input type="email" id="Email" name="Email" value="@Model?.Email"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            placeholder="Adınız" required>
-                        <span asp-validation-for="FirstName" class="text-red-500 text-xs"></span>
+                            placeholder="ornek@sirket.com" required>
+                        <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
                     </div>
-                    <div>
-                        <label for="LastName" class="block text-sm font-medium text-gray-700">Soyad</label>
-                        <input type="text" id="LastName" name="LastName" value="@Model?.LastName"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            placeholder="Soyadınız" required>
-                        <span asp-validation-for="LastName" class="text-red-500 text-xs"></span>
-                    </div>
-                </div>
 
-                <div class="mb-4">
-                    <label for="Email" class="block text-sm font-medium text-gray-700">E-posta</label>
-                    <input type="email" id="Email" name="Email" value="@Model?.Email"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                        placeholder="ornek@sirket.com" required>
-                    <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label for="Password" class="block text-sm font-medium text-gray-700">Şifre</label>
-                    <div class="mt-1 relative">
-                        <input type="password" id="Password" name="Password" 
-                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            placeholder="••••••••" required>
-                        <button type="button" onclick="togglePassword('Password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="far fa-eye text-gray-400"></i>
-                        </button>
-                    </div>
-                    <span asp-validation-for="Password" class="text-red-500 text-xs"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Şifre Tekrarı</label>
-                    <div class="mt-1 relative">
-                        <input type="password" id="ConfirmPassword" name="ConfirmPassword" 
-                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            placeholder="••••••••" required>
-                        <button type="button" onclick="togglePassword('ConfirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="far fa-eye text-gray-400"></i>
-                        </button>
-                    </div>
-                    <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs"></span>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="AcceptTerms" name="AcceptTerms" value="true" 
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required>
-                        <label for="AcceptTerms" class="ml-2 block text-sm text-gray-700">
-                            <a href="#" onclick="showTerms(event)" class="text-blue-600 hover:underline">Kullanım Koşulları</a>'nı kabul ediyorum
-                        </label>
-                    </div>
-                    <span asp-validation-for="AcceptTerms" class="text-red-500 text-xs"></span>
-                </div>
-
-                <!-- Kullanım Koşulları Modal -->
-                <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white rounded-lg p-6 maxw-md w-full max-h-[80vh] overflow-y-auto">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Kullanım Koşulları</h3>
-                            <button onclick="closeTerms(event)" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                                <i class="fas fa-times"></i>
+                    <div class="mb-4">
+                        <label for="Password" class="block text-sm font-medium text-gray-700">Şifre</label>
+                        <div class="mt-1 relative">
+                            <input type="password" id="Password" name="Password" 
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="••••••••" required>
+                            <button type="button" onclick="togglePassword('Password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i class="far fa-eye text-gray-400"></i>
                             </button>
                         </div>
-                        <div class="text-sm text-gray-700">
-                            <h4 class="font-medium mb-2">1. Hizmet Kullanım Şartları</h4>
-                            <p class="mb-3">
-                                Plan345 platformunu kullanarak, bu kullanım koşullarını kabul etmiş sayılırsınız. Platform kullanımı sırasında tüm yerel yasalara 
-                                uymanız ve diğer kullanıcıların haklarına saygı göstermeniz gerekmektedir.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">2. Hesap Güvenliği</h4>
-                            <p class="mb-3">
-                                Hesabınızın güvenliğinden yalnızca siz sorumlusunuz. Güçlü bir şifre kullanmanız ve hesap bilgilerinizi kimseyle paylaşmamanız önerilir.
-                                Hesabınızda yetkisiz bir etkinlik fark ederseniz, derhal bizimle iletişime geçmeniz gerekmektedir.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">3. Veri Gizliliği</h4>
-                            <p class="mb-3">
-                                Kişisel verileriniz, gizlilik politikamıza uygun şekilde işlenmektedir. Platformda paylaştığınız bilgilerin 
-                                güvenliği için gerekli önlemleri almaktayız, ancak internet üzerinden yapılan hiçbir veri iletiminin %100 güvenli olmadığını lütfen unutmayın.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">4. İçerik Sorumluluğu</h4>
-                            <p class="mb-3">
-                                Platformda paylaştığınız tüm içeriklerden siz sorumlusunuz. Telif hakkı ihlali yapan, yasadışı, tehdit edici, istismar edici, 
-                                karalayıcı, müstehcen veya başka şekilde sakıncalı içerikler paylaşılmamalıdır.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">5. Hizmet Değişiklikleri</h4>
-                            <p class="mb-3">
-                                Plan345, sunduğu hizmetleri önceden bildirimde bulunmaksızın değiştirme, askıya alma veya sonlandırma hakkını saklı tutar.
-                                Kullanım koşullarında yapılacak değişiklikler, web sitemizde yayınlanarak duyurulacaktır.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">6. Hesap İptali</h4>
-                            <p class="mb-3">
-                                Dilediğiniz zaman hesabınızı iptal edebilirsiniz. Hesap iptalinden sonra, verileriniz gizlilik politikamızda belirtilen 
-                                süre boyunca saklanacak ve sonrasında kalıcı olarak silinecektir.
-                            </p>
-                            
-                            <h4 class="font-medium mb-2">7. İletişim</h4>
-                            <p>
-                                Bu kullanım koşulları ile ilgili sorularınız veya endişeleriniz için <strong>support@plan345.com</strong> adresinden 
-                                bizimle iletişime geçebilirsiniz.
-                            </p>
-                        </div>
-                        <div class="mt-4 text-right">
-                            <button onclick="closeTerms(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                Kapat
+                        <span asp-validation-for="Password" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Şifre Tekrarı</label>
+                        <div class="mt-1 relative">
+                            <input type="password" id="ConfirmPassword" name="ConfirmPassword" 
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="••••••••" required>
+                            <button type="button" onclick="togglePassword('ConfirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i class="far fa-eye text-gray-400"></i>
                             </button>
                         </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs"></span>
                     </div>
-                </div>
 
-                <div>
-                    <button type="submit" 
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Kayıt Ol
-                    </button>
-                </div>
-            </form>
+                    <div class="mb-6">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="AcceptTerms" name="AcceptTerms" value="true" 
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required>
+                            <label for="AcceptTerms" class="ml-2 block text-sm text-gray-700">
+                                <a href="#" onclick="showTerms(event)" class="text-blue-600 hover:underline">Kullanım Koşulları</a>'nı kabul ediyorum
+                            </label>
+                        </div>
+                        <span asp-validation-for="AcceptTerms" class="text-red-500 text-xs"></span>
+                    </div>
 
-            <p class="mt-8 text-center text-sm text-gray-600">
-                Zaten hesabınız var mı?
-                <a href="/Account/Login" class="font-medium text-blue-600 hover:text-blue-500">Giriş yapın</a>
-            </p>
+                    <!-- Kullanım Koşulları Modal -->
+                    <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg p-6 maxw-md w-full max-h-[80vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Kullanım Koşulları</h3>
+                                <button onclick="closeTerms(event)" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <h4 class="font-medium mb-2">1. Hizmet Kullanım Şartları</h4>
+                                <p class="mb-3">
+                                    Plan345 platformunu kullanarak, bu kullanım koşullarını kabul etmiş sayılırsınız. Platform kullanımı sırasında tüm yerel yasalara 
+                                    uymanız ve diğer kullanıcıların haklarına saygı göstermeniz gerekmektedir.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">2. Hesap Güvenliği</h4>
+                                <p class="mb-3">
+                                    Hesabınızın güvenliğinden yalnızca siz sorumlusunuz. Güçlü bir şifre kullanmanız ve hesap bilgilerinizi kimseyle paylaşmamanız önerilir.
+                                    Hesabınızda yetkisiz bir etkinlik fark ederseniz, derhal bizimle iletişime geçmeniz gerekmektedir.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">3. Veri Gizliliği</h4>
+                                <p class="mb-3">
+                                    Kişisel verileriniz, gizlilik politikamıza uygun şekilde işlenmektedir. Platformda paylaştığınız bilgilerin 
+                                    güvenliği için gerekli önlemleri almaktayız, ancak internet üzerinden yapılan hiçbir veri iletiminin %100 güvenli olmadığını lütfen unutmayın.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">4. İçerik Sorumluluğu</h4>
+                                <p class="mb-3">
+                                    Platformda paylaştığınız tüm içeriklerden siz sorumlusunuz. Telif hakkı ihlali yapan, yasadışı, tehdit edici, istismar edici, 
+                                    karalayıcı, müstehcen veya başka şekilde sakıncalı içerikler paylaşılmamalıdır.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">5. Hizmet Değişiklikleri</h4>
+                                <p class="mb-3">
+                                    Plan345, sunduğu hizmetleri önceden bildirimde bulunmaksızın değiştirme, askıya alma veya sonlandırma hakkını saklı tutar.
+                                    Kullanım koşullarında yapılacak değişiklikler, web sitemizde yayınlanarak duyurulacaktır.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">6. Hesap İptali</h4>
+                                <p class="mb-3">
+                                    Dilediğiniz zaman hesabınızı iptal edebilirsiniz. Hesap iptalinden sonra, verileriniz gizlilik politikamızda belirtilen 
+                                    süre boyunca saklanacak ve sonrasında kalıcı olarak silinecektir.
+                                </p>
+                                
+                                <h4 class="font-medium mb-2">7. İletişim</h4>
+                                <p>
+                                    Bu kullanım koşulları ile ilgili sorularınız veya endişeleriniz için <strong>support@plan345.com</strong> adresinden 
+                                    bizimle iletişime geçebilirsiniz.
+                                </p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <button onclick="closeTerms(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    Kapat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" 
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Kayıt Ol
+                        </button>
+                    </div>
+                </form>
+
+                <p class="mt-8 text-center text-sm text-gray-600">
+                    Zaten hesabınız var mı?
+                    <a href="/Account/Login" class="font-medium text-blue-600 hover:text-blue-500">Giriş yapın</a>
+                </p>
+            </div>
         </div>
     </div>
 

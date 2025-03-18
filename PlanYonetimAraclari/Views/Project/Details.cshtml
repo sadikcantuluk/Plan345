@@ -212,7 +212,7 @@
                                 <i class="fas fa-plus-circle text-lg"></i>
                             </button>
                         }
-                    </div>
+                </div>
                     <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full todo-count-badge" id="todo-count">@Model.TodoTasks.Count</span>
                 </div>
                 <div id="todo-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-blue-100 border-opacity-0 transition-all hover:border-opacity-100 overflow-y-auto flex-grow">
@@ -310,7 +310,7 @@
                                 <i class="fas fa-plus-circle text-lg"></i>
                             </button>
                         }
-                    </div>
+                </div>
                     <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full in-progress-count-badge" id="in-progress-count">@Model.InProgressTasks.Count</span>
                 </div>
                 <div id="in-progress-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-amber-100 border-opacity-0 transition-all hover:border-opacity-100 overflow-y-auto flex-grow">
@@ -411,7 +411,7 @@
                                 <i class="fas fa-plus-circle text-lg"></i>
                             </button>
                         }
-                    </div>
+                </div>
                     <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full done-count-badge" id="done-count">@Model.DoneTasks.Count</span>
                 </div>
                 <div id="done-tasks" class="task-container space-y-3 min-h-[200px] p-2 rounded-lg border-2 border-dashed border-green-100 border-opacity-0 transition-all hover:border-opacity-100 overflow-y-auto flex-grow">
@@ -940,17 +940,17 @@
                                         if (optionVal === assignedIdStr || optionUserId === assignedIdStr) {
                                             option.selected = true;
                                             $("#edit-task-assigned-member").val(optionVal);
-                                            optionFound = true;
+                                        optionFound = true;
                                             console.log(`Eşleşen seçenek bulundu: ${optionVal}`);
-                                        }
+                                    }
                                     });
                                 }
                                 
                                 if (!optionFound) {
                                     console.log("Eşleşen seçenek bulunamadı, boş değer atanıyor");
                                     $("#edit-task-assigned-member").val("");
-                                }
-                            } else {
+                                        }
+                                    } else {
                                 // Atanmış üye yoksa boş seç
                                 console.log("Atanmış üye bilgisi yok, boş değer atanıyor");
                                 $("#edit-task-assigned-member").val("");
@@ -1364,22 +1364,42 @@
                 .withAutomaticReconnect()
                 .build();
             
+            // Son güncelleme süresini izlemek için yardımcı değişkenler
+            const taskUpdateTimers = {};
+            const UPDATE_COOLDOWN = 500; // ms cinsinden güncelleme bekleme süresi
+            
+            // Tekrarlı güncellemeleri önleyen yardımcı fonksiyon
+            function preventDuplicateUpdates(taskId, callback) {
+                // Eğer bu görev için bir zamanlayıcı zaten varsa, temizle
+                if (taskUpdateTimers[taskId]) {
+                    clearTimeout(taskUpdateTimers[taskId]);
+                }
+                
+                // Yeni bir zamanlayıcı ayarla
+                taskUpdateTimers[taskId] = setTimeout(() => {
+                    // Zamanlayıcıyı temizle
+                    delete taskUpdateTimers[taskId];
+                    // Callback'i çağır
+                    callback();
+                }, UPDATE_COOLDOWN);
+            }
+            
             // Bağlantıyı başlatmayı dene
             try {
                 if (connection.state === "Disconnected" || !connection.state) {
-                    connection.start().then(function() {
-                        console.log("SignalR bağlantısı kuruldu");
-                        // Bağlantı açıldığında sonrasında proje grubuna katıl
-                        connection.invoke("JoinProjectGroup", @Model.Project.Id)
-                            .then(function() {
-                                console.log("Proje grubuna başarıyla katıldı: project_@Model.Project.Id");
-                            })
-                            .catch(function(err) {
-                                console.error("Proje grubuna katılırken hata oluştu: " + err.toString());
-                            });
-                    }).catch(function(err) {
-                        console.error("SignalR bağlantısı kurulamadı: " + err.toString());
-                    });
+                connection.start().then(function() {
+                    console.log("SignalR bağlantısı kuruldu");
+                    // Bağlantı açıldığında sonrasında proje grubuna katıl
+                    connection.invoke("JoinProjectGroup", @Model.Project.Id)
+                        .then(function() {
+                            console.log("Proje grubuna başarıyla katıldı: project_@Model.Project.Id");
+                        })
+                        .catch(function(err) {
+                            console.error("Proje grubuna katılırken hata oluştu: " + err.toString());
+                        });
+                }).catch(function(err) {
+                    console.error("SignalR bağlantısı kurulamadı: " + err.toString());
+                });
                 } else {
                     console.log("SignalR bağlantısı zaten kurulu durumda: " + connection.state);
                 }
@@ -1472,34 +1492,40 @@
             connection.on("ReceiveTaskUpdate", function(taskId, data) {
                 console.log("SignalR: Görev güncelleme bildirimi alındı:", taskId, data);
                 
+                // Tekrarlı güncellemeleri önlemek için yardımcı fonksiyonu kullan
+                preventDuplicateUpdates(taskId, function() {
                 // Veriyi ayır - Şimdi taskForSignalR objesi içinde
                 const task = data.task;
                 const assignedMember = data.assignedMember;
                 
                 const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
                 if (taskCard.length > 0) {
-                    // Görev adını güncelle
-                    taskCard.find('h4').text(task.name);
-                    
-                    // Açıklamayı güncelle
-                    let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                        // Görevin mevcut özelliklerini sakla
+                        const cardId = taskCard.attr('data-task-id');
+                        const statusId = task.status;
+                        
+                        // Edit ve delete butonlarını klonla
+                        const editBtn = taskCard.find('.edit-task-btn').clone(true);
+                        const deleteBtn = taskCard.find('.delete-task-btn').clone(true);
+                        
+                        // Kartı tamamen yeniden oluştur
+                        let newCardHtml = `
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-gray-800 mb-1">${task.name}</h4>
+                                <div class="task-actions ml-2 flex items-center">
+                                    <!-- Edit ve delete butonları buraya eklenecek -->
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Açıklama varsa ekle
                     if (task.description && task.description.trim() !== '') {
-                        if (descriptionElement.length === 0) {
-                            // Açıklama elementi yoksa oluştur
-                            taskCard.find('.flex.justify-between.items-start').after(
-                                `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
-                            );
-                        } else {
-                            // Varsa güncelle
-                            descriptionElement.text(task.description);
+                            newCardHtml += `
+                                <p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>
+                            `;
                         }
-                    } else if (descriptionElement.length > 0) {
-                        // Açıklama boşsa ve element varsa kaldır
-                        descriptionElement.remove();
-                    }
-                    
-                    // Önceliği güncelle
-                    const prioritySpan = taskCard.find('span.rounded-full').first();
+                        
+                        // Öncelik ve tarih bilgilerini ekle
                     const priorityClasses = {
                         0: 'bg-green-100 text-green-800',
                         1: 'bg-blue-100 text-blue-800',
@@ -1513,53 +1539,168 @@
                         3: 'Acil'
                     };
                     
-                    prioritySpan.removeClass('bg-green-100 text-green-800 bg-blue-100 text-blue-800 bg-yellow-100 text-yellow-800 bg-red-100 text-red-800');
-                    prioritySpan.addClass(priorityClasses[task.priority]);
-                    prioritySpan.text(priorityTexts[task.priority]);
-                    
-                    // Atanan üye bilgisini güncelle
-                    updateAssignedMemberInCard(taskCard, assignedMember);
-                }
+                        newCardHtml += `
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="px-2 py-1 ${priorityClasses[task.priority]} text-xs rounded-full">${priorityTexts[task.priority]}</span>
+                        `;
+                        
+                        // Tarih varsa ekle
+                        if (task.dueDate) {
+                            const dueDate = new Date(task.dueDate);
+                            const formattedDate = `${dueDate.getDate()} ${['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'][dueDate.getMonth()]} ${dueDate.getFullYear()}`;
+                            newCardHtml += `
+                                <span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>${formattedDate}</span>
+                            `;
+                        }
+                        
+                        newCardHtml += `</div>`;
+                        
+                        // Atanan üye bilgisi varsa ekle
+                        if (assignedMember) {
+                            const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
+                            const fullName = assignedMember.userFullName || assignedMember.userName;
+                            
+                            newCardHtml += `
+                                <div class="flex items-center mt-1">
+                                    <span class="text-xs text-gray-600 flex items-center">
+                                        <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
+                                        <span>${fullName}</span>
+                                    </span>
+                                </div>
+                            `;
+                        }
+                        
+                        // Aksiyon butonlarını ekle
+                        const canModifyTasks = @canModifyTasks.ToString().ToLower();
+                        if (canModifyTasks) {
+                            if (statusId === 0) { // Todo
+                                newCardHtml += `
+                                    <div class="flex space-x-2 mt-2">
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${cardId}" data-status="1">
+                                            <i class="fas fa-arrow-right"></i> Devam Ediyor
+                                        </button>
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${cardId}" data-status="2">
+                                            <i class="fas fa-arrow-right"></i> Tamamlandı
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (statusId === 1) { // In Progress
+                                newCardHtml += `
+                                    <div class="flex space-x-2 mt-2">
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${cardId}" data-status="0">
+                                            <i class="fas fa-arrow-left"></i> Yapılacak
+                                        </button>
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${cardId}" data-status="2">
+                                            <i class="fas fa-arrow-right"></i> Tamamlandı
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (statusId === 2) { // Done
+                                newCardHtml += `
+                                    <div class="flex space-x-2 mt-2">
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${cardId}" data-status="0">
+                                            <i class="fas fa-arrow-left"></i> Yapılacak
+                                        </button>
+                                        <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${cardId}" data-status="1">
+                                            <i class="fas fa-arrow-left"></i> Devam Ediyor
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        // Görev kartını güncelle
+                        taskCard.html(newCardHtml);
+                        
+                        // Edit ve delete butonlarını yerleştir
+                        if (editBtn.length > 0 && deleteBtn.length > 0) {
+                            const actionDiv = taskCard.find('.task-actions');
+                            actionDiv.append(editBtn).append(deleteBtn);
+                        }
+                        
+                        // Move butonları için event listener'ları yeniden bağla
+                        taskCard.find('.move-task-btn').on('click', function() {
+                            const taskId = $(this).data('task-id');
+                            const newStatus = $(this).data('status');
+                            
+                            // AJAX ile görev durumunu güncelle
+                            $.ajax({
+                                url: "@Url.Action("UpdateTaskStatus", "Project")",
+                                type: "POST",
+                                data: {
+                                    taskId: taskId,
+                                    newStatus: newStatus
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        // İşlem SignalR üzerinden yürütülecek
+                                    } else {
+                                        showNotification("Hata: " + response.message, "error");
+                                    }
+                                },
+                                error: function() {
+                                    showNotification("Bağlantı hatası oluştu", "error");
+                                }
+                            });
+                        });
+                    }
+                });
             });
             
             // Görev kartında atanmış üye bilgisini güncelleme fonksiyonu
             function updateAssignedMemberInCard(taskCard, assignedMember) {
-                // Önce her türlü üye bilgisi içeren elementi temizleyelim - eski stilde ve yeni stilde olanları
+                console.log("Üye bilgisi güncelleniyor:", assignedMember);
+                
+                // Önce mevcut tüm atanan üye elementlerini temizle
                 taskCard.find('.assigned-member').remove();
+                // Diğer olası üye bilgisi sınıflarını da temizle
                 taskCard.find('div.flex.items-center.mt-1').remove();
-                taskCard.find('div[class*="flex"][class*="items-center"]').each(function() {
-                    // İçerisinde img tag'i varsa ve priority/date div'i değilse kaldır
-                    if ($(this).find('img').length > 0 && !$(this).find('span.rounded-full').length) {
-                        $(this).remove();
+                taskCard.find('div.flex.items-center.mt-2').each(function() {
+                    const $this = $(this);
+                    // Sadece içinde img.rounded-full olan ve assigned-member sınıfı olmayan divleri bul
+                    if ($this.find('img.rounded-full').length > 0 && !$this.hasClass('task-actions')) {
+                        $this.remove();
                     }
                 });
                 
                 if (assignedMember) {
-                    // Üye bilgisi varsa
-                    const profileImage = assignedMember.userProfileImage || '/img/default-profile.png';
+                    // Üye bilgisi varsa - Standardize edilmiş şekilde
+                    const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
                     const fullName = assignedMember.userFullName || assignedMember.userName;
                     
-                    // HTML içeriği hazırla
+                    // Yeni üye HTML oluştur
                     const memberHtml = `
-                        <img src="${profileImage}" alt="${fullName}" class="w-6 h-6 rounded-full">
-                        <span class="text-xs text-gray-600">${fullName}</span>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs text-gray-600 flex items-center">
+                                <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
+                                <span>${fullName}</span>
+                            </span>
+                        </div>
                     `;
                     
-                    // Öncelik ve tarih bilgisinin olduğu divden sonra ekle
-                    const priorityDiv = taskCard.find('.flex.items-center.justify-between, .flex.justify-between').first();
-                    if (priorityDiv.length > 0) {
-                        priorityDiv.after(`
-                            <div class="assigned-member mt-2 flex items-center gap-2">
-                                ${memberHtml}
-                            </div>
-                        `);
+                    // Priority/date div'i bul (sabit selector kullan)
+                    const priorityDateDiv = taskCard.find('div.flex.items-center.justify-between');
+                    
+                    // Aksiyon butonlarını bul (farklı olası selectorlarla)
+                    const actionButtons = taskCard.find('div.flex.space-x-2.mt-2, div.flex.justify-between.items-center.mt-2, div.flex.justify-end.items-center.mt-2');
+                    
+                    // Önce aksiyon butonlarını geçici kaldır
+                    let detachedButtons = null;
+                    if (actionButtons.length > 0) {
+                        detachedButtons = actionButtons.detach();
+                    }
+                    
+                    // Üye bilgisini priority/date div'inden sonra ekle
+                    if (priorityDateDiv.length > 0) {
+                        priorityDateDiv.after(memberHtml);
                     } else {
-                        // Veya içeriği alt kısma ekle
-                        taskCard.append(`
-                            <div class="assigned-member mt-2 flex items-center gap-2">
-                                ${memberHtml}
-                            </div>
-                        `);
+                        // Fallback: Doğrudan karta ekle
+                        taskCard.append(memberHtml);
+                    }
+                    
+                    // Eğer aksiyon butonları varsa, en sona tekrar ekle
+                    if (detachedButtons) {
+                        taskCard.append(detachedButtons);
                     }
                 }
             }
@@ -1581,6 +1722,12 @@
                     3: 'bg-red-100 text-red-800'
                 };
                 
+                // Açıklama HTML'i (mevcutsa)
+                let descriptionHtml = '';
+                if (task.description && task.description.trim() !== '') {
+                    descriptionHtml = `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`;
+                }
+                
                 // Tarih formatı (mevcutsa)
                 let dueDateHtml = '';
                 if (task.dueDate) {
@@ -1588,15 +1735,17 @@
                     dueDateHtml = `<span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>${formatDate(dueDate)}</span>`;
                 }
                 
-                // Atanan üye bilgisi (mevcutsa)
+                // Atanan üye bilgisi (mevcutsa) - Standardize edilmiş şekilde
                 let assignedMemberHtml = '';
                 if (assignedMember) {
-                    const profileImage = assignedMember.userProfileImage || '/img/default-profile.png';
+                    const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
                     const fullName = assignedMember.userFullName || assignedMember.userName;
                     assignedMemberHtml = `
-                        <div class="assigned-member mt-2 flex items-center gap-2">
-                            <img src="${profileImage}" alt="${fullName}" class="w-6 h-6 rounded-full">
-                            <span class="text-xs text-gray-600">${fullName}</span>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs text-gray-600 flex items-center">
+                                <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
+                                <span>${fullName}</span>
+                            </span>
                         </div>
                     `;
                 }
@@ -1608,7 +1757,7 @@
                         actionButtons = `
                             <div class="flex space-x-2 mt-2">
                                 <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${task.id}" data-status="1">
-                                    <i class="fas fa-arrow-right"></i> İlerliyor
+                                    <i class="fas fa-arrow-right"></i> Devam Ediyor
                                 </button>
                                 <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${task.id}" data-status="2">
                                     <i class="fas fa-arrow-right"></i> Tamamlandı
@@ -1633,20 +1782,13 @@
                                     <i class="fas fa-arrow-left"></i> Yapılacak
                                 </button>
                                 <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${task.id}" data-status="1">
-                                    <i class="fas fa-arrow-left"></i> İlerliyor
+                                    <i class="fas fa-arrow-left"></i> Devam Ediyor
                                 </button>
                             </div>
                         `;
                     }
                 }
                 
-                // Açıklama (varsa)
-                let descriptionHtml = '';
-                if (task.description && task.description.trim() !== '') {
-                    descriptionHtml = `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`;
-                }
-                
-                // Görev kartı HTML'i
                 return `
                     <div class="task-card bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing" data-task-id="${task.id}">
                         <div class="flex justify-between items-start">
@@ -2099,15 +2241,15 @@
                         console.error("Görev güncelleme hatası:", xhr.responseText);
                         showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
                     }
-                });
             });
+        });
 
-            // Sayfadan ayrılırken bağlantıyı kapat
-            $(window).on('beforeunload', function() {
-                if (connection && connection.state === "Connected") {
-                    connection.invoke("LeaveProjectGroup", @Model.Project.Id);
-                    connection.stop();
-                }
+        // Sayfadan ayrılırken bağlantıyı kapat
+        $(window).on('beforeunload', function() {
+            if (connection && connection.state === "Connected") {
+                connection.invoke("LeaveProjectGroup", @Model.Project.Id);
+                connection.stop();
+            }
             });
 
             // Sayfa yüklendiğinde sayaçları güncelle

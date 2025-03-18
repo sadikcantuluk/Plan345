@@ -251,6 +251,8 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
+                _logger.LogInformation($"CreateTask çağrıldı: ProjectId={model.ProjectId}, Status={model.Status}, AssignedMemberId={model.AssignedMemberId ?? "null"}");
+                
                 // Kullanıcıyı bul
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
@@ -288,6 +290,27 @@ namespace PlanYonetimAraclari.Controllers
                     return RedirectToAction("Details", new { id = model.ProjectId });
                 }
                 
+                // AssignedMemberId kontrolü
+                if (!string.IsNullOrWhiteSpace(model.AssignedMemberId))
+                {
+                    // TeamMember ID'si olabilir, kontrol et
+                    if (int.TryParse(model.AssignedMemberId, out int teamMemberId))
+                    {
+                        var teamMember = await _context.ProjectTeamMembers.FindAsync(teamMemberId);
+                        if (teamMember != null)
+                        {
+                            // TeamMember'ın User ID'sini ata
+                            model.AssignedMemberId = teamMember.UserId;
+                            _logger.LogInformation($"CreateTask: TeamMember ID {teamMemberId} için User ID {model.AssignedMemberId} atandı");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"CreateTask: TeamMember bulunamadı: ID={teamMemberId}, null olarak ayarlanıyor");
+                            model.AssignedMemberId = null;
+                        }
+                    }
+                }
+                
                 // Görev oluştur
                 var task = await _projectService.CreateTaskAsync(model);
                 
@@ -295,40 +318,96 @@ namespace PlanYonetimAraclari.Controllers
                 ProjectTeamMemberViewModel assignedMember = null;
                 if (!string.IsNullOrEmpty(task.AssignedMemberId))
                 {
-                    var memberRecord = await _context.ProjectTeamMembers
-                        .Include(m => m.User)
-                        .FirstOrDefaultAsync(m => m.Id.ToString() == task.AssignedMemberId);
-                        
-                    if (memberRecord != null)
+                    // Kullanıcıyı doğrudan ID'ye göre bul
+                    var assignedUser = await _userManager.FindByIdAsync(task.AssignedMemberId);
+                    if (assignedUser != null)
                     {
-                        assignedMember = new ProjectTeamMemberViewModel
+                        // Bu kullanıcı projenin bir üyesi mi kontrol et
+                        var memberRecord = await _context.ProjectTeamMembers
+                            .FirstOrDefaultAsync(m => m.ProjectId == task.ProjectId && m.UserId == assignedUser.Id);
+                            
+                        if (memberRecord != null)
                         {
-                            MemberId = memberRecord.Id,
-                            UserId = memberRecord.UserId,
-                            UserName = memberRecord.User.UserName,
-                            UserFullName = memberRecord.User.FullName,
-                            UserEmail = memberRecord.User.Email,
-                            UserProfileImage = memberRecord.User.ProfileImageUrl,
-                            Role = memberRecord.Role
-                        };
+                            assignedMember = new ProjectTeamMemberViewModel
+                            {
+                                MemberId = memberRecord.Id,
+                                UserId = assignedUser.Id,
+                                UserName = assignedUser.UserName,
+                                UserFullName = assignedUser.FullName,
+                                UserEmail = assignedUser.Email,
+                                UserProfileImage = assignedUser.ProfileImageUrl,
+                                Role = memberRecord.Role
+                            };
+                        }
+                        else
+                        {
+                            // Proje sahibi olabilir
+                            assignedMember = new ProjectTeamMemberViewModel
+                            {
+                                UserId = assignedUser.Id,
+                                UserName = assignedUser.UserName,
+                                UserFullName = assignedUser.FullName,
+                                UserEmail = assignedUser.Email,
+                                UserProfileImage = assignedUser.ProfileImageUrl,
+                                Role = project.UserId == assignedUser.Id ? TeamMemberRole.Owner : TeamMemberRole.Member
+                            };
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"CreateTask: Atanan kullanıcı bulunamadı: {task.AssignedMemberId}");
                     }
                 }
                 
                 // SignalR ile yeni görevi tüm bağlı kullanıcılara bildir
+                // Basitleştirilmiş task nesnesi oluşturalım (nesne döngüsünü önlemek için)
+                var simplifiedTask = new 
+                {
+                    id = task.Id,
+                    name = task.Name,
+                    description = task.Description,
+                    status = (int)task.Status,
+                    priority = (int)task.Priority,
+                    dueDate = task.DueDate,
+                    projectId = task.ProjectId,
+                    assignedMemberId = task.AssignedMemberId
+                };
+                
                 var taskForSignalR = new 
                 {
-                    task = task,
+                    task = simplifiedTask,
                     assignedMember = assignedMember
                 };
                 
                 await _taskHub.Clients.Group($"project_{model.ProjectId}").SendAsync("ReceiveNewTask", taskForSignalR);
                 
+                // AJAX isteği için JSON yanıtı
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { 
+                        success = true, 
+                        message = "Görev başarıyla oluşturuldu.",
+                        task = simplifiedTask,
+                        assignedMember = assignedMember
+                    });
+                }
+                
+                // Normal form submit için redirect
                 TempData["SuccessMessage"] = "Görev başarıyla oluşturuldu.";
                 return RedirectToAction("Details", new { id = model.ProjectId });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Görev oluşturulurken hata oluştu: {ex.Message}");
+                _logger.LogError($"Hata detayı: {ex.ToString()}");
+                
+                // AJAX isteği için JSON yanıtı
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = $"Görev oluşturulurken bir hata oluştu: {ex.Message}" });
+                }
+                
+                // Normal form submit için redirect
                 TempData["ErrorMessage"] = $"Görev oluşturulurken bir hata oluştu: {ex.Message}";
                 return RedirectToAction("Details", new { id = model.ProjectId });
             }
@@ -399,9 +478,22 @@ namespace PlanYonetimAraclari.Controllers
                 }
                 
                 // SignalR ile görev durumu değişikliğini tüm bağlı kullanıcılara bildir
+                // Basitleştirilmiş task nesnesi oluşturalım (nesne döngüsünü önlemek için)
+                var simplifiedTask = new 
+                {
+                    id = updatedTask.Id,
+                    name = updatedTask.Name,
+                    description = updatedTask.Description,
+                    status = (int)updatedTask.Status,
+                    priority = (int)updatedTask.Priority,
+                    dueDate = updatedTask.DueDate,
+                    projectId = updatedTask.ProjectId,
+                    assignedMemberId = updatedTask.AssignedMemberId
+                };
+                
                 var taskForSignalR = new 
                 {
-                    task = updatedTask,
+                    task = simplifiedTask,
                     assignedMember = assignedMember
                 };
                 
@@ -595,6 +687,8 @@ namespace PlanYonetimAraclari.Controllers
         {
             try
             {
+                _logger.LogInformation($"UpdateTask çağrıldı: TaskId={model.Id}, ProjectId={model.ProjectId}, AssignedMemberId={model.AssignedMemberId ?? "null"}, DueDate={model.DueDate}");
+                
                 // Kullanıcıyı bul
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
@@ -624,13 +718,70 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(new { success = false, message = "Bu görevi güncelleme yetkiniz yok." });
                 }
                 
+                // AssignedMemberId'yi kontrol et ve doğru şekilde ayarla
+                string assignedUserId = null;
+                if (!string.IsNullOrWhiteSpace(model.AssignedMemberId))
+                {
+                    // Bu bir TeamMember ID'si olabilir, o durumda ilgili kullanıcının ID'sini almalıyız
+                    if (int.TryParse(model.AssignedMemberId, out int teamMemberId))
+                    {
+                        var teamMember = await _context.ProjectTeamMembers
+                            .FirstOrDefaultAsync(m => m.Id == teamMemberId);
+                        
+                        if (teamMember != null)
+                        {
+                            // TeamMember'ın User ID'sini kullan
+                            assignedUserId = teamMember.UserId;
+                            _logger.LogInformation($"TeamMember ID {teamMemberId} için User ID {assignedUserId} bulundu");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"TeamMember bulunamadı: ID={teamMemberId}");
+                            assignedUserId = null;
+                        }
+                    }
+                    else
+                    {
+                        // Zaten bir User ID olabilir
+                        assignedUserId = model.AssignedMemberId;
+                        _logger.LogInformation($"AssignedMemberId doğrudan User ID olarak kullanılıyor: {assignedUserId}");
+                    }
+                    
+                    // User ID'nin geçerli olup olmadığını kontrol et
+                    if (assignedUserId != null)
+                    {
+                        var assignedUser = await _userManager.FindByIdAsync(assignedUserId);
+                        if (assignedUser == null)
+                        {
+                            _logger.LogWarning($"Atanmak istenen kullanıcı bulunamadı: {assignedUserId}");
+                            assignedUserId = null;
+                        }
+                    }
+                }
+                
                 // Görev özelliklerini güncelle
                 existingTask.Name = model.Name;
                 existingTask.Description = model.Description;
-                existingTask.Priority = model.Priority;
+                
+                // Priority değeri int olarak geliyorsa enum'a dönüştür
+                if (Enum.IsDefined(typeof(TaskPriority), model.Priority))
+                {
+                    existingTask.Priority = model.Priority;
+                }
+                
+                // DueDate null kontrolü
                 existingTask.DueDate = model.DueDate;
-                existingTask.AssignedMemberId = model.AssignedMemberId;
+                
+                // Status değeri int olarak geliyorsa enum'a dönüştür
+                if (Enum.IsDefined(typeof(Models.TaskStatus), model.Status))
+                {
+                    existingTask.Status = model.Status;
+                }
+                
+                existingTask.AssignedMemberId = assignedUserId; // Doğru User ID'yi kullan
                 existingTask.LastUpdatedDate = DateTime.Now;
+                
+                _logger.LogInformation($"Görev güncelleniyor: Id={existingTask.Id}, Name={existingTask.Name}, AssignedMemberId={existingTask.AssignedMemberId ?? "null"}");
                 
                 // Görevi güncelle
                 var updatedTask = await _projectService.UpdateTaskAsync(existingTask);
@@ -639,29 +790,64 @@ namespace PlanYonetimAraclari.Controllers
                 ProjectTeamMemberViewModel assignedMember = null;
                 if (!string.IsNullOrEmpty(updatedTask.AssignedMemberId))
                 {
-                    var memberRecord = await _context.ProjectTeamMembers
-                        .Include(m => m.User)
-                        .FirstOrDefaultAsync(m => m.Id.ToString() == updatedTask.AssignedMemberId);
-                        
-                    if (memberRecord != null)
+                    // Kullanıcıyı doğrudan ID'ye göre bul
+                    var assignedUser = await _userManager.FindByIdAsync(updatedTask.AssignedMemberId);
+                    if (assignedUser != null)
                     {
-                        assignedMember = new ProjectTeamMemberViewModel
+                        // Bu kullanıcı projenin bir üyesi mi kontrol et
+                        var memberRecord = await _context.ProjectTeamMembers
+                            .FirstOrDefaultAsync(m => m.ProjectId == existingTask.ProjectId && m.UserId == assignedUser.Id);
+                            
+                        if (memberRecord != null)
                         {
-                            MemberId = memberRecord.Id,
-                            UserId = memberRecord.UserId,
-                            UserName = memberRecord.User.UserName,
-                            UserFullName = memberRecord.User.FullName,
-                            UserEmail = memberRecord.User.Email,
-                            UserProfileImage = memberRecord.User.ProfileImageUrl,
-                            Role = memberRecord.Role
-                        };
+                            assignedMember = new ProjectTeamMemberViewModel
+                            {
+                                MemberId = memberRecord.Id,
+                                UserId = assignedUser.Id,
+                                UserName = assignedUser.UserName,
+                                UserFullName = assignedUser.FullName,
+                                UserEmail = assignedUser.Email,
+                                UserProfileImage = assignedUser.ProfileImageUrl,
+                                Role = memberRecord.Role
+                            };
+                        }
+                        else
+                        {
+                            // Proje sahibi olabilir
+                            assignedMember = new ProjectTeamMemberViewModel
+                            {
+                                UserId = assignedUser.Id,
+                                UserName = assignedUser.UserName,
+                                UserFullName = assignedUser.FullName,
+                                UserEmail = assignedUser.Email,
+                                UserProfileImage = assignedUser.ProfileImageUrl,
+                                Role = project.UserId == assignedUser.Id ? TeamMemberRole.Owner : TeamMemberRole.Member
+                            };
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Atanan kullanıcı bulunamadı: {updatedTask.AssignedMemberId}");
                     }
                 }
                 
                 // SignalR ile görev güncellemesini tüm bağlı kullanıcılara bildir
+                // Sadece gerekli verileri içeren basitleştirilmiş nesneler oluşturalım (nesne döngüsünü önlemek için)
+                var simplifiedTask = new 
+                {
+                    id = updatedTask.Id,
+                    name = updatedTask.Name,
+                    description = updatedTask.Description,
+                    status = (int)updatedTask.Status,
+                    priority = (int)updatedTask.Priority,
+                    dueDate = updatedTask.DueDate,
+                    projectId = updatedTask.ProjectId,
+                    assignedMemberId = updatedTask.AssignedMemberId
+                };
+                
                 var taskForSignalR = new 
                 {
-                    task = updatedTask,
+                    task = simplifiedTask,
                     assignedMember = assignedMember
                 };
                 
@@ -685,6 +871,7 @@ namespace PlanYonetimAraclari.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Görev güncellenirken hata oluştu: {ex.Message}");
+                _logger.LogError($"Hata detayı: {ex.ToString()}");
                 return Json(new { success = false, message = $"Görev güncellenirken bir hata oluştu: {ex.Message}" });
             }
         }
@@ -715,7 +902,7 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(null);
                 }
                 
-                _logger.LogInformation($"GetTask: Görev bilgisi: TaskId={task.Id}, ProjectId={task.ProjectId}, Name={task.Name}");
+                _logger.LogInformation($"GetTask: Görev bilgisi: TaskId={task.Id}, ProjectId={task.ProjectId}, Name={task.Name}, AssignedMemberId={task.AssignedMemberId ?? "null"}");
                 
                 // Proje sahibi veya ekip üyesi kontrolü - Tüm ekip üyelerine izin ver
                 var isTeamMember = await _context.ProjectTeamMembers
@@ -732,7 +919,29 @@ namespace PlanYonetimAraclari.Controllers
                     return Json(null);
                 }
                 
-                // Görevi döndür
+                // Atanan üye bilgisini bul
+                string assignedMemberId = null;
+                if (!string.IsNullOrEmpty(task.AssignedMemberId))
+                {
+                    // Eğer görev bir kullanıcıya atanmışsa, o kullanıcının projedeki takım üyesi kaydını bul
+                    var teamMember = await _context.ProjectTeamMembers
+                        .FirstOrDefaultAsync(m => m.ProjectId == task.ProjectId && m.UserId == task.AssignedMemberId);
+                        
+                    if (teamMember != null)
+                    {
+                        // Eğer takım üyesi kaydı bulunursa, takım üyesi ID'sini kullan
+                        assignedMemberId = teamMember.Id.ToString();
+                        _logger.LogInformation($"GetTask: AssignedUserId {task.AssignedMemberId} için TeamMemberId {assignedMemberId} bulundu");
+                    }
+                    else
+                    {
+                        // Eğer takım üyesi kaydı bulunamazsa, user ID'sini kullan (ör. proje sahibi için)
+                        assignedMemberId = task.AssignedMemberId;
+                        _logger.LogInformation($"GetTask: AssignedUserId {task.AssignedMemberId} için TeamMember bulunamadı, direkt UserId kullanılıyor");
+                    }
+                }
+                
+                // Görevi döndür - assignedMemberId null ise boş string olarak gönder
                 var result = new { 
                     id = task.Id,
                     projectId = task.ProjectId,
@@ -741,15 +950,15 @@ namespace PlanYonetimAraclari.Controllers
                     status = (int)task.Status,
                     priority = (int)task.Priority,
                     dueDate = task.DueDate,
-                    assignedMemberId = task.AssignedMemberId
+                    assignedMemberId = assignedMemberId ?? ""
                 };
                 
-                _logger.LogInformation($"GetTask: Görev bilgisi başarıyla döndürüldü: {task.Id}");
+                _logger.LogInformation($"GetTask: Görev bilgisi başarıyla döndürüldü: Id={task.Id}, AssignedMemberId={assignedMemberId ?? "boş"}");
                 return Json(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Görev bilgileri alınırken hata oluştu: {ex.Message}");
+                _logger.LogError($"Görev bilgisi alınırken hata oluştu: {ex.Message}");
                 return Json(null);
             }
         }

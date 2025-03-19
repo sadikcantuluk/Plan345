@@ -121,9 +121,9 @@
                     <h3 class="text-sm font-medium text-gray-500">Tamamlanma Durumu</h3>
                     <div class="mt-2 flex items-center">
                         <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
-                            <div class="bg-primary-500 h-2 rounded-full" style="width: @Model.CompletionPercentage%"></div>
+                            <div class="completion-bar bg-primary-500 h-2 rounded-full" style="width: @Model.CompletionPercentage%"></div>
                         </div>
-                        <span class="text-sm text-gray-500">%@Model.CompletionPercentage</span>
+                        <span class="completion-percentage text-sm text-gray-500">%@Model.CompletionPercentage</span>
                     </div>
                 </div>
 
@@ -670,38 +670,44 @@
     </div>
 </div>
 
-<!-- Proje Silme Modal -->
-<div id="delete-project-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all scale-95 opacity-0" id="delete-modal-content">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-semibold text-red-600">Projeyi Sil</h3>
-            <button id="close-delete-modal" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+<!-- Proje Silme Modalı -->
+<div id="delete-project-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-modal="true" role="dialog">
+    <div class="flex items-center justify-center min-h-screen">
+        <!-- Arkaplan overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        
+        <!-- Modal içeriği -->
+        <div id="delete-modal-content" class="bg-white rounded-lg max-w-md w-full mx-auto shadow-xl transform transition-all ease-out duration-300 opacity-0 scale-95 relative">
+            <!-- Kapatma butonu -->
+            <button id="close-delete-modal" type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                 <i class="fas fa-times"></i>
             </button>
-        </div>
-        
-        <div class="mb-6">
-            <p class="text-gray-700 mb-4">Bu işlem projeyi ve tüm görevlerini <span class="font-bold">kalıcı olarak</span> silecektir. Bu işlem geri alınamaz.</p>
             
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+            <div class="p-6">
+                <div class="text-center mb-4">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700">Projeyi silmek istediğinizden emin misiniz?</p>
+                    <h3 class="text-lg font-medium text-gray-900">Projeyi Silmek İstediğinize Emin Misiniz?</h3>
                     </div>
-                </div>
-            </div>
+                
+                <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                        Bu işlem geri alınamaz. Proje ve tüm görevleri kalıcı olarak silinecektir.
+                    </p>
         </div>
         
-        <div class="flex justify-end space-x-3">
-            <button type="button" id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
-                İptal
+                @Html.AntiForgeryToken()
+                
+                <div class="mt-6 flex space-x-3 justify-center">
+                    <button type="button" id="cancel-delete" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Vazgeç
             </button>
             <button type="button" id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
                 Projeyi Sil
             </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -758,6 +764,452 @@
             setTimeout(function() {
                 $(".alert").fadeOut(500);
             }, 5000);
+            
+            // SignalR bağlantısı
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/taskHub")
+                .withAutomaticReconnect()
+                .build();
+                
+            // SignalR bağlantısını başlat
+            connection.start()
+                .then(() => {
+                    console.log("SignalR bağlantısı kuruldu");
+                    // Proje grubuna katıl
+                    connection.invoke("JoinProjectGroup", @Model.Project.Id)
+                        .then(() => {
+                            console.log("Proje grubuna katıldı: @Model.Project.Id");
+                        })
+                        .catch(err => {
+                            console.error("Proje grubuna katılırken hata oluştu:", err);
+                        });
+                })
+                .catch(err => {
+                    console.error("SignalR bağlantısı kurulamadı:", err);
+                });
+            
+            // Yeni görev eklendiğinde
+            connection.on("ReceiveNewTask", function(payload) {
+                console.log("SignalR: Yeni görev eklendi", payload);
+                
+                // Sayfayı yenileme gerekebilir, ancak ileride dinamik olarak yeni görev kart oluşturma ile geliştirilebilir
+                window.location.reload();
+            });
+            
+            // Görev durumu değiştiğinde
+            connection.on("ReceiveTaskStatusChange", function(taskId, newStatus, payload) {
+                console.log("SignalR: Görev durumu değişti", taskId, newStatus, payload);
+                
+                // Görev ID'si ile kartı bul
+                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
+                
+                // Kart bulunamadıysa, sayfayı yenile
+                if (taskCard.length === 0) {
+                    return;
+                }
+                
+                // Görevin eski durumunu belirle
+                let oldStatus;
+                if (taskCard.closest('#todo-tasks').length > 0) {
+                    oldStatus = 0;
+                } else if (taskCard.closest('#in-progress-tasks').length > 0) {
+                    oldStatus = 1;
+                } else if (taskCard.closest('#done-tasks').length > 0) {
+                    oldStatus = 2;
+                }
+                
+                // Durum değiştiyse, görevi taşı
+                if (oldStatus !== newStatus) {
+                    // Kartı eski konumundan kaldır
+                    taskCard.fadeOut(300, function() {
+                        taskCard.detach();
+                        
+                        // Yeni konuma ekle
+                        let targetContainer;
+                        if (newStatus === 0) {
+                            targetContainer = $('#todo-tasks');
+                        } else if (newStatus === 1) {
+                            targetContainer = $('#in-progress-tasks');
+                        } else {
+                            targetContainer = $('#done-tasks');
+                        }
+                        
+                        // Taşıma butonlarını güncelle ve görevi ekle
+                        updateTaskButtons(taskCard, newStatus);
+                        targetContainer.prepend(taskCard);
+                        taskCard.hide().fadeIn(300);
+                        
+                        // Sayaçları ve tamamlanma yüzdesini güncelle
+                        updateTaskCounters();
+                        updateCompletionPercentage();
+                    });
+                }
+                
+                // Görev içeriğini güncelle, eğer payload içinde task değeri varsa
+                if (payload && payload.task) {
+                    const task = payload.task;
+                    taskCard.find('h4').text(task.name);
+                    
+                    // Açıklama alanını güncelle
+                    let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                    if (task.description) {
+                        if (descriptionElement.length === 0) {
+                            taskCard.find('div.flex.justify-between.items-start').after(
+                                `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
+                            );
+                        } else {
+                            descriptionElement.text(task.description);
+                        }
+                    } else if (descriptionElement.length > 0) {
+                        descriptionElement.remove();
+                    }
+                    
+                    // Önceliği güncelle
+                    const prioritySpan = taskCard.find('span.rounded-full').first();
+                    const priorityClasses = {
+                        0: 'bg-blue-100 text-blue-800',
+                        1: 'bg-amber-100 text-amber-800',
+                        2: 'bg-orange-100 text-orange-800',
+                        3: 'bg-red-100 text-red-800'
+                    };
+                    const priorityTexts = {
+                        0: 'Düşük',
+                        1: 'Orta',
+                        2: 'Yüksek',
+                        3: 'Acil'
+                    };
+                    
+                    prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
+                    prioritySpan.addClass(priorityClasses[task.priority]);
+                    prioritySpan.text(priorityTexts[task.priority]);
+                    
+                    // Atanan üyeyi güncellemek için atanmış üye bölümünü bul
+                    if (payload.assignedMember) {
+                        updateAssignedMemberWithPayload(taskCard, payload.assignedMember);
+                    } else {
+                        updateAssignedMemberInCard(taskCard, task.assignedMemberId);
+                    }
+                }
+            });
+            
+            // Task güncellendiğinde
+            connection.on("ReceiveTaskUpdate", function(taskId, payload) {
+                console.log("SignalR: Görev güncellendi", taskId, payload);
+                
+                // Görev ID'si ile kartı bul
+                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
+                
+                // Kart bulunamadıysa, sayfayı yenile
+                if (taskCard.length === 0) {
+                    return;
+                }
+                
+                // Görev içeriğini güncelle
+                if (payload && payload.task) {
+                    const task = payload.task;
+                    
+                    // Görevin eski durumunu belirle
+                    let oldStatus;
+                    if (taskCard.closest('#todo-tasks').length > 0) {
+                        oldStatus = 0;
+                    } else if (taskCard.closest('#in-progress-tasks').length > 0) {
+                        oldStatus = 1;
+                    } else if (taskCard.closest('#done-tasks').length > 0) {
+                        oldStatus = 2;
+                    }
+                    
+                    // Durum değiştiyse, görevi taşı
+                    if (oldStatus !== task.status) {
+                        // Kartı eski konumundan kaldır
+                        taskCard.fadeOut(300, function() {
+                            taskCard.detach();
+                            
+                            // Yeni konuma ekle
+                            let targetContainer;
+                            if (task.status === 0) {
+                                targetContainer = $('#todo-tasks');
+                            } else if (task.status === 1) {
+                                targetContainer = $('#in-progress-tasks');
+                            } else {
+                                targetContainer = $('#done-tasks');
+                            }
+                            
+                            // Taşıma butonlarını güncelle ve görevi ekle
+                            updateTaskButtons(taskCard, task.status);
+                            targetContainer.prepend(taskCard);
+                            taskCard.hide().fadeIn(300);
+                            
+                            // Sayaçları ve tamamlanma yüzdesini güncelle
+                            updateTaskCounters();
+                            updateCompletionPercentage();
+                        });
+                    }
+                    
+                    // Temel görev bilgilerini güncelle
+                    taskCard.find('h4').text(task.name);
+                    
+                    // Açıklama alanını güncelle
+                    let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                    if (task.description) {
+                        if (descriptionElement.length === 0) {
+                            taskCard.find('div.flex.justify-between.items-start').after(
+                                `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
+                            );
+                        } else {
+                            descriptionElement.text(task.description);
+                        }
+                    } else if (descriptionElement.length > 0) {
+                        descriptionElement.remove();
+                    }
+                    
+                    // Önceliği güncelle
+                    const prioritySpan = taskCard.find('span.rounded-full').first();
+                    const priorityClasses = {
+                        0: 'bg-blue-100 text-blue-800',
+                        1: 'bg-amber-100 text-amber-800',
+                        2: 'bg-orange-100 text-orange-800',
+                        3: 'bg-red-100 text-red-800'
+                    };
+                    const priorityTexts = {
+                        0: 'Düşük',
+                        1: 'Orta',
+                        2: 'Yüksek',
+                        3: 'Acil'
+                    };
+                    
+                    prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
+                    prioritySpan.addClass(priorityClasses[task.priority]);
+                    prioritySpan.text(priorityTexts[task.priority]);
+                    
+                    // Atanan üyeyi güncellemek için atanmış üye bölümünü bul
+                    if (payload.assignedMember) {
+                        updateAssignedMemberWithPayload(taskCard, payload.assignedMember);
+                    } else {
+                        updateAssignedMemberInCard(taskCard, task.assignedMemberId);
+                    }
+                }
+            });
+            
+            // Görev silindiğinde
+            connection.on("ReceiveTaskDelete", function(taskId) {
+                console.log("SignalR: Görev silindi", taskId);
+                
+                // Silinecek görevi bul ve animasyonla kaldır
+                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
+                if (taskCard.length > 0) {
+                    taskCard.fadeOut(300, function() {
+                        $(this).remove();
+                        
+                        // Sayaçları ve tamamlanma yüzdesini güncelle
+                        updateTaskCounters();
+                        updateCompletionPercentage();
+                    });
+                }
+            });
+            
+            // Atanan üye güncellemesi için yardımcı fonksiyon (member ID ve server data kullanarak)
+            function updateAssignedMemberInCard(taskCard, assignedMemberId) {
+                const assignedMemberDiv = taskCard.find('.flex.items-center.mt-1');
+                const teamMembers = @Html.Raw(Json.Serialize(Model.TeamMembers));
+                
+                if (assignedMemberId) {
+                    const member = teamMembers.find(m => m.userId === assignedMemberId);
+                    
+                    if (member) {
+                        let assignedMemberHtml = `
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-gray-600 flex items-center">
+                                    <img src="${member.userProfileImage}" alt="${member.userFullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
+                                    <span>${member.userFullName}</span>
+                                </span>
+                            </div>
+                        `;
+                        
+                        if (assignedMemberDiv.length === 0) {
+                            // Atanan üye bölümü yoksa ekle
+                            const priorityContainer = taskCard.find('.flex.items-center.justify-between').closest('div');
+                            priorityContainer.after(assignedMemberHtml);
+                        } else {
+                            // Varsa güncelle
+                            assignedMemberDiv.replaceWith(assignedMemberHtml);
+                        }
+                    }
+                } else if (assignedMemberDiv.length > 0) {
+                    // Atanan üye yoksa ve bölüm varsa kaldır
+                    assignedMemberDiv.remove();
+                }
+            }
+            
+            // Atanan üye güncellemesi için yardımcı fonksiyon (payload data kullanarak)
+            function updateAssignedMemberWithPayload(taskCard, memberData) {
+                const assignedMemberDiv = taskCard.find('.flex.items-center.mt-1');
+                
+                if (memberData) {
+                    let assignedMemberHtml = `
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs text-gray-600 flex items-center">
+                                <img src="${memberData.userProfileImage}" alt="${memberData.userFullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
+                                <span>${memberData.userFullName}</span>
+                            </span>
+                        </div>
+                    `;
+                    
+                    if (assignedMemberDiv.length === 0) {
+                        // Atanan üye bölümü yoksa ekle
+                        const priorityContainer = taskCard.find('.flex.items-center.justify-between').closest('div');
+                        priorityContainer.after(assignedMemberHtml);
+                    } else {
+                        // Varsa güncelle
+                        assignedMemberDiv.replaceWith(assignedMemberHtml);
+                    }
+                } else if (assignedMemberDiv.length > 0) {
+                    // Atanan üye yoksa ve bölüm varsa kaldır
+                    assignedMemberDiv.remove();
+                }
+            }
+            
+            // Proje silme butonu ve modal işlemleri
+            $("#delete-project-btn").on("click", function() {
+                console.log("Delete project button clicked");
+                // Modalı göster
+                $("#delete-project-modal").removeClass("hidden");
+                // Modalın animasyon sınıflarını ekle
+                setTimeout(() => {
+                    $("#delete-modal-content").removeClass("scale-95 opacity-0");
+                    $("#delete-modal-content").addClass("scale-100 opacity-100");
+                }, 10);
+                $("body").css("overflow", "hidden"); // Arka planı kaydırmayı engelle
+            });
+            
+            // Görev taşıma butonlarının tıklama olayını ele al
+            $(document).on("click", ".move-task-btn", function() {
+                console.log("Move task button clicked");
+                const taskId = $(this).data("task-id");
+                const newStatus = $(this).data("status");
+                console.log("Moving task", taskId, "to status", newStatus);
+                
+                // AJAX ile görev durumunu güncelle
+                $.ajax({
+                    url: "@Url.Action("UpdateTaskStatus", "Project")",
+                    type: "POST",
+                    data: {
+                        taskId: taskId,
+                        newStatus: newStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log("Task status updated successfully");
+                            const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
+                            
+                            // Kartı eski konumundan kaldır
+                            taskCard.fadeOut(300, function() {
+                                taskCard.detach();
+                                
+                                // Yeni konuma ekle
+                                let targetContainer;
+                                if (newStatus === 0) {
+                                    targetContainer = $('#todo-tasks');
+                                } else if (newStatus === 1) {
+                                    targetContainer = $('#in-progress-tasks');
+                                } else {
+                                    targetContainer = $('#done-tasks');
+                                }
+                                
+                                // Taşıma butonlarını güncelle ve görevi ekle
+                                updateTaskButtons(taskCard, newStatus);
+                                targetContainer.prepend(taskCard);
+                                taskCard.hide().fadeIn(300);
+                                
+                                // Sayaçları ve tamamlanma yüzdesini güncelle
+                                updateTaskCounters();
+                                updateCompletionPercentage();
+                                
+                                // Kullanıcıya bildir
+                                showNotification("Görev durumu güncellendi", "success");
+                            });
+                        } else {
+                            showNotification("Hata: " + response.message, "error");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error updating task status:", error);
+                        console.error("Response:", xhr.responseText);
+                        showNotification("Bağlantı hatası oluştu", "error");
+                    }
+                });
+            });
+            
+            // Proje silme modalı kapatma
+            $("#close-delete-modal, #cancel-delete").on("click", function() {
+                console.log("Close delete modal");
+                // Modalın animasyon sınıflarını kaldır
+                $("#delete-modal-content").removeClass("scale-100 opacity-100");
+                $("#delete-modal-content").addClass("scale-95 opacity-0");
+                
+                // Animasyon bittikten sonra modalı gizle
+                setTimeout(() => {
+                    $("#delete-project-modal").addClass("hidden");
+                    $("body").css("overflow", ""); // Kaydırmayı tekrar etkinleştir
+                }, 300);
+            });
+            
+            // Proje silme işlemi
+            $("#confirm-delete").on("click", function() {
+                console.log("Confirm delete project");
+                
+                // AJAX ile projeyi sil
+                $.ajax({
+                    url: "@Url.Action("Delete", "Project")",
+                    type: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    data: {
+                        id: @Model.Project.Id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        console.log("Project delete response:", response);
+                        
+                        if (response.success) {
+                            showNotification("Proje başarıyla silindi", "success");
+                            
+                            // Kısa bir süre sonra Dashboard'a yönlendir
+                            setTimeout(function() {
+                                window.location.href = "@Url.Action("Index", "Dashboard")";
+                            }, 1000);
+                        } else {
+                            // Modalı kapat
+                            $("#delete-modal-content").removeClass("scale-100 opacity-100");
+                            $("#delete-modal-content").addClass("scale-95 opacity-0");
+                            
+                            setTimeout(() => {
+                                $("#delete-project-modal").addClass("hidden");
+                                $("body").css("overflow", "");
+                            }, 300);
+                            
+                            // Hata mesajı göster
+                            showNotification("Proje silinirken bir hata oluştu: " + response.message, "error");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Project delete error:", error);
+                        console.error("Response:", xhr.responseText);
+                        
+                        // Modalı kapat
+                        $("#delete-modal-content").removeClass("scale-100 opacity-100");
+                        $("#delete-modal-content").addClass("scale-95 opacity-0");
+                        
+                        setTimeout(() => {
+                            $("#delete-project-modal").addClass("hidden");
+                            $("body").css("overflow", "");
+                        }, 300);
+                        
+                        // Hata mesajı göster
+                        showNotification("Proje silinirken bir hata oluştu: " + error, "error");
+                    }
+                });
+            });
             
             // Görev ekleme butonları için event listener'lar - Debug için console.log ekledik
             $(".add-task-card button").on("click", function() {
@@ -969,46 +1421,107 @@
                 });
             });
             
-            // Görev taşıma butonları için event listener
-            $(document).on("click", ".move-task-btn", function() {
-                console.log("Move task button clicked");
-                const taskId = $(this).data("task-id");
-                const newStatus = parseInt($(this).data("status"));
-                console.log("Task ID:", taskId, "New Status:", newStatus);
+                // Görev düzenleme modalını kapatma
+                $("#close-edit-task-modal, #cancel-edit-task").on("click", function() {
+                    $("#edit-task-modal").addClass("hidden");
+                    $("body").css("overflow", "");
+                    $("#edit-task-form")[0].reset();
+                });
                 
-                // AJAX ile görev durumunu güncelle
+                // Form submit olayını engelle ve sadece buton click olayını kullan
+                $("#edit-task-form").on("submit", function(e) {
+                    e.preventDefault(); // Form submiti engelle
+                    return false;
+                });
+                
+                // Görev düzenleme formunu gönder
+                $("#edit-task-form").on("submit", function(e) {
+                    e.preventDefault();
+                    
+                    const taskId = $("#edit-task-id").val();
+                    const projectId = $("#edit-task-project-id").val();
+                    const status = $("#edit-task-status").val();
+                    const name = $("#edit-task-name").val();
+                    const description = $("#edit-task-description").val();
+                    const priority = $("#edit-task-priority").val();
+                    const dueDate = $("#edit-task-due-date").val();
+                    const assignedMemberId = $("#edit-task-assigned-member").val();
+                    
+                    if (!name || name.trim() === "") {
+                        showNotification("Görev adı zorunludur", "error");
+                        return false;
+                    }
+                    
+                    // Görevi Ajax ile güncelle
                 $.ajax({
-                    url: "@Url.Action("UpdateTaskStatus", "Project")",
+                        url: "@Url.Action("UpdateTask", "Project")",
                     type: "POST",
                     data: {
-                        taskId: taskId,
-                        newStatus: newStatus
+                            Id: taskId,
+                            ProjectId: projectId,
+                            Status: status,
+                            Name: name,
+                            Description: description,
+                            Priority: priority,
+                            DueDate: dueDate,
+                            AssignedMemberId: assignedMemberId
                     },
                     success: function(response) {
                         if (response.success) {
-                            // Başarılı olduğunda görev kartını taşı
+                                // Modalı kapat
+                                $("#edit-task-modal").addClass("hidden");
+                                $("body").css("overflow", "");
+                                
+                                // Kullanıcıya bilgi ver
+                                showNotification("Görev başarıyla güncellendi", "success");
+                                
+                                // Sayfa yenileme yapmadan dinamik olarak görevi güncelle
                             const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                            
-                            // Görev kartını yeni konuma taşı
-                            if (newStatus === 0) { // Todo
-                                $("#todo-tasks").append(taskCard);
-                            } else if (newStatus === 1) { // In Progress
-                                $("#in-progress-tasks").append(taskCard);
-                            } else if (newStatus === 2) { // Done
-                                $("#done-tasks").append(taskCard);
+                                const task = response.task;
+                                
+                                // Basit alanları güncelle
+                                taskCard.find('h4').text(task.name);
+                                
+                                // Açıklama alanını güncelle
+                                let descriptionElement = taskCard.find('p.text-sm.text-gray.600.mb-2');
+                                if (task.description) {
+                                    if (descriptionElement.length === 0) {
+                                        taskCard.find('div.flex.justify-between.items-start').after(
+                                            `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
+                                        );
+                        } else {
+                                    descriptionElement.text(task.description);
+                                }
+                            } else if (descriptionElement.length > 0) {
+                                descriptionElement.remove();
                             }
                             
-                            // Görev butonlarını güncelle
-                            updateTaskButtons(taskCard, newStatus);
+                            // Önceliği güncelle
+                            const prioritySpan = taskCard.find('span.rounded-full').first();
+                            const priorityClasses = {
+                                0: 'bg-blue-100 text-blue-800',
+                                1: 'bg-amber-100 text-amber-800',
+                                2: 'bg-orange-100 text-orange-800',
+                                3: 'bg-red-100 text-red-800'
+                            };
+                            const priorityTexts = {
+                                0: 'Düşük',
+                                1: 'Orta',
+                                2: 'Yüksek',
+                                3: 'Acil'
+                            };
                             
-                            // Sayaçları ve tamamlanma yüzdesini güncelle
-                            updateTaskCounters();
-                            updateCompletionPercentage();
+                            prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
+                            prioritySpan.addClass(priorityClasses[task.priority]);
+                            prioritySpan.text(priorityTexts[task.priority]);
                             
-                            // Başarı mesajı göster
-                            showNotification("Görev durumu güncellendi", "success");
+                            // Görev atanmış kişiyi güncelle
+                            // Bu kısmı daha karmaşık olduğu için şimdilik sayfayı yenileme şeklinde ele alalım
+                            // Daha sonra iyileştirmek için bu bölüm geliştirilebilir
+                            
+                            // Formu sıfırla
+                            $("#edit-task-form")[0].reset();
                         } else {
-                            // Hata mesajı göster
                             showNotification("Hata: " + response.message, "error");
                         }
                     },
@@ -1018,175 +1531,87 @@
                 });
             });
             
-            // Görev formunu submit
-            $("#create-task-form").on("submit", function(e) {
-                e.preventDefault(); // Prevent the default form submission
+            // Görev düzenleme modalı için düğme işleyicileri
+            $("#edit-task-save-btn").on("click", function() {
+                console.log("Save button clicked");
                 
-                const taskName = $("#task-name").val();
+                // Form değerlerini al ve ekrana yazdır (debug için)
+                const taskId = $("#edit-task-id").val();
+                const projectId = $("#edit-task-project-id").val();
+                const status = $("#edit-task-status").val();
+                const name = $("#edit-task-name").val();
+                const description = $("#edit-task-description").val();
+                const priority = $("#edit-task-priority").val();
+                const dueDate = $("#edit-task-due-date").val();
+                const assignedMemberId = $("#edit-task-assigned-member").val();
                 
-                if (!taskName || taskName.trim() === "") {
+                // Tüm form verilerini logla
+                console.log("FORM VERİLERİ:", {
+                    Id: taskId,
+                    ProjectId: projectId,
+                    Status: status,
+                    Name: name,
+                    Description: description,
+                    Priority: priority,
+                    DueDate: dueDate,
+                    AssignedMemberId: assignedMemberId
+                });
+                
+                if (!name || name.trim() === "") {
                     showNotification("Görev adı zorunludur", "error");
                     return false;
                 }
                 
-                // Get form data
-                const formData = $(this).serialize();
-                
-                // Send AJAX request
+                // Görevi Ajax ile güncelle - Form datayı manuel olarak gönderelim
                 $.ajax({
-                    url: "@Url.Action("CreateTask", "Project")",
+                    url: "@Url.Action("UpdateTask", "Project")",
                     type: "POST",
-                    data: formData,
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        Id: parseInt(taskId),
+                        ProjectId: parseInt(projectId),
+                        Status: parseInt(status),
+                        Name: name,
+                        Description: description,
+                        Priority: parseInt(priority),
+                        DueDate: dueDate ? new Date(dueDate) : null,
+                        AssignedMemberId: assignedMemberId
+                    }),
                     success: function(response) {
-                        if (response && response.success) {
-                            // Reset the form
-                            $("#create-task-form")[0].reset();
+                        console.log("Sunucu yanıtı:", response);
                             
-                            // Close the modal
-                            $("#add-task-modal").addClass("hidden");
+                        if (response.success) {
+                            // Modalı kapat
+                            $("#edit-task-modal").addClass("hidden");
                             $("body").css("overflow", "");
                             
-                            // Show success notification
-                            showNotification("Görev başarıyla oluşturuldu", "success");
+                            // Kullanıcıya bilgi ver
+                            showNotification("Görev başarıyla güncellendi", "success");
                             
-                            // SignalR bağlantısı yoksa veya gecikmeli çalışıyorsa, görev kartını manuel olarak oluştur
-                            if (response.task) {
-                                // Görevi ilgili sütuna ekleyelim
-                                const task = response.task;
-                                const assignedMember = response.assignedMember;
-                                
-                                // Önce bu ID'de bir görev kartı var mı kontrol et (SignalR zaten eklemiş olabilir)
-                                const existingTaskCard = $(`.task-card[data-task-id="${task.id}"]`);
-                                if (existingTaskCard.length === 0) {
-                                    // createTaskCard fonksiyonu ile HTML oluştur
-                                    const taskHtml = createTaskCard(task, assignedMember);
-                                    
-                                    // Durumuna göre uygun listeye ekle
-                                    if (task.status === 0) {
-                                        // Todo listesine ekle
-                                        $("#todo-tasks").append(taskHtml);
-                                    } else if (task.status === 1) {
-                                        // In Progress listesine ekle
-                                        $("#in-progress-tasks").append(taskHtml);
-                                    } else if (task.status === 2) {
-                                        // Done listesine ekle
-                                        $("#done-tasks").append(taskHtml);
-                                    }
-                                    
-                                    // Yeni eklenen kartın butonlarını durumuna göre güncelleyelim
-                                    const newTaskCard = $(`.task-card[data-task-id="${task.id}"]`);
-                                    if (newTaskCard.length > 0) {
-                                        updateTaskButtons(newTaskCard, task.status);
-                                    }
-                                    
-                                    // Sayaçları ve tamamlanma yüzdesini güncelle
-                                    updateTaskCounters();
-                                    updateCompletionPercentage();
-                                }
-                            }
+                            // Sayfayı yenile (assigned member gösterimi için)
+                            window.location.reload();
                         } else {
-                            showNotification(response.message || "Görev oluşturulurken bir hata oluştu", "error");
+                            showNotification("Görev güncellenirken bir hata oluştu: " + (response.message || "Bilinmeyen hata"), "error");
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error("Görev oluşturma hatası:", error);
-                        showNotification("Görev oluşturulurken bir hata oluştu: " + error, "error");
+                        console.error("Görev güncelleme hatası:", xhr.responseText);
+                        showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
                     }
-                });
-                
-                return false;
             });
-            
-            // Görev butonlarını güncelleyen fonksiyon
-            function updateTaskButtons(taskCard, newStatus) {
-                // Task bilgilerini bul
-                const taskId = taskCard.data('task-id');
-                
-                // Mevcut tüm taşıma butonlarını bulup temizle
-                taskCard.find('.flex.space-x-2.mt-2').remove();
-                taskCard.find('.flex.justify-between.items-center.mt-2').remove();
-                taskCard.find('.flex.justify-end.items-center.mt-2').remove();
-                taskCard.find('.flex.items-center.justify-end.space-x-1.mt-2').remove();
-                taskCard.find('.flex.items-center.justify-end.space-x-1').remove();
-                
-                // canModifyTasks değerini kontrol et (Razor kullanarak)
-                @if (canModifyTasks) {
-                    <text>
-                    // Yeni butonları ekleyelim - createTaskCard ile tutarlı olacak şekilde
-                    if (newStatus === 0) { // Todo - Todo sütunundayken
-                        taskCard.append(`
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${taskId}" data-status="1">
-                                    <i class="fas fa-arrow-right"></i> İlerliyor
-                                </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${taskId}" data-status="2">
-                                    <i class="fas fa-arrow-right"></i> Tamamlandı
-                                </button>
-                            </div>
-                        `);
-                    } else if (newStatus === 1) { // In Progress - Devam edenler sütunundayken
-                        taskCard.append(`
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${taskId}" data-status="0">
-                                    <i class="fas fa-arrow-left"></i> Yapılacak
-                                </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${taskId}" data-status="2">
-                                    <i class="fas fa-arrow-right"></i> Tamamlandı
-                                </button>
-                            </div>
-                        `);
-                    } else if (newStatus === 2) { // Done - Tamamlandı sütunundayken
-                        taskCard.append(`
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${taskId}" data-status="0">
-                                    <i class="fas fa-arrow-left"></i> Yapılacak
-                                </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${taskId}" data-status="1">
-                                    <i class="fas fa-arrow-left"></i> İlerliyor
-                                </button>
-                            </div>
-                        `);
-                    }
-                    </text>
-                }
+        });
+
+        // Sayfadan ayrılırken bağlantıyı kapat
+        $(window).on('beforeunload', function() {
+            if (connection && connection.state === "Connected") {
+                connection.invoke("LeaveProjectGroup", @Model.Project.Id);
+                connection.stop();
             }
-            
-            // Görev taşıma butonları için event listener
-            $(document).on("click", ".move-task-btn", function() {
-                const taskId = $(this).data("task-id");
-                const newStatus = parseInt($(this).data("status"));
-                
-                // AJAX ile görev durumunu güncelle
-                $.ajax({
-                    url: "@Url.Action("UpdateTaskStatus", "Project")",
-                    type: "POST",
-                    data: {
-                        taskId: taskId,
-                        newStatus: newStatus
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // Başarılı olduğunda görevleri güncelle
-                            const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                            updateTaskButtons(taskCard, newStatus);
+            });
+
+            // Sayfa yüklendiğinde sayaçları güncelle
                             updateTaskCounters();
                             updateCompletionPercentage();
-                            
-                            // Bildirim göster
-                            showNotification("Görev durumu güncellendi", "success");
-                        } else {
-                            // Hata durumunda bildirim göster
-                            showNotification("Hata: " + response.message, "error");
-                        }
-                    },
-                    error: function() {
-                        showNotification("Bağlantı hatası oluştu", "error");
-                    }
-                });
-            });
             
             // Sürükle-bırak işlevini etkinleştir
             const todoList = document.getElementById('todo-tasks');
@@ -1357,485 +1782,59 @@
                     }
                 }
             });
+        });
+        
+        // Görev butonlarını güncelleyen fonksiyon
+        function updateTaskButtons(taskCard, newStatus) {
+            // Task bilgilerini bul
+            const taskId = taskCard.data('task-id');
             
-            // SignalR bağlantısı
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/taskHub")
-                .withAutomaticReconnect()
-                .build();
+            // Mevcut tüm taşıma butonlarını bulup temizle
+            let buttonsContainer = taskCard.find('.flex.justify-between.items-center.mt-2, .flex.justify-end.items-center.mt-2, .flex.items-center.justify-end.space-x-1, .flex.space-x-2.mt-2');
             
-            // Son güncelleme süresini izlemek için yardımcı değişkenler
-            const taskUpdateTimers = {};
-            const UPDATE_COOLDOWN = 500; // ms cinsinden güncelleme bekleme süresi
-            
-            // Tekrarlı güncellemeleri önleyen yardımcı fonksiyon
-            function preventDuplicateUpdates(taskId, callback) {
-                // Eğer bu görev için bir zamanlayıcı zaten varsa, temizle
-                if (taskUpdateTimers[taskId]) {
-                    clearTimeout(taskUpdateTimers[taskId]);
-                }
-                
-                // Yeni bir zamanlayıcı ayarla
-                taskUpdateTimers[taskId] = setTimeout(() => {
-                    // Zamanlayıcıyı temizle
-                    delete taskUpdateTimers[taskId];
-                    // Callback'i çağır
-                    callback();
-                }, UPDATE_COOLDOWN);
+            if (buttonsContainer.length > 0) {
+                buttonsContainer.remove();
             }
             
-            // Bağlantıyı başlatmayı dene
-            try {
-                if (connection.state === "Disconnected" || !connection.state) {
-                connection.start().then(function() {
-                    console.log("SignalR bağlantısı kuruldu");
-                    // Bağlantı açıldığında sonrasında proje grubuna katıl
-                    connection.invoke("JoinProjectGroup", @Model.Project.Id)
-                        .then(function() {
-                            console.log("Proje grubuna başarıyla katıldı: project_@Model.Project.Id");
-                        })
-                        .catch(function(err) {
-                            console.error("Proje grubuna katılırken hata oluştu: " + err.toString());
-                        });
-                }).catch(function(err) {
-                    console.error("SignalR bağlantısı kurulamadı: " + err.toString());
-                });
-                } else {
-                    console.log("SignalR bağlantısı zaten kurulu durumda: " + connection.state);
-                }
-            } catch (error) {
-                console.error("SignalR başlatılırken hata oluştu:", error);
-            }
-            
-            // Yeni görev eklendiğinde
-            connection.on("ReceiveNewTask", function(data) {
-                console.log("SignalR: Yeni görev alındı:", data);
+            // canModifyTasks değerini kontrol et (Razor kullanarak)
+            @if (canModifyTasks) {
+                <text>
+                // Yeni butonlar ekleyelim
+                let buttonsHtml = '';
                 
-                // Veriyi ayır - Şimdi taskForSignalR objesi içinde
-                const task = data.task;
-                const assignedMember = data.assignedMember;
-                
-                // Görev zaten mevcut mu kontrol et (AJAX yanıtında eklenmişse)
-                const existingTaskCard = $(`.task-card[data-task-id="${task.id}"]`);
-                if (existingTaskCard.length === 0) {
-                    // Görevin durumuna göre ilgili listeye ekle
-                    // Atanan üye bilgisi varsa createTaskCard'a gönder
-                    let taskHtml = createTaskCard(task, assignedMember);
-                    
-                    if (task.status === 0) {
-                        // Todo listesine ekle
-                        $("#todo-tasks").append(taskHtml);
-                    } else if (task.status === 1) {
-                        // In Progress listesine ekle
-                        $("#in-progress-tasks").append(taskHtml);
-                    } else if (task.status === 2) {
-                        // Done listesine ekle
-                        $("#done-tasks").append(taskHtml);
-                    }
-                    
-                    // Sayaçları ve tamamlanma yüzdesini güncelle
-                    updateTaskCounters();
-                    updateCompletionPercentage();
-                    
-                    // Bildirim göster
-                    showNotification("Yeni görev eklendi: " + task.name, "success");
-                }
-            });
-            
-            // Görev durumu değiştiğinde
-            connection.on("ReceiveTaskStatusChange", function(taskId, newStatus, data) {
-                console.log("SignalR: Görev durum değişikliği alındı:", taskId, newStatus, data);
-                
-                // Ekstra veri varsa ayır
-                const task = data ? data.task : null;
-                const assignedMember = data ? data.assignedMember : null;
-                
-                // Görev kartını bul
-                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                if (taskCard.length > 0) {
-                    // Görevi yeni konuma taşı
-                    if (newStatus === 0) {
-                        const container = $("#todo-tasks");
-                        container.append(taskCard);
-                    } else if (newStatus === 1) {
-                        const container = $("#in-progress-tasks");
-                        container.append(taskCard);
-                    } else if (newStatus === 2) {
-                        const container = $("#done-tasks");
-                        container.append(taskCard);
-                    }
-                    
-                    // Görev butonlarını güncelle - updateTaskButtons fonksiyonunu çağır
-                    updateTaskButtons(taskCard, newStatus);
-                    
-                    // Sayaçları ve tamamlanma yüzdesini güncelle
-                    updateTaskCounters();
-                    updateCompletionPercentage();
-                }
-            });
-            
-            // Görev silindiğinde
-            connection.on("ReceiveTaskDelete", function(taskId) {
-                console.log("SignalR: Görev silme bildirimi alındı:", taskId);
-                
-                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                if (taskCard.length > 0) {
-                    taskCard.fadeOut('fast', function() {
-                        $(this).remove();
-                        updateTaskCounters();
-                        updateCompletionPercentage();
-                    });
-                }
-            });
-            
-            // Görev güncellendiğinde
-            connection.on("ReceiveTaskUpdate", function(taskId, data) {
-                console.log("SignalR: Görev güncelleme bildirimi alındı:", taskId, data);
-                
-                // Tekrarlı güncellemeleri önlemek için yardımcı fonksiyonu kullan
-                preventDuplicateUpdates(taskId, function() {
-                // Veriyi ayır - Şimdi taskForSignalR objesi içinde
-                const task = data.task;
-                const assignedMember = data.assignedMember;
-                
-                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                if (taskCard.length > 0) {
-                        // Görevin mevcut özelliklerini sakla
-                        const cardId = taskCard.attr('data-task-id');
-                        const statusId = task.status;
-                        
-                        // Edit ve delete butonlarını klonla
-                        const editBtn = taskCard.find('.edit-task-btn').clone(true);
-                        const deleteBtn = taskCard.find('.delete-task-btn').clone(true);
-                        
-                        // Kartı tamamen yeniden oluştur
-                        let newCardHtml = `
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-medium text-gray-800 mb-1">${task.name}</h4>
-                                <div class="task-actions ml-2 flex items-center">
-                                    <!-- Edit ve delete butonları buraya eklenecek -->
-                                </div>
+                if (newStatus === 0) { // Todo - Yapılacaklar sütunu
+                    buttonsHtml = `
+                        <div class="flex items-center justify-end space-x-1">
+                            <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="${taskId}" data-status="1">
+                                <i class="fas fa-arrow-right"></i> Devam Ediyor
+                                </button>
                             </div>
                         `;
-                        
-                        // Açıklama varsa ekle
-                    if (task.description && task.description.trim() !== '') {
-                            newCardHtml += `
-                                <p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>
-                            `;
-                        }
-                        
-                        // Öncelik ve tarih bilgilerini ekle
-                    const priorityClasses = {
-                        0: 'bg-green-100 text-green-800',
-                        1: 'bg-blue-100 text-blue-800',
-                        2: 'bg-yellow-100 text-yellow-800',
-                        3: 'bg-red-100 text-red-800'
-                    };
-                    const priorityTexts = {
-                        0: 'Düşük',
-                        1: 'Orta',
-                        2: 'Yüksek',
-                        3: 'Acil'
-                    };
-                    
-                        newCardHtml += `
-                            <div class="flex items-center justify-between mt-2">
-                                <span class="px-2 py-1 ${priorityClasses[task.priority]} text-xs rounded-full">${priorityTexts[task.priority]}</span>
-                        `;
-                        
-                        // Tarih varsa ekle
-                        if (task.dueDate) {
-                            const dueDate = new Date(task.dueDate);
-                            const formattedDate = `${dueDate.getDate()} ${['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'][dueDate.getMonth()]} ${dueDate.getFullYear()}`;
-                            newCardHtml += `
-                                <span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>${formattedDate}</span>
-                            `;
-                        }
-                        
-                        newCardHtml += `</div>`;
-                        
-                        // Atanan üye bilgisi varsa ekle
-                        if (assignedMember) {
-                            const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
-                            const fullName = assignedMember.userFullName || assignedMember.userName;
-                            
-                            newCardHtml += `
-                                <div class="flex items-center mt-1">
-                                    <span class="text-xs text-gray-600 flex items-center">
-                                        <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
-                                        <span>${fullName}</span>
-                                    </span>
-                                </div>
-                            `;
-                        }
-                        
-                        // Aksiyon butonlarını ekle
-                        const canModifyTasks = @canModifyTasks.ToString().ToLower();
-                        if (canModifyTasks) {
-                            if (statusId === 0) { // Todo
-                                newCardHtml += `
-                                    <div class="flex space-x-2 mt-2">
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${cardId}" data-status="1">
-                                            <i class="fas fa-arrow-right"></i> Devam Ediyor
-                                        </button>
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${cardId}" data-status="2">
-                                            <i class="fas fa-arrow-right"></i> Tamamlandı
-                                        </button>
-                                    </div>
-                                `;
-                            } else if (statusId === 1) { // In Progress
-                                newCardHtml += `
-                                    <div class="flex space-x-2 mt-2">
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${cardId}" data-status="0">
-                                            <i class="fas fa-arrow-left"></i> Yapılacak
-                                        </button>
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${cardId}" data-status="2">
-                                            <i class="fas fa-arrow-right"></i> Tamamlandı
-                                        </button>
-                                    </div>
-                                `;
-                            } else if (statusId === 2) { // Done
-                                newCardHtml += `
-                                    <div class="flex space-x-2 mt-2">
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${cardId}" data-status="0">
-                                            <i class="fas fa-arrow-left"></i> Yapılacak
-                                        </button>
-                                        <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${cardId}" data-status="1">
-                                            <i class="fas fa-arrow-left"></i> Devam Ediyor
-                                        </button>
-                                    </div>
-                                `;
-                            }
-                        }
-                        
-                        // Görev kartını güncelle
-                        taskCard.html(newCardHtml);
-                        
-                        // Edit ve delete butonlarını yerleştir
-                        if (editBtn.length > 0 && deleteBtn.length > 0) {
-                            const actionDiv = taskCard.find('.task-actions');
-                            actionDiv.append(editBtn).append(deleteBtn);
-                        }
-                        
-                        // Move butonları için event listener'ları yeniden bağla
-                        taskCard.find('.move-task-btn').on('click', function() {
-                            const taskId = $(this).data('task-id');
-                            const newStatus = $(this).data('status');
-                            
-                            // AJAX ile görev durumunu güncelle
-                            $.ajax({
-                                url: "@Url.Action("UpdateTaskStatus", "Project")",
-                                type: "POST",
-                                data: {
-                                    taskId: taskId,
-                                    newStatus: newStatus
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        // İşlem SignalR üzerinden yürütülecek
-                                    } else {
-                                        showNotification("Hata: " + response.message, "error");
-                                    }
-                                },
-                                error: function() {
-                                    showNotification("Bağlantı hatası oluştu", "error");
-                                }
-                            });
-                        });
-                    }
-                });
-            });
-            
-            // Görev kartında atanmış üye bilgisini güncelleme fonksiyonu
-            function updateAssignedMemberInCard(taskCard, assignedMember) {
-                console.log("Üye bilgisi güncelleniyor:", assignedMember);
-                
-                // Önce mevcut tüm atanan üye elementlerini temizle
-                taskCard.find('.assigned-member').remove();
-                // Diğer olası üye bilgisi sınıflarını da temizle
-                taskCard.find('div.flex.items-center.mt-1').remove();
-                taskCard.find('div.flex.items-center.mt-2').each(function() {
-                    const $this = $(this);
-                    // Sadece içinde img.rounded-full olan ve assigned-member sınıfı olmayan divleri bul
-                    if ($this.find('img.rounded-full').length > 0 && !$this.hasClass('task-actions')) {
-                        $this.remove();
-                    }
-                });
-                
-                if (assignedMember) {
-                    // Üye bilgisi varsa - Standardize edilmiş şekilde
-                    const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
-                    const fullName = assignedMember.userFullName || assignedMember.userName;
-                    
-                    // Yeni üye HTML oluştur
-                    const memberHtml = `
-                        <div class="flex items-center mt-1">
-                            <span class="text-xs text-gray-600 flex items-center">
-                                <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
-                                <span>${fullName}</span>
-                            </span>
-                        </div>
-                    `;
-                    
-                    // Priority/date div'i bul (sabit selector kullan)
-                    const priorityDateDiv = taskCard.find('div.flex.items-center.justify-between');
-                    
-                    // Aksiyon butonlarını bul (farklı olası selectorlarla)
-                    const actionButtons = taskCard.find('div.flex.space-x-2.mt-2, div.flex.justify-between.items-center.mt-2, div.flex.justify-end.items-center.mt-2');
-                    
-                    // Önce aksiyon butonlarını geçici kaldır
-                    let detachedButtons = null;
-                    if (actionButtons.length > 0) {
-                        detachedButtons = actionButtons.detach();
-                    }
-                    
-                    // Üye bilgisini priority/date div'inden sonra ekle
-                    if (priorityDateDiv.length > 0) {
-                        priorityDateDiv.after(memberHtml);
-                    } else {
-                        // Fallback: Doğrudan karta ekle
-                        taskCard.append(memberHtml);
-                    }
-                    
-                    // Eğer aksiyon butonları varsa, en sona tekrar ekle
-                    if (detachedButtons) {
-                        taskCard.append(detachedButtons);
-                    }
-                }
-            }
-            
-            // Görev kartı oluşturma fonksiyonu
-            function createTaskCard(task, assignedMember) {
-                // Öncelik metinleri ve sınıfları
-                const priorityTexts = {
-                    0: 'Düşük',
-                    1: 'Orta',
-                    2: 'Yüksek',
-                    3: 'Acil'
-                };
-                
-                const priorityClasses = {
-                    0: 'bg-green-100 text-green-800',
-                    1: 'bg-blue-100 text-blue-800',
-                    2: 'bg-yellow-100 text-yellow-800',
-                    3: 'bg-red-100 text-red-800'
-                };
-                
-                // Açıklama HTML'i (mevcutsa)
-                let descriptionHtml = '';
-                if (task.description && task.description.trim() !== '') {
-                    descriptionHtml = `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`;
-                }
-                
-                // Tarih formatı (mevcutsa)
-                let dueDateHtml = '';
-                if (task.dueDate) {
-                    const dueDate = new Date(task.dueDate);
-                    dueDateHtml = `<span class="text-xs text-gray-500"><i class="far fa-calendar-alt mr-1"></i>${formatDate(dueDate)}</span>`;
-                }
-                
-                // Atanan üye bilgisi (mevcutsa) - Standardize edilmiş şekilde
-                let assignedMemberHtml = '';
-                if (assignedMember) {
-                    const profileImage = assignedMember.userProfileImage || '/images/profiles/default.png';
-                    const fullName = assignedMember.userFullName || assignedMember.userName;
-                    assignedMemberHtml = `
-                        <div class="flex items-center mt-1">
-                            <span class="text-xs text-gray-600 flex items-center">
-                                <img src="${profileImage}" alt="${fullName}" class="w-5 h-5 rounded-full mr-1 border border-gray-200" onerror="this.src='/images/profiles/default.png';">
-                                <span>${fullName}</span>
-                            </span>
-                        </div>
-                    `;
-                }
-                
-                // Duruma göre aksiyon butonları
-                let actionButtons = '';
-                if (@(canModifyTasks.ToString().ToLower())) {
-                    if (task.status === 0) { // Todo
-                        actionButtons = `
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${task.id}" data-status="1">
-                                    <i class="fas fa-arrow-right"></i> Devam Ediyor
+                } else if (newStatus === 1) { // In Progress - Devam Edenler sütunu
+                    buttonsHtml = `
+                        <div class="flex justify-between items-center mt-2">
+                            <button class="move-task-btn bg-blue-100 text-blue-800 hover:bg-blue-200 text-xs px-2 py-1 rounded" data-task-id="${taskId}" data-status="0">
+                                    <i class="fas fa-arrow-left"></i> Yapılacak
                                 </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${task.id}" data-status="2">
+                            <button class="move-task-btn bg-green-100 text-green-800 hover:bg-green-200 text-xs px-2 py-1 rounded" data-task-id="${taskId}" data-status="2">
                                     <i class="fas fa-arrow-right"></i> Tamamlandı
                                 </button>
                             </div>
                         `;
-                    } else if (task.status === 1) { // In Progress
-                        actionButtons = `
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${task.id}" data-status="0">
-                                    <i class="fas fa-arrow-left"></i> Yapılacak
-                                </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200" data-task-id="${task.id}" data-status="2">
-                                    <i class="fas fa-arrow-right"></i> Tamamlandı
+                } else if (newStatus === 2) { // Done - Tamamlananlar sütunu
+                    buttonsHtml = `
+                        <div class="flex justify-end items-center mt-2">
+                            <button class="move-task-btn bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs px-2 py-1 rounded" data-task-id="${taskId}" data-status="1">
+                                <i class="fas fa-arrow-left"></i> Devam Ediyor
                                 </button>
                             </div>
                         `;
-                    } else if (task.status === 2) { // Done
-                        actionButtons = `
-                            <div class="flex space-x-2 mt-2">
-                                <button class="move-task-btn text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200" data-task-id="${task.id}" data-status="0">
-                                    <i class="fas fa-arrow-left"></i> Yapılacak
-                                </button>
-                                <button class="move-task-btn text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200" data-task-id="${task.id}" data-status="1">
-                                    <i class="fas fa-arrow-left"></i> Devam Ediyor
-                                </button>
-                            </div>
-                        `;
-                    }
                 }
                 
-                return `
-                    <div class="task-card bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing" data-task-id="${task.id}">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-medium text-gray-800 mb-1">${task.name}</h4>
-                            @if (canModifyTasks.ToString().ToLower() == "true") {
-                                <text>
-                                <div class="task-actions ml-2 flex items-center">
-                                    <button class="edit-task-btn text-blue-500 hover:text-blue-700 mr-2" data-task-id="${task.id}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="delete-task-btn text-red-500 hover:text-red-700" data-task-id="${task.id}">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
+                // Butonları karta ekle
+                taskCard.append(buttonsHtml);
                                 </text>
                             }
-                        </div>
-                        ${descriptionHtml}
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="px-2 py-1 ${priorityClasses[task.priority]} text-xs rounded-full">${priorityTexts[task.priority]}</span>
-                            ${dueDateHtml}
-                        </div>
-                        ${assignedMemberHtml}
-                        ${actionButtons}
-                    </div>
-                `;
-            }
-            
-            // Takım üyesinin adını ID'ye göre almak için yardımcı fonksiyon
-            function getTeamMemberName(userId) {
-                const teamMembers = @Html.Raw(Json.Serialize(Model.TeamMembers));
-                const member = teamMembers.find(m => m.UserId === userId);
-                return member ? member.UserName : "Atanmamış";
-            }
-            
-            // Takım üyesinin tam adını ID'ye göre almak için yardımcı fonksiyon
-            function getTeamMemberFullName(userId) {
-                const teamMembers = @Html.Raw(Json.Serialize(Model.TeamMembers));
-                const member = teamMembers.find(m => m.UserId === userId);
-                return member ? member.UserFullName : "Atanmamış";
-            }
-            
-            // Takım üyesinin profil resmini ID'ye göre almak için yardımcı fonksiyon
-            function getTeamMemberProfileImage(userId) {
-                const teamMembers = @Html.Raw(Json.Serialize(Model.TeamMembers));
-                const member = teamMembers.find(m => m.UserId === userId);
-                return member ? member.UserProfileImage : "/images/profiles/default.png";
             }
             
             // Görev sayaçlarını güncelleme fonksiyonu
@@ -1845,13 +1844,12 @@
                 const inProgressCount = $('#in-progress-tasks .task-card').length;
                 const doneCount = $('#done-tasks .task-card').length;
                 
-                // Sayaçları güncelle - daha spesifik seçicilerle
-                $('.todo-count-badge').text(todoCount);
-                $('.in-progress-count-badge').text(inProgressCount);
-                $('.done-count-badge').text(doneCount);
-                
-                // Sayıları konsola yazdır (debug amaçlı)
-                console.log("Görev sayıları güncellendi:", { todo: todoCount, inProgress: inProgressCount, done: doneCount });
+                // Sayaçları güncelle
+            $('.todo-count-badge').text(todoCount);
+            $('.in-progress-count-badge').text(inProgressCount);
+            $('.done-count-badge').text(doneCount);
+            
+            console.log("Görev sayıları güncellendi:", { todo: todoCount, inProgress: inProgressCount, done: doneCount });
             }
             
             // Tamamlanma yüzdesini güncelleme fonksiyonu
@@ -1866,7 +1864,8 @@
                 
                 // Eğer hiç görev yoksa, yüzde 0 olarak ayarla
                 if (totalTasks === 0) {
-                    setCompletionBar(0);
+                $('.completion-bar').css('width', '0%');
+                $('.completion-percentage').text('%0');
                     return;
                 }
                 
@@ -1874,387 +1873,144 @@
                 const completionPercentage = Math.round((doneCount / totalTasks) * 100);
                 
                 // İlerleme çubuğunu güncelle
-                setCompletionBar(completionPercentage);
-            }
-            
-            // İlerleme çubuğunu ayarlama fonksiyonu
-            function setCompletionBar(percentage) {
-                // İlerleme çubuğu elementini seç
-                const progressBar = $('.bg-primary-500.h-2.rounded-full');
-                const percentageText = progressBar.parent().next('.text-sm.text-gray-500');
-                
-                // Genişliği güncelle
-                progressBar.css('width', percentage + '%');
-                
-                // Yüzde metnini güncelle
-                percentageText.text('%' + percentage);
+            $('.completion-bar').css('width', completionPercentage + '%');
+            $('.completion-percentage').text('%' + completionPercentage);
             }
             
             // Bildirim gösterme fonksiyonu
             function showNotification(message, type) {
-                const notificationDiv = $('<div>').addClass('fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50')
-                    .css('transition', 'all 0.5s ease')
-                    .css('opacity', '0')
-                    .text(message);
-                
+            // Mevcut bildirimleri kaldır
+            $('.notification-toast').remove();
+            
+            // Yeni bildirim oluştur
+            const notificationDiv = $('<div>')
+                .addClass('notification-toast fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50')
+                .css({
+                    'transition': 'all 0.5s ease',
+                    'opacity': '0',
+                    'transform': 'translateY(20px)'
+                });
+            
+            // Tür'e göre stilini belirle
                 if (type === 'success') {
                     notificationDiv.addClass('bg-green-500 text-white');
-                } else {
+            } else if (type === 'error') {
                     notificationDiv.addClass('bg-red-500 text-white');
+            } else if (type === 'warning') {
+                notificationDiv.addClass('bg-yellow-500 text-white');
+            } else {
+                notificationDiv.addClass('bg-blue-500 text-white');
                 }
                 
+            // Mesajı ekle
+            notificationDiv.text(message);
+            
+            // Body'e ekle
                 $('body').append(notificationDiv);
                 
-                // Animasyon ile göster
+            // Animasyonla göster
                 setTimeout(() => {
-                    notificationDiv.css('opacity', '1');
+                notificationDiv.css({
+                    'opacity': '1',
+                    'transform': 'translateY(0)'
+                });
                 }, 10);
                 
                 // 3 saniye sonra kaldır
                 setTimeout(() => {
-                    notificationDiv.css('opacity', '0');
+                notificationDiv.css({
+                    'opacity': '0',
+                    'transform': 'translateY(20px)'
+                });
                     setTimeout(() => {
                         notificationDiv.remove();
                     }, 500);
                 }, 3000);
             }
             
-            // Öncelik değerini metne dönüştüren fonksiyon
-            function getPriorityText(priority) {
-                switch(parseInt(priority)) {
-                    case 0: return "Düşük";
-                    case 1: return "Orta";
-                    case 2: return "Yüksek";
-                    case 3: return "Acil";
-                    default: return "Orta";
-                }
-            }
-
-            // Öncelik değerine göre stil sınıflarını döndüren fonksiyon
-            function getPriorityClasses(priority) {
-                switch(parseInt(priority)) {
-                    case 0: return "bg-green-100 text-green-800";
-                    case 1: return "bg-blue-100 text-blue-800";
-                    case 2: return "bg-yellow-100 text-yellow-800";
-                    case 3: return "bg-red-100 text-red-800";
-                    default: return "bg-gray-100 text-gray-800";
-                }
-            }
-            
-            // Tarih formatı fonksiyonu
-            function formatDate(dateString) {
-                if (!dateString) return '';
-                const date = new Date(dateString);
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = date.toLocaleString('tr-TR', { month: 'short' });
-                const year = date.getFullYear();
-                return `${day} ${month} ${year}`;
-            }
-
-            // Görev silme butonuna tıklandığında
-            $(document).on('click', '.delete-task-btn', function() {
-                const taskId = $(this).data('task-id');
-                $('#delete-task-id').val(taskId);
-                $('#delete-task-modal').removeClass('hidden');
-                $('body').css('overflow', 'hidden');
-            });
-            
-            // Görev düzenleme butonuna tıklandığında
-            $(document).on('click', '.edit-task-btn', function() {
-                console.log("Edit task button clicked");
-                const taskId = $(this).data("task-id");
-                console.log("Task ID:", taskId);
-                
-                // Görevi Ajax ile getir
-                $.ajax({
-                    url: "@Url.Action("GetTask", "Project")",
-                    type: "GET",
-                    data: { taskId: taskId },
-                    success: function(task) {
-                        if (task) {
-                            console.log("Görev verisi alındı:", task);
-                            
-                            // Modal alanlarını doldur
-                            $("#edit-task-id").val(task.id);
-                            $("#edit-task-project-id").val(task.projectId);
-                            $("#edit-task-status").val(task.status);
-                            $("#edit-task-name").val(task.name);
-                            $("#edit-task-description").val(task.description);
-                            $("#edit-task-priority").val(task.priority);
-                            
-                            // Bitiş tarihi varsa formatla ve ata
-                            if (task.dueDate) {
-                                const dueDate = new Date(task.dueDate);
-                                $("#edit-task-due-date").val(dueDate.toISOString().split('T')[0]);
-                            } else {
-                                $("#edit-task-due-date").val('');
-                            }
-                            
-                            // Atanan üye seçimini güncelle
-                            console.log("Atanan üye ID:", task.assignedMemberId);
-                            
-                            // Mevcut tüm takım üyelerini getir
-                            const teamMembers = @Html.Raw(Json.Serialize(Model.TeamMembers));
-                            
-                            // Atanan üye ID'sini düzgün şekilde handle et
-                            if (task.assignedMemberId && task.assignedMemberId !== "") {
-                                console.log("Atanacak üye ID değeri:", task.assignedMemberId, "Tip:", typeof task.assignedMemberId);
-                                
-                                // Tüm seçenekleri kontrol et ve veri özniteliği eşleşeni bul
-                                let optionFound = false;
-                                
-                                // Öncelikle tüm seçenek değerlerini string olarak karşılaştır
-                                const assignedIdStr = String(task.assignedMemberId);
-                                
-                                // Forma üye ID değerini doğrudan atamayı dene
-                                $("#edit-task-assigned-member").val(assignedIdStr);
-                                
-                                // Atama başarılı mı kontrol et
-                                if ($("#edit-task-assigned-member").val() === assignedIdStr) {
-                                    console.log(`Doğrudan atama başarılı: ${assignedIdStr}`);
-                                    optionFound = true;
-                                } else {
-                                    console.log("Doğrudan atama başarısız, alternatif yöntemler deneniyor");
-                                    
-                                    // Her option için kontrol
-                                    Array.from(selectElement.options).forEach(option => {
-                                        const optionVal = String(option.value);
-                                        const optionUserId = String(option.getAttribute('data-user-id') || "");
-                                        
-                                        console.log(`Karşılaştırma: 
-                                            option.value (${typeof optionVal}) = ${optionVal} 
-                                            vs 
-                                            assignedIdStr (${typeof assignedIdStr}) = ${assignedIdStr}`);
-                                            
-                                        console.log(`Kullanıcı ID Karşılaştırma: 
-                                            option.data-user-id (${typeof optionUserId}) = ${optionUserId} 
-                                            vs 
-                                            assignedIdStr (${typeof assignedIdStr}) = ${assignedIdStr}`);
-                                        
-                                        // Değer veya kullanıcı ID eşleşmesi
-                                        if (optionVal === assignedIdStr || optionUserId === assignedIdStr) {
-                                            option.selected = true;
-                                            $("#edit-task-assigned-member").val(optionVal);
-                                            optionFound = true;
-                                            console.log(`Eşleşen seçenek bulundu: ${optionVal}`);
-                                        }
-                                    });
-                                }
-                                
-                                if (!optionFound) {
-                                    console.log("Eşleşen seçenek bulunamadı, boş değer atanıyor");
-                                    $("#edit-task-assigned-member").val("");
-                                }
-                            } else {
-                                // Atanmış üye yoksa boş seç
-                                console.log("Atanmış üye bilgisi yok, boş değer atanıyor");
-                                $("#edit-task-assigned-member").val("");
-                            }
-                            
+        // Projeden ayrılma butonu ve modal işlemleri
+        $("#leave-project-btn").on("click", function() {
+            console.log("Leave project button clicked");
                             // Modalı göster
-                            $("#edit-task-modal").removeClass("hidden");
-                $("body").css("overflow", "hidden");
-                            } else {
-                                showNotification("Görev bilgileri alınamadı", "error");
-                            }
-                        },
-                        error: function() {
-                            showNotification("Bağlantı hatası oluştu", "error");
-                        }
-                    });
-                });
-                
-                // Görev düzenleme modalını kapatma
-                $("#close-edit-task-modal, #cancel-edit-task").on("click", function() {
-                    $("#edit-task-modal").addClass("hidden");
-                    $("body").css("overflow", "");
-                    $("#edit-task-form")[0].reset();
-                });
-                
-                // Form submit olayını engelle ve sadece buton click olayını kullan
-                $("#edit-task-form").on("submit", function(e) {
-                    e.preventDefault(); // Form submiti engelle
-                    return false;
-                });
-                
-                // Görev düzenleme formunu gönder
-                $("#edit-task-form").on("submit", function(e) {
-                    e.preventDefault();
-                    
-                    const taskId = $("#edit-task-id").val();
-                    const projectId = $("#edit-task-project-id").val();
-                    const status = $("#edit-task-status").val();
-                    const name = $("#edit-task-name").val();
-                    const description = $("#edit-task-description").val();
-                    const priority = $("#edit-task-priority").val();
-                    const dueDate = $("#edit-task-due-date").val();
-                    const assignedMemberId = $("#edit-task-assigned-member").val();
-                    
-                    if (!name || name.trim() === "") {
-                        showNotification("Görev adı zorunludur", "error");
-                        return false;
-                    }
-                    
-                    // Görevi Ajax ile güncelle
-                    $.ajax({
-                        url: "@Url.Action("UpdateTask", "Project")",
-                        type: "POST",
-                        data: {
-                            Id: taskId,
-                            ProjectId: projectId,
-                            Status: status,
-                            Name: name,
-                            Description: description,
-                            Priority: priority,
-                            DueDate: dueDate,
-                            AssignedMemberId: assignedMemberId
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                // Modalı kapat
-                                $("#edit-task-modal").addClass("hidden");
-                                $("body").css("overflow", "");
-                                
-                                // Kullanıcıya bilgi ver
-                                showNotification("Görev başarıyla güncellendi", "success");
-                                
-                                // Sayfa yenileme yapmadan dinamik olarak görevi güncelle
-                                const taskCard = $(`.task-card[data-task-id="${taskId}"]`);
-                                const task = response.task;
-                                
-                                // Basit alanları güncelle
-                                taskCard.find('h4').text(task.name);
-                                
-                                // Açıklama alanını güncelle
-                                let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
-                                if (task.description) {
-                                    if (descriptionElement.length === 0) {
-                                        taskCard.find('div.flex.justify-between.items-start').after(
-                                            `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
-                                        );
-                        } else {
-                                    descriptionElement.text(task.description);
-                                }
-                            } else if (descriptionElement.length > 0) {
-                                descriptionElement.remove();
-                            }
-                            
-                            // Önceliği güncelle
-                            const prioritySpan = taskCard.find('span.rounded-full').first();
-                            const priorityClasses = {
-                                0: 'bg-blue-100 text-blue-800',
-                                1: 'bg-amber-100 text-amber-800',
-                                2: 'bg-orange-100 text-orange-800',
-                                3: 'bg-red-100 text-red-800'
-                            };
-                            const priorityTexts = {
-                                0: 'Düşük',
-                                1: 'Orta',
-                                2: 'Yüksek',
-                                3: 'Acil'
-                            };
-                            
-                            prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
-                            prioritySpan.addClass(priorityClasses[task.priority]);
-                            prioritySpan.text(priorityTexts[task.priority]);
-                            
-                            // Görev atanmış kişiyi güncelle
-                            // Bu kısmı daha karmaşık olduğu için şimdilik sayfayı yenileme şeklinde ele alalım
-                            // Daha sonra iyileştirmek için bu bölüm geliştirilebilir
-                            
-                            // Formu sıfırla
-                            $("#edit-task-form")[0].reset();
-                        } else {
-                            showNotification("Hata: " + response.message, "error");
-                        }
-                    },
-                    error: function() {
-                        showNotification("Bağlantı hatası oluştu", "error");
-                    }
-                });
-            });
-
-            // Görev düzenleme modalı için düğme işleyicileri
-            $("#edit-task-save-btn").on("click", function() {
-                console.log("Save button clicked");
-                
-                // Form değerlerini al ve ekrana yazdır (debug için)
-                const taskId = $("#edit-task-id").val();
-                const projectId = $("#edit-task-project-id").val();
-                const status = $("#edit-task-status").val();
-                const name = $("#edit-task-name").val();
-                const description = $("#edit-task-description").val();
-                const priority = $("#edit-task-priority").val();
-                const dueDate = $("#edit-task-due-date").val();
-                const assignedMemberId = $("#edit-task-assigned-member").val();
-                
-                // Tüm form verilerini logla
-                console.log("FORM VERİLERİ:", {
-                    Id: taskId,
-                    ProjectId: projectId,
-                    Status: status,
-                    Name: name,
-                    Description: description,
-                    Priority: priority,
-                    DueDate: dueDate,
-                    AssignedMemberId: assignedMemberId
-                });
-                
-                if (!name || name.trim() === "") {
-                    showNotification("Görev adı zorunludur", "error");
-                    return false;
-                }
-                
-                // Görevi Ajax ile güncelle - Form datayı manuel olarak gönderelim
-                $.ajax({
-                    url: "@Url.Action("UpdateTask", "Project")",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        Id: parseInt(taskId),
-                        ProjectId: parseInt(projectId),
-                        Status: parseInt(status),
-                        Name: name,
-                        Description: description,
-                        Priority: parseInt(priority),
-                        DueDate: dueDate ? new Date(dueDate) : null,
-                        AssignedMemberId: assignedMemberId
-                    }),
-                    success: function(response) {
-                        console.log("Sunucu yanıtı:", response);
-                        
-                        if (response.success) {
-                            // Modalı kapat
-                            $("#edit-task-modal").addClass("hidden");
-                            $("body").css("overflow", "");
-                            
-                            // Kullanıcıya bilgi ver
-                            showNotification("Görev başarıyla güncellendi", "success");
-                            
-                            // Sayfayı yenile (assigned member gösterimi için)
-                            window.location.reload();
-                        } else {
-                            showNotification("Görev güncellenirken bir hata oluştu: " + (response.message || "Bilinmeyen hata"), "error");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Görev güncelleme hatası:", xhr.responseText);
-                        showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
-                    }
-            });
+            $("#leave-project-modal").removeClass("hidden");
+            // Modalın animasyon sınıflarını ekle
+            setTimeout(() => {
+                $("#leave-modal-content").removeClass("scale-95 opacity-0");
+                $("#leave-modal-content").addClass("scale-100 opacity-100");
+            }, 10);
+            $("body").css("overflow", "hidden"); // Arka planı kaydırmayı engelle
         });
 
-        // Sayfadan ayrılırken bağlantıyı kapat
-        $(window).on('beforeunload', function() {
-            if (connection && connection.state === "Connected") {
-                connection.invoke("LeaveProjectGroup", @Model.Project.Id);
-                connection.stop();
-            }
-            });
+        // Projeden ayrılma modalı kapatma
+        $("#close-leave-modal, #cancel-leave").on("click", function() {
+            console.log("Close leave modal");
+            // Modalın animasyon sınıflarını kaldır
+            $("#leave-modal-content").removeClass("scale-100 opacity-100");
+            $("#leave-modal-content").addClass("scale-95 opacity-0");
+            
+            // Animasyon bittikten sonra modalı gizle
+            setTimeout(() => {
+                $("#leave-project-modal").addClass("hidden");
+                $("body").css("overflow", ""); // Kaydırmayı tekrar etkinleştir
+            }, 300);
+        });
 
-            // Sayfa yüklendiğinde sayaçları güncelle
-            updateTaskCounters();
-            updateCompletionPercentage();
+        // Projeden ayrılma işlemi
+        $("#confirm-leave").on("click", function() {
+            console.log("Confirm leave project");
+            
+            // AJAX ile projeden ayrıl
+                    $.ajax({
+                url: "@Url.Action("LeaveProject", "Team")",
+                        type: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                        data: {
+                    projectId: @Model.Project.Id,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                    console.log("Project leave response:", response);
+                    
+                            if (response.success) {
+                        showNotification("Projeden başarıyla ayrıldınız", "success");
+                        
+                        // Kısa bir süre sonra Dashboard'a yönlendir
+                        setTimeout(function() {
+                            window.location.href = "@Url.Action("Index", "Dashboard")";
+                        }, 1000);
+                        } else {
+                        // Modalı kapat
+                        $("#leave-modal-content").removeClass("scale-100 opacity-100");
+                        $("#leave-modal-content").addClass("scale-95 opacity-0");
+                        
+                        setTimeout(() => {
+                            $("#leave-project-modal").addClass("hidden");
+                            $("body").css("overflow", "");
+                        }, 300);
+                        
+                        // Hata mesajı göster
+                        showNotification("Projeden ayrılırken bir hata oluştu: " + response.message, "error");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Project leave error:", error);
+                    console.error("Response:", xhr.responseText);
+                    
+                            // Modalı kapat
+                    $("#leave-modal-content").removeClass("scale-100 opacity-100");
+                    $("#leave-modal-content").addClass("scale-95 opacity-0");
+                    
+                    setTimeout(() => {
+                        $("#leave-project-modal").addClass("hidden");
+                            $("body").css("overflow", "");
+                    }, 300);
+                    
+                    // Hata mesajı göster
+                    showNotification("Projeden ayrılırken bir hata oluştu: " + error, "error");
+                }
+            });
         });
     </script>
 } 

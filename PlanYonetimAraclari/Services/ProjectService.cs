@@ -102,6 +102,23 @@ namespace PlanYonetimAraclari.Services
                 if (affectedRows > 0)
                 {
                     _logger.LogInformation($"Proje başarıyla oluşturuldu: ID={project.Id}, Adı={project.Name}, UserId={project.UserId}");
+                    
+                    // Projeyi oluşturan kullanıcıyı otomatik olarak ekip üyesi (Manager rolünde) olarak ekle
+                    var teamMember = new ProjectTeamMember
+                    {
+                        ProjectId = project.Id,
+                        UserId = project.UserId,
+                        Role = TeamMemberRole.Manager,
+                        Status = "Accepted",
+                        InvitedAt = DateTime.Now,
+                        JoinedAt = DateTime.Now
+                    };
+                    
+                    _logger.LogInformation($"Proje sahibi ekip üyesi olarak ekleniyor: ProjectId={project.Id}, UserId={project.UserId}, Role=Manager");
+                    await _context.ProjectTeamMembers.AddAsync(teamMember);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Proje sahibi başarıyla ekip üyesi olarak eklendi");
+                    
                     return project;
                 }
                 else
@@ -153,7 +170,11 @@ namespace PlanYonetimAraclari.Services
             {
                 _logger.LogInformation($"Proje siliniyor: {projectId}, Force Delete: {forceDelete}");
                 
-                var project = await _context.Projects.FindAsync(projectId);
+                var project = await _context.Projects
+                    .Include(p => p.TeamMembers)
+                    .Include(p => p.Invitations)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
+                    
                 if (project == null)
                 {
                     _logger.LogWarning($"Silinecek proje bulunamadı: {projectId}");
@@ -169,20 +190,53 @@ namespace PlanYonetimAraclari.Services
                     return false;
                 }
                 
-                // Eğer forceDelete true ise veya görevler yoksa, projeyi sil
-                if (forceDelete && hasRelatedTasks)
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    // Önce projeye ait tüm görevleri sil
-                    var projectTasks = await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
-                    _context.Tasks.RemoveRange(projectTasks);
-                    _logger.LogInformation($"Projeye ait {projectTasks.Count} görev silindi: {projectId}");
+                    try
+                    {
+                        // Önce projeye ait tüm takım üyelerini sil
+                        if (project.TeamMembers != null && project.TeamMembers.Any())
+                        {
+                            _context.ProjectTeamMembers.RemoveRange(project.TeamMembers);
+                            _logger.LogInformation($"Projeye ait {project.TeamMembers.Count} takım üyesi silindi: {projectId}");
+                        }
+                        
+                        // Projeye ait tüm davetleri sil
+                        if (project.Invitations != null && project.Invitations.Any())
+                        {
+                            _context.ProjectInvitations.RemoveRange(project.Invitations);
+                            _logger.LogInformation($"Projeye ait {project.Invitations.Count} davetiye silindi: {projectId}");
+                        }
+                        
+                        // Eğer forceDelete true ise veya görevler yoksa, görevleri sil
+                        if (forceDelete && hasRelatedTasks)
+                        {
+                            // Önce projeye ait tüm görevleri sil
+                            var projectTasks = await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
+                            _context.Tasks.RemoveRange(projectTasks);
+                            _logger.LogInformation($"Projeye ait {projectTasks.Count} görev silindi: {projectId}");
+                        }
+                        
+                        // Projeyi sil
+                        _context.Projects.Remove(project);
+                        
+                        // Değişiklikleri kaydet
+                        await _context.SaveChangesAsync();
+                        
+                        // Transaction'ı tamamla
+                        await transaction.CommitAsync();
+                        
+                        _logger.LogInformation($"Proje başarıyla silindi: {projectId}");
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Hata durumunda transaction'ı geri al
+                        await transaction.RollbackAsync();
+                        _logger.LogError($"Proje silinirken transaction hatası oluştu: {ex.Message}");
+                        throw;
+                    }
                 }
-                
-                _context.Projects.Remove(project);
-                await _context.SaveChangesAsync();
-                
-                _logger.LogInformation($"Proje başarıyla silindi: {projectId}");
-                return true;
             }
             catch (Exception ex)
             {
@@ -196,17 +250,15 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı proje sayısı alınıyor: {userId}");
-                var ownedCount = await _context.Projects
-                    .Where(p => p.UserId == userId)
-                    .CountAsync();
-
-                var teamCount = await _context.ProjectTeamMembers
-                    .Where(m => m.UserId == userId)
-                    .Select(m => m.ProjectId)
+                
+                // Kullanıcının sahip olduğu ve ekip üyesi olduğu projeleri tek sorguda al
+                var projectIds = await _context.Projects
+                    .Where(p => p.UserId == userId || p.TeamMembers.Any(m => m.UserId == userId))
+                    .Select(p => p.Id)
                     .Distinct()
                     .CountAsync();
 
-                return ownedCount + teamCount;
+                return projectIds;
             }
             catch (Exception ex)
             {
@@ -220,21 +272,16 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı aktif proje sayısı alınıyor: {userId}");
-                var ownedCount = await _context.Projects
-                    .Where(p => p.UserId == userId && 
-                           (p.Status == ProjectStatus.Planning || 
-                            p.Status == ProjectStatus.InProgress))
-                    .CountAsync();
-
-                var teamCount = await _context.ProjectTeamMembers
-                    .Where(m => m.UserId == userId)
-                    .Select(m => m.Project)
-                    .Where(p => p.Status == ProjectStatus.Planning || 
-                               p.Status == ProjectStatus.InProgress)
+                
+                // Planlama ve Devam Eden durumundaki projeleri say
+                var projectIds = await _context.Projects
+                    .Where(p => (p.UserId == userId || p.TeamMembers.Any(m => m.UserId == userId)) &&
+                               (p.Status == ProjectStatus.Planning || p.Status == ProjectStatus.InProgress))
+                    .Select(p => p.Id)
                     .Distinct()
                     .CountAsync();
 
-                return ownedCount + teamCount;
+                return projectIds;
             }
             catch (Exception ex)
             {
@@ -248,19 +295,16 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı tamamlanan proje sayısı alınıyor: {userId}");
-                var ownedCount = await _context.Projects
-                    .Where(p => p.UserId == userId && 
-                           p.Status == ProjectStatus.Completed)
-                    .CountAsync();
-
-                var teamCount = await _context.ProjectTeamMembers
-                    .Where(m => m.UserId == userId)
-                    .Select(m => m.Project)
-                    .Where(p => p.Status == ProjectStatus.Completed)
+                
+                // Tamamlanmış durumundaki projeleri say
+                var projectIds = await _context.Projects
+                    .Where(p => (p.UserId == userId || p.TeamMembers.Any(m => m.UserId == userId)) &&
+                               p.Status == ProjectStatus.Completed)
+                    .Select(p => p.Id)
                     .Distinct()
                     .CountAsync();
 
-                return ownedCount + teamCount;
+                return projectIds;
             }
             catch (Exception ex)
             {
@@ -274,19 +318,16 @@ namespace PlanYonetimAraclari.Services
             try
             {
                 _logger.LogInformation($"Kullanıcı beklemedeki proje sayısı alınıyor: {userId}");
-                var ownedCount = await _context.Projects
-                    .Where(p => p.UserId == userId && 
-                           p.Status == ProjectStatus.OnHold)
-                    .CountAsync();
-
-                var teamCount = await _context.ProjectTeamMembers
-                    .Where(m => m.UserId == userId)
-                    .Select(m => m.Project)
-                    .Where(p => p.Status == ProjectStatus.OnHold)
+                
+                // Beklemede durumundaki projeleri say
+                var projectIds = await _context.Projects
+                    .Where(p => (p.UserId == userId || p.TeamMembers.Any(m => m.UserId == userId)) &&
+                               p.Status == ProjectStatus.OnHold)
+                    .Select(p => p.Id)
                     .Distinct()
                     .CountAsync();
 
-                return ownedCount + teamCount;
+                return projectIds;
             }
             catch (Exception ex)
             {

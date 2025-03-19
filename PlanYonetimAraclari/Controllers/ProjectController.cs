@@ -197,7 +197,7 @@ namespace PlanYonetimAraclari.Controllers
             }
         }
         
-        // Proje silme 
+        // Proje silme
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -206,7 +206,13 @@ namespace PlanYonetimAraclari.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = "Kullanıcı oturumu bulunamadı" });
+                    }
                     return RedirectToAction("Login", "Account");
+                }
 
                 // Layout için gereken bilgileri ViewData'da sakla
                 ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
@@ -216,29 +222,61 @@ namespace PlanYonetimAraclari.Controllers
 
                 var project = await _projectService.GetProjectByIdAsync(id);
                 if (project == null)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = "Proje bulunamadı" });
+                    }
                     return NotFound();
+                }
 
                 // Only project owner can delete the project
                 if (project.UserId != user.Id)
                 {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = "Bu projeyi silme yetkiniz yok" });
+                    }
                     TempData["ErrorMessage"] = "Bu projeyi silme yetkiniz yok.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
+                _logger.LogInformation($"Proje silme isteği alındı: {id}, Kullanıcı: {user.Id}");
+
                 // Projeyi silerken güvenlik amacıyla forceDelete parametresini true yapalım
                 var result = await _projectService.DeleteProjectAsync(id, true);
+                
                 if (result)
                 {
+                    _logger.LogInformation($"Proje başarıyla silindi: {id}");
+                    
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true, message = "Proje başarıyla silindi" });
+                    }
+                    
                     TempData["SuccessMessage"] = "Proje başarıyla silindi.";
                     return RedirectToAction("Index", "Dashboard");
                 }
 
+                _logger.LogWarning($"Proje silinemedi: {id}");
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Proje silinirken bir hata oluştu" });
+                }
+                
                 TempData["ErrorMessage"] = "Proje silinirken bir hata oluştu.";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Proje silinirken hata oluştu: {ex.Message}");
+                
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = $"Proje silinirken bir hata oluştu: {ex.Message}" });
+                }
+                
                 TempData["ErrorMessage"] = $"Proje silinirken bir hata oluştu: {ex.Message}";
                 return RedirectToAction(nameof(Details), new { id });
             }

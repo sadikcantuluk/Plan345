@@ -30,7 +30,7 @@ namespace PlanYonetimAraclari.Data
                 .HasOne(ptm => ptm.Project)
                 .WithMany(p => p.TeamMembers)
                 .HasForeignKey(ptm => ptm.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<ProjectTeamMember>()
                 .HasOne(ptm => ptm.User)
@@ -42,7 +42,7 @@ namespace PlanYonetimAraclari.Data
                 .HasOne(pi => pi.Project)
                 .WithMany(p => p.Invitations)
                 .HasForeignKey(pi => pi.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<ProjectInvitation>()
                 .HasOne(pi => pi.InvitedByUser)

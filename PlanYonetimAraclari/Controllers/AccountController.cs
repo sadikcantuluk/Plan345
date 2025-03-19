@@ -65,6 +65,37 @@ namespace PlanYonetimAraclari.Controllers
                     
                     if (passwordValid)
                     {
+                        // İki faktörlü doğrulama kontrolü - eğer etkinse, doğrulama kodu gönder
+                        if (user.TwoFactorEnabled)
+                        {
+                            _logger.LogInformation($"Kullanıcı {email} için iki faktörlü doğrulama etkin");
+                            
+                            // Doğrulama kodu oluştur
+                            string verificationCode = GenerateRandomCode();
+                            
+                            // Kodu veritabanına kaydet
+                            await SaveVerificationCodeAsync(user.Id, verificationCode);
+                            
+                            // Kodu kullanıcının e-posta adresine gönder
+                            try
+                            {
+                                await _emailService.SendTwoFactorCodeAsync(email, verificationCode);
+                                _logger.LogInformation($"Doğrulama kodu {email} adresine gönderildi");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"Doğrulama kodu gönderilirken hata oluştu: {ex.Message}");
+                                // Kod gönderiminde hata oluşsa bile kullanıcı akışını bozmuyoruz
+                            }
+                            
+                            // TempData'da 2FA gerektiğini ve e-posta adresini sakla
+                            TempData["RequiresTwoFactor"] = true;
+                            TempData["UserEmail"] = email;
+                            
+                            // Doğrulama sayfasına yönlendir
+                            return RedirectToAction("VerifyCode");
+                        }
+
                         // Identity ile giriş yap
                         if (rememberMe)
                         {
@@ -194,6 +225,39 @@ namespace PlanYonetimAraclari.Controllers
                     {
                         return RedirectToAction("Index", "Dashboard");
                     }
+                }
+                
+                if (result.RequiresTwoFactor)
+                {
+                    _logger.LogInformation($"Kullanıcı {model.Email} için iki faktörlü doğrulama gerekiyor");
+                    
+                    // Kullanıcı bilgilerini al
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    
+                    // Doğrulama kodu oluştur
+                    string verificationCode = GenerateRandomCode();
+                    
+                    // Kodu veritabanına kaydet
+                    await SaveVerificationCodeAsync(user.Id, verificationCode);
+                    
+                    // Kodu kullanıcının e-posta adresine gönder
+                    try
+                    {
+                        await _emailService.SendTwoFactorCodeAsync(model.Email, verificationCode);
+                        _logger.LogInformation($"Doğrulama kodu {model.Email} adresine gönderildi");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Doğrulama kodu gönderilirken hata oluştu: {ex.Message}");
+                        // Kod gönderiminde hata oluşsa bile kullanıcı akışını bozmuyoruz
+                    }
+                    
+                    // TempData'da 2FA gerektiğini ve e-posta adresini sakla
+                    TempData["RequiresTwoFactor"] = true;
+                    TempData["UserEmail"] = model.Email;
+                    
+                    // Doğrulama sayfasına yönlendir
+                    return RedirectToAction("VerifyCode");
                 }
                 
                 if (result.IsLockedOut)
@@ -682,12 +746,16 @@ namespace PlanYonetimAraclari.Controllers
                         user.LastLoginTime = DateTime.Now;
                         await _userManager.UpdateAsync(user);
                         
+                        // Açıkça SignInAsync ile oturum açtır
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        
                         // Session ve TempData'da kullanıcı bilgilerini sakla
                         HttpContext.Session.SetString("IsAuthenticated", "true");
                         HttpContext.Session.SetString("UserEmail", model.Email);
                         HttpContext.Session.SetString("UserName", userName);
                         HttpContext.Session.SetString("UserRole", userRole);
                         HttpContext.Session.SetString("UserProfileImage", user.ProfileImageUrl ?? "/images/profiles/default.png");
+                        HttpContext.Session.SetString("CurrentUserId", user.Id);
                         
                         // TempData temizle
                         TempData.Remove("RequiresTwoFactor");

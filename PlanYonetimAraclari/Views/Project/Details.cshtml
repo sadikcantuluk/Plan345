@@ -97,7 +97,7 @@
             <div>
                 <div class="mb-4">
                     <h3 class="text-sm font-medium text-gray-500">Açıklama</h3>
-                    <p class="text-gray-700">@(string.IsNullOrEmpty(Model.Project.Description) ? "Açıklama yok" : Model.Project.Description)</p>
+                    <p class="text-gray-700 break-words whitespace-pre-wrap max-w-full overflow-hidden">@(string.IsNullOrEmpty(Model.Project.Description) ? "Açıklama yok" : Model.Project.Description)</p>
                 </div>
                 
                 <div class="mb-4">

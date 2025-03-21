@@ -62,6 +62,11 @@ namespace PlanYonetimAraclari.Controllers
             {
                 return BadRequest(new { success = false, error = "Not içeriği boş olamaz" });
             }
+            
+            if (request.Content.Length > 200)
+            {
+                return BadRequest(new { success = false, error = "Not içeriği maksimum 200 karakter olabilir" });
+            }
 
             try
             {
@@ -71,7 +76,7 @@ namespace PlanYonetimAraclari.Controllers
                 {
                     Content = request.Content,
                     UserId = userId,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.QuickNotes.Add(quickNote);
@@ -113,6 +118,11 @@ namespace PlanYonetimAraclari.Controllers
             {
                 return BadRequest(new { success = false, error = "Not içeriği boş olamaz" });
             }
+            
+            if (request.Content.Length > 200)
+            {
+                return BadRequest(new { success = false, error = "Not içeriği maksimum 200 karakter olabilir" });
+            }
 
             try
             {
@@ -126,7 +136,7 @@ namespace PlanYonetimAraclari.Controllers
                 }
 
                 quickNote.Content = request.Content;
-                quickNote.UpdatedAt = DateTime.UtcNow;
+                quickNote.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
                 

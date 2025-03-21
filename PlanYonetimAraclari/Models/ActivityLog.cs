@@ -27,7 +27,7 @@ namespace PlanYonetimAraclari.Models
         public string RelatedEntityType { get; set; }
         
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }

@@ -189,7 +189,8 @@
             
             <div class="space-y-4">
                 <div class="relative">
-                    <textarea id="quickNoteInput" class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" rows="2" placeholder="Yeni bir not ekleyin..." maxlength="500"></textarea>
+                    <textarea id="quickNoteInput" class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" rows="2" placeholder="Yeni bir not ekleyin..." maxlength="200"></textarea>
+                    <span id="charCount" class="absolute left-2 bottom-2 text-xs text-gray-500">0/200</span>
                     <button id="addQuickNoteBtn" class="absolute right-2 bottom-2 p-2 text-primary-500 hover:text-primary-700">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -247,7 +248,7 @@
                                          data-activity-id="@activity.Id"
                                          data-activity-title="@activity.Title.Replace("\"", "&quot;")"
                                          data-activity-description="@(activity.Description?.Replace("\"", "&quot;") ?? "")"
-                                         data-activity-date="@activity.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")"
+                                         data-activity-date="@activity.CreatedAt.AddHours(-3).ToString("dd.MM.yyyy HH:mm")"
                                          data-activity-user="@activity.User.FullName.Replace("\"", "&quot;")"
                                          data-activity-type="@activity.Type"
                                          onclick="showActivityDetails(this)">
@@ -262,7 +263,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex items-center mt-auto pt-3">
-                                                <p class="text-xs text-gray-400">@activity.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                                                <p class="text-xs text-gray-400">@activity.CreatedAt.AddHours(-3).ToString("dd.MM.yyyy HH:mm")</p>
                                                 <span class="text-gray-300 mx-2">•</span>
                                                 <p class="text-xs text-gray-500 truncate">
                                                 @if (activity.Type == ActivityType.TaskCreated || activity.Type == ActivityType.TaskUpdated || 
@@ -593,6 +594,15 @@
         const quickNoteInput = document.getElementById('quickNoteInput');
         const addQuickNoteBtn = document.getElementById('addQuickNoteBtn');
         const quickNotesContainer = document.getElementById('quickNotesContainer');
+        
+        // Karakter sayacı
+        if (quickNoteInput) {
+            quickNoteInput.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                const maxLength = this.getAttribute('maxlength');
+                document.getElementById('charCount').textContent = `${currentLength}/${maxLength}`;
+            });
+        }
 
         // Not ekleme butonu tıklama olayı
         if (addQuickNoteBtn) {
@@ -600,7 +610,7 @@
                 addQuickNote();
             });
         }
-
+        
         // Enter tuşu ile not ekleme
         if (quickNoteInput) {
             quickNoteInput.addEventListener('keypress', (e) => {
@@ -643,7 +653,7 @@
             });
         }
 
-        // Notu UI'a ekleme fonksiyonu
+        // Notu UI'a ekleme fonksiyonu (yeni notlar eklerken kullanılır)
         function addNoteToUI(note) {
             const noteElement = document.createElement('div');
             noteElement.className = 'border-b border-gray-100 pb-4';
@@ -653,8 +663,8 @@
                     <div class="flex-shrink-0 h-8 w-8 bg-primary-100 text-primary-500 rounded-full flex items-center justify-center">
                         <i class="fas fa-sticky-note text-xs"></i>
                     </div>
-                    <div class="flex-grow">
-                        <p class="text-sm text-gray-700">${note.content}</p>
+                    <div class="flex-grow overflow-hidden">
+                        <p class="text-sm text-gray-700 break-words line-clamp-2 overflow-hidden" style="word-break: break-word;">${note.content}</p>
                         <p class="text-xs text-gray-400 mt-1">${formatDate(note.createdAt)}</p>
                     </div>
                     <div class="flex-shrink-0">
@@ -680,7 +690,29 @@
                 .then(result => {
                     if (result.success) {
                         quickNotesContainer.innerHTML = ''; // Container'ı temizle
-                        result.data.forEach(note => addNoteToUI(note));
+                        // API'den gelen notları olduğu gibi ekle (zaten yeniden eskiye sıralı)
+                        result.data.forEach(note => {
+                            const noteElement = document.createElement('div');
+                            noteElement.className = 'border-b border-gray-100 pb-4';
+                            noteElement.dataset.noteId = note.id;
+                            noteElement.innerHTML = `
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0 h-8 w-8 bg-primary-100 text-primary-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-sticky-note text-xs"></i>
+                                    </div>
+                                    <div class="flex-grow overflow-hidden">
+                                        <p class="text-sm text-gray-700 break-words line-clamp-2 overflow-hidden" style="word-break: break-word;">${note.content}</p>
+                                        <p class="text-xs text-gray-400 mt-1">${formatDate(note.createdAt)}</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button onclick="deleteQuickNote(${note.id})" class="text-gray-400 hover:text-red-500 transition-colors duration-200">
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            quickNotesContainer.appendChild(noteElement);
+                        });
                     } else {
                         throw new Error(result.error || 'Notlar yüklenemedi');
                     }
@@ -694,12 +726,14 @@
         // Tarih formatlama yardımcı fonksiyonu
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('tr-TR', { 
-                day: 'numeric', 
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            // UTC saat farkını düzeltmek için sabit 3 saat ekle (Türkiye için)
+            const adjustedDate = new Date(date.getTime());
+            return adjustedDate.toLocaleString('tr-TR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
             });
         }
 

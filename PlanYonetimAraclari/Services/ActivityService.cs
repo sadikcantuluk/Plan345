@@ -24,7 +24,7 @@ namespace PlanYonetimAraclari.Services
                 Description = description,
                 RelatedEntityId = relatedEntityId,
                 RelatedEntityType = relatedEntityType,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now.AddHours(3)
             };
 
             _context.ActivityLogs.Add(activity);
@@ -110,7 +110,7 @@ namespace PlanYonetimAraclari.Services
         /// </summary>
         public async Task<int> CleanupOldActivitiesAsync()
         {
-            var cutoffDate = DateTime.UtcNow.AddDays(-ActivityRetentionDays);
+            var cutoffDate = DateTime.Now.AddHours(3).AddDays(-ActivityRetentionDays);
             
             var oldActivities = await _context.ActivityLogs
                 .Where(a => a.CreatedAt < cutoffDate)

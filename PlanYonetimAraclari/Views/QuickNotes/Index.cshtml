@@ -44,8 +44,11 @@
                 @Html.AntiForgeryToken()
                 <div>
                     <label for="noteContent" class="block text-sm font-medium text-gray-700 mb-2">Yeni Not</label>
-                    <textarea id="noteContent" rows="3" placeholder="Not yazın..." maxlength="500"
-                        class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                    <div class="relative">
+                        <textarea id="noteContent" rows="3" placeholder="Not yazın..." maxlength="200"
+                            class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                        <span id="charCount" class="absolute left-4 bottom-2 text-xs text-gray-500">0/200</span>
+                    </div>
                 </div>
                 <div class="flex justify-end">
                     <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg flex items-center transition-colors duration-200">
@@ -77,8 +80,11 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2" for="editNoteContent">
                         Not İçeriği
                     </label>
-                    <textarea id="editNoteContent" name="content" rows="3" required maxlength="500"
-                            class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                    <div class="relative">
+                        <textarea id="editNoteContent" name="content" rows="3" required maxlength="200"
+                                class="w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                        <span id="editCharCount" class="absolute left-4 bottom-2 text-xs text-gray-500">0/200</span>
+                    </div>
                 </div>
                 <div class="flex items-center justify-end mt-6 space-x-3">
                     <button type="button" id="closeEditModal"
@@ -101,14 +107,33 @@
             const API_BASE_URL = '/api/quicknotes';
             const notesList = document.getElementById('notesList');
             const quickNoteForm = document.getElementById('quickNoteForm');
-            const noteContent = document.getElementById('noteContent');
+            const noteContentInput = document.getElementById('noteContent');
+            const editNoteContentInput = document.getElementById('editNoteContent');
+            const charCount = document.getElementById('charCount');
+            const editCharCount = document.getElementById('editCharCount');
             
             // Modal elements
             const editModal = document.getElementById('editNoteModal');
-            const closeEditModal = document.getElementById('closeEditModal');
+            const closeEditModalBtn = document.getElementById('closeEditModal');
             const editNoteForm = document.getElementById('editNoteForm');
             const editNoteId = document.getElementById('editNoteId');
-            const editNoteContent = document.getElementById('editNoteContent');
+            
+            // Karakter sayacı işlevsellikleri
+            if (noteContentInput) {
+                noteContentInput.addEventListener('input', function() {
+                    const currentLength = this.value.length;
+                    const maxLength = this.getAttribute('maxlength');
+                    charCount.textContent = `${currentLength}/${maxLength}`;
+                });
+            }
+            
+            if (editNoteContentInput) {
+                editNoteContentInput.addEventListener('input', function() {
+                    const currentLength = this.value.length;
+                    const maxLength = this.getAttribute('maxlength');
+                    editCharCount.textContent = `${currentLength}/${maxLength}`;
+                });
+            }
             
             // Initial load
             loadNotes();
@@ -124,7 +149,7 @@
                 await updateNote();
             });
             
-            closeEditModal.addEventListener('click', () => {
+            closeEditModalBtn.addEventListener('click', () => {
                 editModal.classList.add('hidden');
             });
             
@@ -153,42 +178,48 @@
             }
             
             function displayNotes(notes) {
-                if (notes.length === 0) {
-                    notesList.innerHTML = '<div class="text-center text-gray-500 py-4"><p>Henüz not eklenmemiş</p></div>';
+                if (!notes || notes.length === 0) {
+                    notesList.innerHTML = `
+                        <div class="text-center text-gray-500 py-4">
+                            <p>Henüz not eklenmemiş</p>
+                        </div>
+                    `;
                     return;
                 }
                 
                 notesList.innerHTML = '';
+                
                 notes.forEach(note => {
-                    const noteCard = document.createElement('div');
-                    noteCard.className = 'bg-gray-50 p-4 rounded-lg border border-gray-200';
-                    
-                    const createdDate = new Date(note.createdAt);
-                    const formattedDate = formatDate(createdDate);
-                    
-                    noteCard.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div class="w-full">
-                                <p class="text-gray-800 whitespace-pre-wrap">${note.content}</p>
-                                <p class="text-xs text-gray-500 mt-2">${formattedDate}</p>
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-100';
+                    noteElement.innerHTML = `
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-8 w-8 bg-primary-100 text-primary-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-sticky-note"></i>
+                                </div>
+                                <p class="text-xs text-gray-500">${formatDate(note.createdAt)}</p>
                             </div>
-                            <div class="flex space-x-2 ml-4">
-                                <button class="text-blue-500 hover:text-blue-700" onclick="editNote(${note.id}, '${note.content.replace(/'/g, "\\'")}')">
+                            <div class="flex items-center space-x-2">
+                                <button onclick="editNote(${note.id}, '${note.content.replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-primary-500 transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="text-red-500 hover:text-red-700" onclick="deleteNote(${note.id})">
-                                    <i class="fas fa-trash"></i>
+                                <button onclick="deleteNote(${note.id})" class="text-gray-400 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-700 break-words" style="word-break: break-word;">${note.content}</p>
+                        </div>
                     `;
                     
-                    notesList.appendChild(noteCard);
+                    notesList.appendChild(noteElement);
                 });
             }
             
             async function addNote() {
-                const content = noteContent.value.trim();
+                const content = noteContentInput.value.trim();
                 if (!content) {
                     showNotification('Not içeriği boş olamaz', 'error');
                     return;
@@ -211,7 +242,7 @@
                     }
                     
                     if (result.success) {
-                        noteContent.value = '';
+                        noteContentInput.value = '';
                         loadNotes();
                         showNotification('Not eklendi', 'success');
                     } else {
@@ -226,7 +257,7 @@
             // Global functions for edit/delete
             window.editNote = function(id, content) {
                 editNoteId.value = id;
-                editNoteContent.value = content;
+                editNoteContentInput.value = content;
                 editModal.classList.remove('hidden');
             };
             
@@ -238,7 +269,7 @@
             
             async function updateNote() {
                 const id = editNoteId.value;
-                const content = editNoteContent.value.trim();
+                const content = editNoteContentInput.value.trim();
                 
                 if (!content) {
                     showNotification('Not içeriği boş olamaz', 'error');
@@ -301,14 +332,27 @@
                 }
             }
             
-            function formatDate(date) {
-                return new Intl.DateTimeFormat('tr-TR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }).format(date);
+            function formatDate(dateString) {
+                try {
+                    // API'den gelen tarih string'ini Date nesnesine dönüştür
+                    const date = new Date(dateString);
+                    
+                    // Geçerli bir tarih kontrolü
+                    if (isNaN(date.getTime())) {
+                        return 'Geçersiz tarih';
+                    }
+                    
+                    return date.toLocaleString('tr-TR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (error) {
+                    console.error('Tarih biçimlendirme hatası:', error);
+                    return 'Tarih formatlanırken hata oluştu';
+                }
             }
             
             function showNotification(message, type) {

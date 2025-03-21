@@ -1,0 +1,554 @@
+@model PlanYonetimAraclari.Models.ReportsViewModel
+@using PlanYonetimAraclari.Models
+@{
+    ViewData["Title"] = "Raporlar - Plan345";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Ana İçerik -->
+<div class="p-6">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Proje ve Görev Raporları</h1>
+        <p class="text-sm text-gray-600">Projelerinizin ve görevlerinizin durumunu görsel olarak takip edin</p>
+    </div>
+
+    <!-- Bildirim Mesajları -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 auto-hide-message">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <!-- Özet Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Toplam Projeler -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Toplam Projeler</h3>
+                <span class="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+                    <i class="fas fa-folder"></i>
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-bold text-gray-900">@Model.TotalProjects</span>
+                <span class="text-sm font-medium text-blue-500 flex items-center">
+                    <i class="fas fa-clipboard-list mr-1"></i> Proje
+                </span>
+            </div>
+        </div>
+
+        <!-- Toplam Görevler -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Toplam Görevler</h3>
+                <span class="h-10 w-10 flex items-center justify-center rounded-full bg-purple-50 text-purple-500">
+                    <i class="fas fa-tasks"></i>
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-bold text-gray-900">@Model.TotalTasks</span>
+                <div class="flex flex-col text-xs">
+                    <span class="text-green-500 font-medium">@Model.CompletedTasks Tamamlandı</span>
+                    <span class="text-amber-500 font-medium">@Model.InProgressTasks Devam Ediyor</span>
+                    <span class="text-blue-500 font-medium">@Model.PendingTasks Yapılacak</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Görev Tamamlanma Oranı -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Görevler</h3>
+                <span class="h-10 w-10 flex items-center justify-center rounded-full bg-green-50 text-green-500">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-3xl font-bold text-gray-900 mb-2">%@(Math.Round(Model.TaskCompletionRate, 0))</span>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-green-500 h-2.5 rounded-full" style="width: @(Model.TaskCompletionRate)%"></div>
+                </div>
+                <span class="text-xs text-gray-500 mt-2">Tamamlanma Oranı</span>
+            </div>
+        </div>
+
+        <!-- Proje Tamamlanma Oranı -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dashboard-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Projeler</h3>
+                <span class="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 text-amber-500">
+                    <i class="fas fa-chart-line"></i>
+                </span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-3xl font-bold text-gray-900 mb-2">%@(Math.Round(Model.ProjectCompletionRate, 0))</span>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-amber-500 h-2.5 rounded-full" style="width: @(Model.ProjectCompletionRate)%"></div>
+                </div>
+                <span class="text-xs text-gray-500 mt-2">Tamamlanma Oranı</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafikler ve Tablolar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Proje Durum Grafiği -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-900 mb-4">Proje Durumları</h3>
+            <div class="h-64">
+                <canvas id="projectStatusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Görev Durum Grafiği -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-900 mb-4">Görev Durumları</h3>
+            <div class="h-64">
+                <canvas id="taskStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Görev Öncelik Grafiği -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-900 mb-4">Görev Öncelikleri</h3>
+            <div class="h-64">
+                <canvas id="taskPriorityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Etkin Projeler -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-900">Aktif Projeler</h3>
+                <span class="text-xs text-gray-500">Devam Eden ve Planlama Aşamasındaki Projeler</span>
+            </div>
+            <div class="overflow-hidden">
+                <div class="h-[300px] overflow-y-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proje Adı</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tamamlanma</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevler</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @{
+                                var activeProjects = Model.Projects
+                                    .Where(p => p.Status == ProjectStatus.Planning || p.Status == ProjectStatus.InProgress)
+                                    .OrderByDescending(p => p.LastUpdatedDate ?? p.CreatedDate)
+                                    .Take(20)
+                                    .ToList();
+                            }
+                            @if (activeProjects.Any())
+                            {
+                                foreach (var project in activeProjects)
+                                {
+                                    var projectTasks = Model.Tasks.Where(t => t.ProjectId == project.Id).ToList();
+                                    var completedTasks = projectTasks.Count(t => t.Status == PlanYonetimAraclari.Models.TaskStatus.Done);
+                                    var totalTasks = projectTasks.Count;
+                                    var completion = totalTasks > 0 ? (double)completedTasks / totalTasks * 100 : 0;
+                                    
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <a href="@Url.Action("Details", "Project", new { id = project.Id })" class="text-blue-600 hover:text-blue-800">
+                                                @project.Name
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 @(project.Status == ProjectStatus.Planning ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800") text-xs rounded-full">
+                                                @(project.Status == ProjectStatus.Planning ? "Planlama" : "Devam Ediyor")
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5 max-w-[150px]">
+                                                <div class="bg-blue-500 h-2.5 rounded-full" style="width: @(completion)%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500 mt-1">%@(Math.Round(completion, 0))</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @completedTasks / @totalTasks görev tamamlandı
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Aktif proje bulunamadı.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Son Tamamlanan Görevler -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-900 mb-4">Son Tamamlanan Görevler</h3>
+            <div class="overflow-hidden">
+                <div class="h-[300px] overflow-y-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görev</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proje</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if (Model.RecentCompletedTasks.Any())
+                            {
+                                foreach (var task in Model.RecentCompletedTasks.OrderByDescending(t => t.LastUpdatedDate ?? t.CreatedDate))
+                                {
+                                    var project = Model.Projects.FirstOrDefault(p => p.Id == task.ProjectId);
+                                    
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900 max-w-[250px] truncate" title="@task.Name">@task.Name</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">@(project?.Name ?? "Proje Bulunamadı")</div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                            @{
+                                                var completedDate = task.LastUpdatedDate ?? task.CreatedDate;
+                                                @completedDate.ToString("dd.MM.yyyy HH:mm")
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Tamamlanan görev bulunamadı.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Son Eklenen Görevler -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-900 mb-4">Son Eklenen Görevler</h3>
+            <div class="overflow-hidden">
+                <div class="h-[300px] overflow-y-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görev</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proje</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if (Model.RecentCreatedTasks.Any())
+                            {
+                                foreach (var task in Model.RecentCreatedTasks.OrderByDescending(t => t.CreatedDate))
+                                {
+                                    var project = Model.Projects.FirstOrDefault(p => p.Id == task.ProjectId);
+                                    
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900 max-w-[250px] truncate" title="@task.Name">@task.Name</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">@(project?.Name ?? "Proje Bulunamadı")</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 @(task.Status == PlanYonetimAraclari.Models.TaskStatus.Todo ? "bg-blue-100 text-blue-800" :
+                                                                   task.Status == PlanYonetimAraclari.Models.TaskStatus.InProgress ? "bg-amber-100 text-amber-800" :
+                                                                 "bg-green-100 text-green-800") text-xs rounded-full">
+                                                @(task.Status == PlanYonetimAraclari.Models.TaskStatus.Todo ? "Yapılacak" :
+                                                 task.Status == PlanYonetimAraclari.Models.TaskStatus.InProgress ? "Devam Ediyor" :
+                                                 "Tamamlandı")
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                            @{
+                                                @task.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Henüz görev eklenmemiş.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Proje durumları için veri
+            const projectStatusData = {
+                labels: ['Planlama', 'Devam Ediyor', 'Tamamlandı', 'Beklemede', 'İptal Edildi'],
+                datasets: [{
+                    label: 'Projeler',
+                    data: [
+                        @Model.ProjectStats["Planning"],
+                        @Model.ProjectStats["InProgress"],
+                        @Model.ProjectStats["Completed"],
+                        @Model.ProjectStats["OnHold"],
+                        @Model.ProjectStats["Cancelled"]
+                    ],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.5)', // Planlama - Mavi
+                        'rgba(245, 158, 11, 0.5)', // Devam Ediyor - Turuncu
+                        'rgba(16, 185, 129, 0.5)', // Tamamlandı - Yeşil
+                        'rgba(156, 163, 175, 0.5)', // Beklemede - Gri
+                        'rgba(239, 68, 68, 0.5)'    // İptal Edildi - Kırmızı
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(156, 163, 175, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Görev durumları için veri
+            const taskStatusData = {
+                labels: ['Yapılacak', 'Devam Ediyor', 'Tamamlandı'],
+                datasets: [{
+                    label: 'Görevler',
+                    data: [
+                        @Model.TaskStats["Todo"],
+                        @Model.TaskStats["InProgress"],
+                        @Model.TaskStats["Done"]
+                    ],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.5)', // Yapılacak - Mavi
+                        'rgba(245, 158, 11, 0.5)', // Devam Ediyor - Turuncu
+                        'rgba(16, 185, 129, 0.5)'  // Tamamlandı - Yeşil
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(16, 185, 129, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Görev öncelikleri için veri
+            const taskPriorityData = {
+                labels: ['Düşük', 'Orta', 'Yüksek', 'Acil'],
+                datasets: [{
+                    label: 'Görevler',
+                    data: [
+                        @Model.PriorityStats["Low"],
+                        @Model.PriorityStats["Medium"],
+                        @Model.PriorityStats["High"],
+                        @Model.PriorityStats["Urgent"]
+                    ],
+                    backgroundColor: [
+                        'rgba(147, 197, 253, 0.5)', // Düşük - Açık Mavi
+                        'rgba(252, 211, 77, 0.5)',  // Orta - Açık Sarı
+                        'rgba(251, 146, 60, 0.5)',  // Yüksek - Turuncu
+                        'rgba(248, 113, 113, 0.5)'  // Acil - Kırmızı
+                    ],
+                    borderColor: [
+                        'rgba(147, 197, 253, 1)',
+                        'rgba(252, 211, 77, 1)',
+                        'rgba(251, 146, 60, 1)',
+                        'rgba(248, 113, 113, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Grafikleri oluştur
+            const projectStatusChart = new Chart(
+                document.getElementById('projectStatusChart'),
+                {
+                    type: 'pie',
+                    data: projectStatusData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Proje Durumları'
+                            }
+                        }
+                    }
+                }
+            );
+            
+            const taskStatusChart = new Chart(
+                document.getElementById('taskStatusChart'),
+                {
+                    type: 'doughnut',
+                    data: taskStatusData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Görev Durumları'
+                            }
+                        }
+                    }
+                }
+            );
+            
+            const taskPriorityChart = new Chart(
+                document.getElementById('taskPriorityChart'),
+                {
+                    type: 'bar',
+                    data: taskPriorityData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Görev Öncelikleri'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // 5 saniye sonra bildirimleri gizle
+            setTimeout(function() {
+                $('.auto-hide-message').fadeOut('slow');
+            }, 5000);
+        });
+        
+        // Tarih formatlama fonksiyonu
+        function formatDate(date) {
+            if (!(date instanceof Date)) {
+                date = new Date(date);
+            }
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+    </script>
+    
+    <style>
+        /* Modern Scrollbar Tasarımı */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(203, 213, 225, 1) transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(203, 213, 225, 1);
+            border-radius: 20px;
+            border: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(148, 163, 184, 1);
+        }
+
+        /* Hover durumunda scrollbar'ı göster */
+        .custom-scrollbar {
+            scrollbar-width: none; /* Firefox için varsayılan olarak gizle */
+        }
+
+        .custom-scrollbar:hover {
+            scrollbar-width: thin; /* Firefox için hover'da göster */
+        }
+
+        /* Webkit (Chrome, Safari, etc.) için hover durumunda scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 0px; /* Varsayılan olarak gizle */
+        }
+
+        .custom-scrollbar:hover::-webkit-scrollbar {
+            width: 6px; /* Hover'da göster */
+        }
+        
+        /* Tablolarda başlık satırı her zaman görünür olsun */
+        thead.sticky {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgb(249, 250, 251); /* bg-gray-50 */
+        }
+    </style>
+} 

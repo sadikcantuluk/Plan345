@@ -3,38 +3,22 @@
   "WorkspaceRootPath": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\services\\teamservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:services\\teamservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\controllers\\teamcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:controllers\\teamcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\team\\members.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\team\\members.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\team\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\team\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\controllers\\projectcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:controllers\\projectcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\views\\project\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:views\\project\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|c:\\users\\sadik\\onedrive\\masa\u00FCst\u00FC\\yeni klas\u00F6r\\projeyonetimararci\\plan345\\planyonetimaraclari\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{DC10C3C9-D983-93CB-D91D-98E1AF14C2E0}|PlanYonetimAraclari.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 276,
+      "VerticalTabListWidth": 163,
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -74,80 +58,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "TeamService.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Services\\TeamService.cs",
-              "RelativeDocumentMoniker": "Services\\TeamService.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Services\\TeamService.cs",
-              "RelativeToolTip": "Services\\TeamService.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-19T08:05:44.67Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "TeamController.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\TeamController.cs",
-              "RelativeDocumentMoniker": "Controllers\\TeamController.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\TeamController.cs",
-              "RelativeToolTip": "Controllers\\TeamController.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-19T08:03:57.826Z",
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-03-21T12:25:42.991Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Members.cshtml",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Team\\Members.cshtml",
-              "RelativeDocumentMoniker": "Views\\Team\\Members.cshtml",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Team\\Members.cshtml",
-              "RelativeToolTip": "Views\\Team\\Members.cshtml",
-              "ViewState": "AgIAAM8AAAAAAAAAAAAAAEIAAABdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-03-19T08:03:07.252Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Team\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Team\\Index.cshtml",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Team\\Index.cshtml",
-              "RelativeToolTip": "Views\\Team\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-03-19T08:03:05.165Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Project\\Details.cshtml",
-              "RelativeDocumentMoniker": "Views\\Project\\Details.cshtml",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Views\\Project\\Details.cshtml",
-              "RelativeToolTip": "Views\\Project\\Details.cshtml",
-              "ViewState": "AgIAALMBAAAAAAAAAAAAAM4BAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-03-19T07:26:46.826Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ProjectController.cs",
-              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\ProjectController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ProjectController.cs",
-              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Controllers\\ProjectController.cs",
-              "RelativeToolTip": "Controllers\\ProjectController.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAnwFUAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-19T07:26:29.927Z",
+              "DocumentIndex": 0,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\sadik\\OneDrive\\Masa\u00FCst\u00FC\\Yeni klas\u00F6r\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-03-21T12:25:12.279Z",
               "EditorCaption": ""
             }
           ]

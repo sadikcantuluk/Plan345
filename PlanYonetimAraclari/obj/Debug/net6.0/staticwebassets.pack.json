@@ -73,12 +73,16 @@
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
-      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\favicon.ico",
-      "PackagePath": "staticwebassets\\favicon.ico"
+      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\icons8-plan-96.png",
+      "PackagePath": "staticwebassets\\icons8-plan-96.png"
     },
     {
       "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\0c3f0d8d-4f7d-4026-87da-e1cb705ac21a_Ekran görüntüsü 2024-06-22 225953.png",
       "PackagePath": "staticwebassets\\images\\profiles\\0c3f0d8d-4f7d-4026-87da-e1cb705ac21a_Ekran görüntüsü 2024-06-22 225953.png"
+    },
+    {
+      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\121218d6-32b8-4e9e-983a-d540747a58af_foto.jpg",
+      "PackagePath": "staticwebassets\\images\\profiles\\121218d6-32b8-4e9e-983a-d540747a58af_foto.jpg"
     },
     {
       "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\12aee449-2050-426c-9dc8-00dedaa235a1_foto.jpg",
@@ -107,6 +111,10 @@
     {
       "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\99fd3748-3fa1-4b0d-a114-f6ecf2261c8b_sadık.jpg",
       "PackagePath": "staticwebassets\\images\\profiles\\99fd3748-3fa1-4b0d-a114-f6ecf2261c8b_sadık.jpg"
+    },
+    {
+      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\a3ddd537-5a20-4751-aaef-d50409cba108_sadık.jpg",
+      "PackagePath": "staticwebassets\\images\\profiles\\a3ddd537-5a20-4751-aaef-d50409cba108_sadık.jpg"
     },
     {
       "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\a4fe00ee-4fa8-405f-a15e-3026f0918bae_Ekran görüntüsü 2024-07-24 003959.png",
@@ -355,6 +363,10 @@
     {
       "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\logo.png",
+      "PackagePath": "staticwebassets\\logo.png"
     },
     {
       "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.PlanYonetimAraclari.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

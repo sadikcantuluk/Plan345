@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -17,15 +18,18 @@ namespace PlanYonetimAraclari.Controllers
         private readonly ILogger<DashboardController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IProjectService _projectService;
+        private readonly ActivityService _activityService;
 
         public DashboardController(
             ILogger<DashboardController> logger,
             UserManager<ApplicationUser> userManager,
-            IProjectService projectService)
+            IProjectService projectService,
+            ActivityService activityService)
         {
             _logger = logger;
             _userManager = userManager;
             _projectService = projectService;
+            _activityService = activityService;
         }
 
         public async Task<IActionResult> Index()
@@ -70,6 +74,58 @@ namespace PlanYonetimAraclari.Controllers
                 int completedProjectsCount = await _projectService.GetUserCompletedProjectsCountAsync(user.Id);
                 int pendingProjectsCount = await _projectService.GetUserPendingProjectsCountAsync(user.Id);
                 
+                // Son etkinlikleri getir
+                var recentActivities = await _activityService.GetUserAndTeamActivitiesAsync(user.Id, 20);
+                
+                // Etkinlik yoksa ve kullanıcı etkinlikleri ilk kez görüntülüyorsa demo etkinlikleri göster
+                string activityDemoShown = HttpContext.Session.GetString("ActivityDemoShown");
+                if (!recentActivities.Any() && string.IsNullOrEmpty(activityDemoShown))
+                {
+                    // Demo etkinlikleri gösterdiğimizi session'a kaydet
+                    HttpContext.Session.SetString("ActivityDemoShown", "true");
+                    
+                    // Demo etkinlikleri ekle (gösterim amaçlı - veritabanına kaydedilmez)
+                    recentActivities = new List<ActivityLog>
+                    {
+                        new ActivityLog 
+                        { 
+                            Id = -1, 
+                            UserId = user.Id,
+                            Type = ActivityType.ProjectCreated, 
+                            Title = "Yeni proje oluşturuldu", 
+                            Description = "Pazarlama Kampanyası", 
+                            CreatedAt = DateTime.Now.AddHours(-2) 
+                        },
+                        new ActivityLog 
+                        { 
+                            Id = -2, 
+                            UserId = user.Id,
+                            Type = ActivityType.TaskCompleted, 
+                            Title = "Görev tamamlandı", 
+                            Description = "Logo tasarımı", 
+                            CreatedAt = DateTime.Now.AddHours(-5) 
+                        },
+                        new ActivityLog 
+                        { 
+                            Id = -3, 
+                            UserId = user.Id,
+                            Type = ActivityType.TaskUpdated, 
+                            Title = "Görev güncellendi", 
+                            Description = "İçerik düzenleme", 
+                            CreatedAt = DateTime.Now.AddDays(-1) 
+                        },
+                        new ActivityLog 
+                        { 
+                            Id = -4, 
+                            UserId = user.Id,
+                            Type = ActivityType.NoteCreated, 
+                            Title = "Yeni not eklendi", 
+                            Description = "Toplantı notları", 
+                            CreatedAt = DateTime.Now.AddDays(-2) 
+                        }
+                    };
+                }
+                
                 // Dashboard model oluştur
                 var dashboardModel = new DashboardViewModel
                 {
@@ -85,7 +141,9 @@ namespace PlanYonetimAraclari.Controllers
                     TotalProjectsCount = totalProjectsCount,
                     ActiveProjectsCount = activeProjectsCount,
                     CompletedProjectsCount = completedProjectsCount,
-                    PendingProjectsCount = pendingProjectsCount
+                    PendingProjectsCount = pendingProjectsCount,
+                    RecentActivities = recentActivities,
+                    ActivityService = _activityService
                 };
                 
                 // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
@@ -201,6 +259,8 @@ namespace PlanYonetimAraclari.Controllers
                 {
                     _logger.LogInformation($"Proje başarıyla oluşturuldu: {createdProject.Id} - {createdProject.Name}");
                     TempData["SuccessMessage"] = "Proje başarıyla oluşturuldu.";
+                    
+                    // Etkinlik kaydı zaten ProjectService içinde oluşturuluyor, buradan kaldırıldı
                 }
                 else
                 {

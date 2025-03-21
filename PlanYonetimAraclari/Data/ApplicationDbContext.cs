@@ -18,6 +18,7 @@ namespace PlanYonetimAraclari.Data
         public DbSet<ProjectInvitation> ProjectInvitations { get; set; }
         public DbSet<CalendarNote> CalendarNotes { get; set; }
         public DbSet<QuickNote> QuickNotes { get; set; }
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

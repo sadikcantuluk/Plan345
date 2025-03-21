@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PlanYonetimAraclari.Services;
 
 namespace PlanYonetimAraclari.Models
 {
@@ -10,5 +11,7 @@ namespace PlanYonetimAraclari.Models
         public int ActiveProjectsCount { get; set; }
         public int CompletedProjectsCount { get; set; }
         public int PendingProjectsCount { get; set; }
+        public List<ActivityLog> RecentActivities { get; set; } = new List<ActivityLog>();
+        public ActivityService ActivityService { get; set; }
     }
 } 

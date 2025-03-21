@@ -14,11 +14,13 @@ namespace PlanYonetimAraclari.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<ProjectService> _logger;
+        private readonly ActivityService _activityService;
 
-        public ProjectService(ApplicationDbContext context, ILogger<ProjectService> logger)
+        public ProjectService(ApplicationDbContext context, ILogger<ProjectService> logger, ActivityService activityService)
         {
             _context = context;
             _logger = logger;
+            _activityService = activityService;
         }
 
         public async Task<List<ProjectModel>> GetUserProjectsAsync(string userId)
@@ -119,6 +121,16 @@ namespace PlanYonetimAraclari.Services
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("Proje sahibi başarıyla ekip üyesi olarak eklendi");
                     
+                    // Etkinlik kaydı oluştur
+                    await _activityService.LogActivityAsync(
+                        userId: project.UserId,
+                        type: ActivityType.ProjectCreated,
+                        title: "Yeni proje oluşturuldu",
+                        description: project.Name,
+                        relatedEntityId: project.Id,
+                        relatedEntityType: "Project"
+                    );
+                    
                     return project;
                 }
                 else
@@ -148,6 +160,9 @@ namespace PlanYonetimAraclari.Services
             {
                 _logger.LogInformation($"Proje güncelleniyor: {project.Id} - {project.Name}");
                 
+                // Eski projeyi al (değişiklik sonrası karşılaştırma için)
+                var oldProject = await _context.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == project.Id);
+                
                 // Son güncelleme tarihini ayarla
                 project.LastUpdatedDate = DateTime.Now;
                 
@@ -155,6 +170,17 @@ namespace PlanYonetimAraclari.Services
                 await _context.SaveChangesAsync();
                 
                 _logger.LogInformation($"Proje başarıyla güncellendi: {project.Id} - {project.Name}");
+                
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: project.UserId,
+                    type: ActivityType.ProjectUpdated,
+                    title: "Proje güncellendi",
+                    description: project.Name,
+                    relatedEntityId: project.Id,
+                    relatedEntityType: "Project"
+                );
+                
                 return project;
             }
             catch (Exception ex)
@@ -180,6 +206,10 @@ namespace PlanYonetimAraclari.Services
                     _logger.LogWarning($"Silinecek proje bulunamadı: {projectId}");
                     return false;
                 }
+                
+                // Projenin adı ve kullanıcı ID'si silme sonrası etkinlik kaydı için
+                var projectName = project.Name;
+                var userId = project.UserId;
                 
                 // Projeye ait görevleri kontrol et
                 var hasRelatedTasks = await _context.Tasks.AnyAsync(t => t.ProjectId == projectId);
@@ -227,6 +257,17 @@ namespace PlanYonetimAraclari.Services
                         await transaction.CommitAsync();
                         
                         _logger.LogInformation($"Proje başarıyla silindi: {projectId}");
+                        
+                        // Etkinlik kaydı oluştur
+                        await _activityService.LogActivityAsync(
+                            userId: userId,
+                            type: ActivityType.ProjectDeleted,
+                            title: "Proje silindi",
+                            description: projectName,
+                            relatedEntityId: null,
+                            relatedEntityType: "Project"
+                        );
+                        
                         return true;
                     }
                     catch (Exception ex)
@@ -434,6 +475,30 @@ namespace PlanYonetimAraclari.Services
                 await _context.SaveChangesAsync();
                 
                 _logger.LogInformation($"Görev başarıyla oluşturuldu: {task.Id} - {task.Name}");
+                
+                // Etkinlik kaydı oluştur - işlemi yapan kişinin ID'sini kullan
+                string actorUserId = task.CreatedByUserId ?? _context.Projects.FirstOrDefault(p => p.Id == task.ProjectId)?.UserId ?? "Sistem";
+                string assignedToName = "";
+                
+                // Görev atanan kişinin adını sadece atama varsa ekle
+                if (!string.IsNullOrEmpty(task.AssignedMemberId) && task.AssignedMemberId != actorUserId)
+                {
+                    var assignedUser = await _context.Users.FindAsync(task.AssignedMemberId);
+                    if (assignedUser != null)
+                    {
+                        assignedToName = $" ({assignedUser.FullName} kişisine atandı)";
+                    }
+                }
+                
+                await _activityService.LogActivityAsync(
+                    userId: actorUserId,
+                    type: ActivityType.TaskCreated,
+                    title: "Yeni görev oluşturuldu",
+                    description: task.Name + assignedToName,
+                    relatedEntityId: task.ProjectId,
+                    relatedEntityType: "Project"
+                );
+                
                 return task;
             }
             catch (Exception ex)
@@ -447,6 +512,11 @@ namespace PlanYonetimAraclari.Services
         {
             try
             {
+                // Önceki görev durumunu kontrol etmek için veritabanından görevi al
+                var originalTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == task.Id);
+                bool isStatusChange = originalTask != null && originalTask.Status != task.Status;
+                bool isAssignmentChange = originalTask != null && originalTask.AssignedMemberId != task.AssignedMemberId;
+                
                 _logger.LogInformation($"Görev güncelleniyor: {task.Id} - {task.Name}");
                 
                 task.LastUpdatedDate = DateTime.Now;
@@ -455,6 +525,39 @@ namespace PlanYonetimAraclari.Services
                 await _context.SaveChangesAsync();
                 
                 _logger.LogInformation($"Görev başarıyla güncellendi: {task.Id} - {task.Name}");
+                
+                var activityType = task.Status == TaskStatus.Done 
+                    ? ActivityType.TaskCompleted 
+                    : ActivityType.TaskUpdated;
+                
+                var activityTitle = task.Status == TaskStatus.Done
+                    ? "Görev tamamlandı"
+                    : "Görev güncellendi";
+                
+                // İşlemi yapan kullanıcının ID'sini kullan
+                string actorUserId = task.UpdatedByUserId ?? task.CreatedByUserId ?? _context.Projects.FirstOrDefault(p => p.Id == task.ProjectId)?.UserId ?? "Sistem";
+                string assignedToName = "";
+                
+                // Görev atanan kişinin adını sadece atama değişikliği varsa ekle
+                if (isAssignmentChange && !string.IsNullOrEmpty(task.AssignedMemberId))
+                {
+                    var assignedUser = await _context.Users.FindAsync(task.AssignedMemberId);
+                    if (assignedUser != null)
+                    {
+                        assignedToName = $" ({assignedUser.FullName} kişisine atandı)";
+                    }
+                }
+                
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: actorUserId,
+                    type: activityType,
+                    title: activityTitle,
+                    description: task.Name + assignedToName,
+                    relatedEntityId: task.ProjectId,
+                    relatedEntityType: "Project"
+                );
+                
                 return task;
             }
             catch (Exception ex)
@@ -477,10 +580,25 @@ namespace PlanYonetimAraclari.Services
                     return false;
                 }
                 
+                string taskName = task.Name;
+                int projectId = task.ProjectId;
+                
+                // İşlemi yapan kullanıcının ID'sini kullan
+                string actorUserId = task.UpdatedByUserId ?? task.CreatedByUserId ?? _context.Projects.FirstOrDefault(p => p.Id == task.ProjectId)?.UserId ?? "Sistem";
+                
                 _context.Tasks.Remove(task);
                 await _context.SaveChangesAsync();
                 
-                _logger.LogInformation($"Görev başarıyla silindi: {taskId}");
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: actorUserId,
+                    type: ActivityType.TaskDeleted,
+                    title: "Görev silindi",
+                    description: taskName,
+                    relatedEntityId: projectId,
+                    relatedEntityType: "Project"
+                );
+                
                 return true;
             }
             catch (Exception ex)

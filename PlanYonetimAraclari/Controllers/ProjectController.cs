@@ -328,6 +328,9 @@ namespace PlanYonetimAraclari.Controllers
                     return RedirectToAction("Details", new { id = model.ProjectId });
                 }
                 
+                // İşlemi yapan kullanıcının ID'sini ayarla
+                model.CreatedByUserId = user.Id;
+                
                 // AssignedMemberId kontrolü
                 if (!string.IsNullOrWhiteSpace(model.AssignedMemberId))
                 {
@@ -489,6 +492,7 @@ namespace PlanYonetimAraclari.Controllers
                 // Görev durumunu güncelle
                 task.Status = newStatus;
                 task.LastUpdatedDate = DateTime.Now;
+                task.UpdatedByUserId = user.Id; // Güncelleyen kullanıcı ID'sini ayarla
                 
                 var updatedTask = await _projectService.UpdateTaskAsync(task);
                 
@@ -594,6 +598,9 @@ namespace PlanYonetimAraclari.Controllers
                     _logger.LogWarning($"Kullanıcı ({user.Id}) başka bir kullanıcının projesindeki görevi silmeye çalışıyor.");
                     return Json(new { success = false, message = "Bu görevi silme yetkiniz yok." });
                 }
+
+                // İşlemi yapan kullanıcı ID'sini ayarla
+                task.UpdatedByUserId = user.Id;
                 
                 // Görevi sil
                 var result = await _projectService.DeleteTaskAsync(taskId);

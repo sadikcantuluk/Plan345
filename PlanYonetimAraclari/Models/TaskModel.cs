@@ -72,5 +72,11 @@ namespace PlanYonetimAraclari.Models
         
         [ForeignKey("AssignedMemberId")]
         public virtual ApplicationUser? AssignedMember { get; set; }
+        
+        [Display(Name = "Oluşturan Kullanıcı ID")]
+        public string? CreatedByUserId { get; set; }
+        
+        [Display(Name = "Güncelleyen Kullanıcı ID")]
+        public string? UpdatedByUserId { get; set; }
     }
 } 

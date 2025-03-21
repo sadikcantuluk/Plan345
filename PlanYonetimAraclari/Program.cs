@@ -4,6 +4,7 @@ using PlanYonetimAraclari.Data;
 using PlanYonetimAraclari.Models;
 using PlanYonetimAraclari.Services;
 using PlanYonetimAraclari.Extensions;
+using PlanYonetimAraclari.Services.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,10 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 // Proje servisi ekle
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<ActivityService>();
+
+// Arka plan servisleri
+builder.Services.AddHostedService<ActivityCleanupService>();
 
 // Identity yapılandırması
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 

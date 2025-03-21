@@ -15,12 +15,14 @@ namespace PlanYonetimAraclari.Services
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
+        private readonly ActivityService _activityService;
 
-        public TeamService(ApplicationDbContext context, IEmailService emailService, IOptions<EmailSettings> emailSettings)
+        public TeamService(ApplicationDbContext context, IEmailService emailService, IOptions<EmailSettings> emailSettings, ActivityService activityService)
         {
             _context = context;
             _emailService = emailService;
             _emailSettings = emailSettings.Value;
+            _activityService = activityService;
         }
 
         public async Task<bool> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId)
@@ -132,6 +134,16 @@ namespace PlanYonetimAraclari.Services
                 _context.ProjectTeamMembers.Add(teamMember);
                 await _context.SaveChangesAsync();
 
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    invitation.Project.UserId, // Proje sahibinin ID'si ile kaydet
+                    ActivityType.TeamMemberAdded,
+                    $"{user.FullName} ekibe katıldı",
+                    $"{user.FullName}, {invitation.Project.Name} projesine katıldı",
+                    invitation.ProjectId,
+                    "Project"
+                );
+
                 return true;
             }
             catch (Exception ex)
@@ -183,13 +195,29 @@ namespace PlanYonetimAraclari.Services
         public async Task<bool> RemoveTeamMember(int projectId, string userId)
         {
             var teamMember = await _context.ProjectTeamMembers
+                .Include(m => m.User)
+                .Include(m => m.Project)
                 .FirstOrDefaultAsync(m => m.ProjectId == projectId && m.UserId == userId);
 
             if (teamMember == null)
                 return false;
 
+            string memberName = teamMember.User.FullName;
+            string projectName = teamMember.Project.Name;
+            string projectOwnerId = teamMember.Project.UserId;
+
             _context.ProjectTeamMembers.Remove(teamMember);
             await _context.SaveChangesAsync();
+
+            // Etkinlik kaydı oluştur - Tek bir etkinlik yeterli
+            await _activityService.LogActivityAsync(
+                projectOwnerId, // Proje sahibinin ID'si ile kaydet
+                ActivityType.TeamMemberRemoved,
+                $"{memberName} ekipten ayrıldı",
+                $"{memberName}, {projectName} projesinden ayrıldı",
+                projectId,
+                "Project"
+            );
 
             return true;
         }

@@ -9,6 +9,7 @@ using PlanYonetimAraclari.Models;
 using System.Security.Claims;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+using PlanYonetimAraclari.Services;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -18,10 +19,12 @@ namespace PlanYonetimAraclari.Controllers
     public class CalendarApiController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ActivityService _activityService;
 
-        public CalendarApiController(ApplicationDbContext context)
+        public CalendarApiController(ApplicationDbContext context, ActivityService activityService)
         {
             _context = context;
+            _activityService = activityService;
         }
 
         [HttpGet("view")]
@@ -71,13 +74,14 @@ namespace PlanYonetimAraclari.Controllers
 
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var note = new CalendarNote
                 {
                     Title = request.Title,
                     Description = request.Description,
                     NoteDate = request.NoteDate,
                     IsCompleted = request.IsCompleted,
-                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    UserId = userId,
                     CreatedAt = DateTime.UtcNow,
                     NotificationSent = false
                 };
@@ -90,6 +94,16 @@ namespace PlanYonetimAraclari.Controllers
 
                 _context.CalendarNotes.Add(note);
                 await _context.SaveChangesAsync();
+
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId,
+                    ActivityType.CalendarNoteCreated,
+                    "Takvim notu oluşturuldu",
+                    note.Title,
+                    note.Id,
+                    "CalendarNote"
+                );
 
                 var response = new
                 {
@@ -145,6 +159,16 @@ namespace PlanYonetimAraclari.Controllers
 
                 await _context.SaveChangesAsync();
 
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId,
+                    ActivityType.CalendarNoteUpdated,
+                    "Takvim notu güncellendi",
+                    note.Title,
+                    note.Id,
+                    "CalendarNote"
+                );
+
                 return Ok(new { 
                     success = true,
                     data = new {
@@ -176,8 +200,20 @@ namespace PlanYonetimAraclari.Controllers
                     return NotFound(new { success = false, error = "Not bulunamadı" });
                 }
 
+                string noteTitle = note.Title; // Etkinlik kaydı için başlığı sakla
+                
                 _context.CalendarNotes.Remove(note);
                 await _context.SaveChangesAsync();
+
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId,
+                    ActivityType.CalendarNoteDeleted,
+                    "Takvim notu silindi",
+                    noteTitle,
+                    null,
+                    "CalendarNote"
+                );
 
                 return Ok(new { success = true });
             }

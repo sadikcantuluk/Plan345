@@ -206,62 +206,94 @@
     <div class="mb-8">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900">Son Etkinlikler</h3>
+                <div class="flex items-center">
+                    <h3 class="font-semibold text-gray-900 mr-2">Son Etkinlikler</h3>
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+                        <span>Etkinlikler @Model.ActivityService.GetActivityRetentionDays() gün sonra otomatik silinir</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="scroll-left" class="p-2 text-gray-500 hover:text-primary-500 bg-gray-100 hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="scroll-right" class="p-2 text-gray-500 hover:text-primary-500 bg-gray-100 hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0 h-8 w-8 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-plus text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Proje oluşturuldu</p>
-                            <p class="text-xs text-gray-500">Web Sitesi Yenileme</p>
-                            <p class="text-xs text-gray-400 mt-1">2 saat önce</p>
+            @if (Model.RecentActivities == null || !Model.RecentActivities.Any())
+            {
+                <div class="text-center py-8">
+                    <div class="mb-4 text-gray-400">
+                        <i class="fas fa-history text-5xl"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">Henüz hiç etkinlik yok</h4>
+                    <p class="text-gray-500">Etkinlikler, siz ve ekip arkadaşlarınız projelerle etkileşime girdiğinde burada görünecektir.</p>
+                </div>
+            }
+            else
+            {
+                <div class="relative">
+                    <!-- Etkinlikler Kaydırma Konteyneri -->
+                    <div id="activity-slider" class="overflow-x-hidden">
+                        <div id="activity-track" class="flex space-x-4">
+                            @if (Model.RecentActivities.Any())
+                            {
+                                foreach (var activity in Model.RecentActivities.Take(20).ToList())
+                                {
+                                    <div class="activity-item w-[320px] bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 p-4 cursor-pointer" 
+                                         data-activity-id="@activity.Id"
+                                         data-activity-title="@activity.Title.Replace("\"", "&quot;")"
+                                         data-activity-description="@(activity.Description?.Replace("\"", "&quot;") ?? "")"
+                                         data-activity-date="@activity.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")"
+                                         data-activity-user="@activity.User.FullName.Replace("\"", "&quot;")"
+                                         data-activity-type="@activity.Type"
+                                         onclick="showActivityDetails(this)">
+                                        <div class="flex flex-col h-full">
+                                            <div class="flex items-start">
+                                                <div class="@GetActivityIconClass(activity.Type) h-10 w-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                    <i class="@GetActivityIcon(activity.Type)"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-sm font-semibold text-gray-800 truncate" title="@activity.Title">@activity.Title</h4>
+                                                    <p class="text-xs text-gray-500 line-clamp-2 mt-1 min-h-[32px]" title="@activity.Description">@activity.Description</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center mt-auto pt-3">
+                                                <p class="text-xs text-gray-400">@activity.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                                                <span class="text-gray-300 mx-2">•</span>
+                                                <p class="text-xs text-gray-500 truncate">
+                                                @if (activity.Type == ActivityType.TaskCreated || activity.Type == ActivityType.TaskUpdated || 
+                                                     activity.Type == ActivityType.TaskCompleted || activity.Type == ActivityType.TaskDeleted)
+                                                {
+                                                    <span>Görev İşlemi: @activity.User.FullName</span>
+                                                }
+                                                else if (activity.Type == ActivityType.TeamMemberAdded || activity.Type == ActivityType.TeamMemberRemoved)
+                                                {
+                                                    <span>@activity.User.FullName</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@activity.User.FullName</span>
+                                                }
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="w-full text-center py-10">
+                                    <p class="text-gray-500">Henüz etkinlik kaydı bulunmuyor.</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
-                
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0 h-8 w-8 bg-green-100 text-green-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-check text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Görev tamamlandı</p>
-                            <p class="text-xs text-gray-500">Logo tasarımı</p>
-                            <p class="text-xs text-gray-400 mt-1">5 saat önce</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0 h-8 w-8 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-pencil-alt text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Görev güncellendi</p>
-                            <p class="text-xs text-gray-500">İçerik düzenleme</p>
-                            <p class="text-xs text-gray-400 mt-1">1 gün önce</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="border-b border-gray-100 pb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0 h-8 w-8 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-trash text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Görev silindi</p>
-                            <p class="text-xs text-gray-500">Test görevi</p>
-                            <p class="text-xs text-gray-400 mt-1">3 gün önce</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </div>
@@ -331,6 +363,29 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Etkinlik Detayları Modal -->
+<div id="activityDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 transform transition-all">
+        <div class="flex justify-between items-start">
+            <h3 id="activityTitle" class="text-lg font-semibold text-gray-900"></h3>
+            <button onclick="closeActivityModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="mt-4">
+            <div class="text-sm text-gray-600 mb-4">
+                <p id="activityDescription" class="whitespace-pre-line"></p>
+            </div>
+            <div class="flex items-center justify-between text-xs text-gray-500 mt-6 pt-4 border-t border-gray-200">
+                <span id="activityDate"></span>
+                <span id="activityUser"></span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -408,7 +463,64 @@
                     localStorage.removeItem('projectFormData');
                 }, 1000);
             }
+
+            // Son Etkinlikler yatay kaydırma işlevselliği
+            initActivitySlider();
         });
+
+        function initActivitySlider() {
+            const slider = document.getElementById('activity-slider');
+            const track = document.getElementById('activity-track');
+            const items = document.querySelectorAll('.activity-item');
+            const leftBtn = document.getElementById('scroll-left');
+            const rightBtn = document.getElementById('scroll-right');
+            
+            if (!slider || !track || items.length === 0 || !leftBtn || !rightBtn) return;
+            
+            // İlk 5 öğeyi göster, diğerlerini kaydırarak göster
+            const itemWidth = 300; // Her bir öğenin genişliği (w-[320px] ile aynı)
+            const gap = 16; // space-x-4 (1rem = 16px)
+            const visibleItems = 5; // Aynı anda görüntülenecek öğe sayısı
+            
+            // Slider genişliğini ayarla
+            slider.style.width = `${(itemWidth + gap) * visibleItems - gap}px`;
+            
+            let position = 0;
+            const maxPosition = Math.max(0, items.length - visibleItems) * (itemWidth + gap);
+            
+            // Başlangıçta sol düğmeyi devre dışı bırak
+            leftBtn.disabled = true;
+            
+            // Eğer toplam öğe sayısı görünür öğe sayısından az veya eşitse, sağ düğmeyi de devre dışı bırak
+            if (items.length <= visibleItems) {
+                rightBtn.disabled = true;
+            }
+            
+            // Sağa kaydırma
+            rightBtn.addEventListener('click', () => {
+                if (position < maxPosition) {
+                    position += (itemWidth + gap);
+                    updateSliderPosition();
+                }
+            });
+            
+            // Sola kaydırma
+            leftBtn.addEventListener('click', () => {
+                if (position > 0) {
+                    position -= (itemWidth + gap);
+                    updateSliderPosition();
+                }
+            });
+            
+            // Slider pozisyonunu güncelle ve düğme durumlarını ayarla
+            function updateSliderPosition() {
+                track.style.transform = `translateX(-${position}px)`;
+                
+                // Düğme durumlarını güncelle
+                leftBtn.disabled = position === 0;
+                rightBtn.disabled = position >= maxPosition;
+            }
+        }
 
         function validateForm() {
             console.log("Form validation başladı");
@@ -689,5 +801,149 @@
         .custom-scrollbar:hover::-webkit-scrollbar {
             width: 6px; /* Hover'da göster */
         }
+
+        /* Son Etkinlikler Slider Stil */
+        #activity-slider {
+            width: 100%;
+            min-height: 150px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #activity-track {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .activity-item {
+            height: 100%;
+            min-height: 130px; /* Sabit yükseklik */
+            width: 300px; /* Sabit genişlik */
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Kaydırma butonları hover efektleri */
+        #scroll-left:not([disabled]):hover,
+        #scroll-right:not([disabled]):hover {
+            background-color: #f1f5f9;
+            color: #4338ca;
+        }
+
+        /* Line Clamp için uyumluluk */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
+
+    @functions {
+        string GetActivityIconClass(ActivityType type)
+        {
+            return type switch
+            {
+                ActivityType.ProjectCreated => "bg-blue-100 text-blue-500",
+                ActivityType.ProjectUpdated => "bg-amber-100 text-amber-500",
+                ActivityType.ProjectDeleted => "bg-red-100 text-red-500",
+                ActivityType.TaskCreated => "bg-blue-100 text-blue-500",
+                ActivityType.TaskUpdated => "bg-amber-100 text-amber-500",
+                ActivityType.TaskCompleted => "bg-green-100 text-green-500",
+                ActivityType.TaskDeleted => "bg-red-100 text-red-500",
+                ActivityType.NoteCreated => "bg-purple-100 text-purple-500",
+                ActivityType.NoteUpdated => "bg-amber-100 text-amber-500",
+                ActivityType.NoteDeleted => "bg-red-100 text-red-500",
+                ActivityType.TeamMemberAdded => "bg-indigo-100 text-indigo-500",
+                ActivityType.TeamMemberRemoved => "bg-red-100 text-red-500",
+                ActivityType.CalendarNoteCreated => "bg-green-100 text-green-500", 
+                ActivityType.CalendarNoteUpdated => "bg-amber-100 text-amber-500",
+                ActivityType.CalendarNoteDeleted => "bg-red-100 text-red-500",
+                _ => "bg-gray-100 text-gray-500"
+            };
+        }
+
+        string GetActivityIcon(ActivityType type)
+        {
+            return type switch
+            {
+                ActivityType.ProjectCreated => "fas fa-folder-plus",
+                ActivityType.ProjectUpdated => "fas fa-folder-open",
+                ActivityType.ProjectDeleted => "fas fa-folder-minus",
+                ActivityType.TaskCreated => "fas fa-tasks",
+                ActivityType.TaskUpdated => "fas fa-edit",
+                ActivityType.TaskCompleted => "fas fa-check-double",
+                ActivityType.TaskDeleted => "fas fa-trash",
+                ActivityType.NoteCreated => "fas fa-sticky-note",
+                ActivityType.NoteUpdated => "fas fa-pen",
+                ActivityType.NoteDeleted => "fas fa-trash",
+                ActivityType.TeamMemberAdded => "fas fa-user-plus",
+                ActivityType.TeamMemberRemoved => "fas fa-user-minus",
+                ActivityType.CalendarNoteCreated => "fas fa-calendar-plus",
+                ActivityType.CalendarNoteUpdated => "fas fa-calendar-alt",
+                ActivityType.CalendarNoteDeleted => "fas fa-calendar-times",
+                _ => "fas fa-history"
+            };
+        }
+    }
+
+    <script>
+        // Etkinlik detaylarını göster
+        function showActivityDetails(element) {
+            // Modal içeriğini ayarla
+            const activityType = parseInt(element.getAttribute('data-activity-type') || '0');
+            const activityTitle = element.getAttribute('data-activity-title');
+            const activityDescription = element.getAttribute('data-activity-description');
+            const activityDate = element.getAttribute('data-activity-date');
+            const activityUser = element.getAttribute('data-activity-user');
+            
+            document.getElementById('activityTitle').textContent = activityTitle;
+            document.getElementById('activityDescription').textContent = activityDescription;
+            document.getElementById('activityDate').textContent = activityDate;
+            
+            // Görevi yapan kişinin görüntülenmesini özelleştir
+            const userElement = document.getElementById('activityUser');
+            
+            // ActivityType değerlerine göre işlemi gösteren kişiyi ayarla
+            // ActivityType.TaskCreated = 3, TaskUpdated = 4, TaskCompleted = 5, TaskDeleted = 6
+            if (activityType >= 3 && activityType <= 6) {
+                userElement.textContent = `Görev İşlemi: ${activityUser}`;
+            } 
+            // TeamMemberAdded = 10, TeamMemberRemoved = 11
+            else if (activityType === 10 || activityType === 11) {
+                userElement.textContent = activityUser;
+            }
+            else {
+                userElement.textContent = activityUser;
+            }
+            
+            // Modalı göster
+            document.getElementById('activityDetailsModal').classList.remove('hidden');
+            
+            // Kapatma için ESC tuşunu dinle
+            document.addEventListener('keydown', handleEscKeypress);
+            
+            // Arka plana tıklama ile kapatma
+            document.getElementById('activityDetailsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeActivityModal();
+                }
+            });
+        }
+        
+        // Modal kapatma fonksiyonu
+        function closeActivityModal() {
+            document.getElementById('activityDetailsModal').classList.add('hidden');
+            document.removeEventListener('keydown', handleEscKeypress);
+        }
+        
+        // ESC tuşu ile kapatma
+        function handleEscKeypress(e) {
+            if (e.key === 'Escape') {
+                closeActivityModal();
+            }
+        }
+    </script>
 }

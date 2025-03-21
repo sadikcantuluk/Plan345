@@ -9,6 +9,7 @@ using PlanYonetimAraclari.Data;
 using PlanYonetimAraclari.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using PlanYonetimAraclari.Services;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -18,10 +19,12 @@ namespace PlanYonetimAraclari.Controllers
     public class QuickNotesApiController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ActivityService _activityService;
 
-        public QuickNotesApiController(ApplicationDbContext context)
+        public QuickNotesApiController(ApplicationDbContext context, ActivityService activityService)
         {
             _context = context;
+            _activityService = activityService;
         }
 
         // GET: api/quicknotes
@@ -62,15 +65,27 @@ namespace PlanYonetimAraclari.Controllers
 
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
                 var quickNote = new QuickNote
                 {
                     Content = request.Content,
-                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    UserId = userId,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 _context.QuickNotes.Add(quickNote);
                 await _context.SaveChangesAsync();
+                
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: userId,
+                    type: ActivityType.NoteCreated,
+                    title: "Yeni not eklendi",
+                    description: quickNote.Content.Length > 50 ? quickNote.Content.Substring(0, 47) + "..." : quickNote.Content,
+                    relatedEntityId: quickNote.Id,
+                    relatedEntityType: "QuickNote"
+                );
 
                 return Ok(new
                 {
@@ -114,6 +129,16 @@ namespace PlanYonetimAraclari.Controllers
                 quickNote.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+                
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: userId,
+                    type: ActivityType.NoteUpdated,
+                    title: "Not güncellendi",
+                    description: quickNote.Content.Length > 50 ? quickNote.Content.Substring(0, 47) + "..." : quickNote.Content,
+                    relatedEntityId: quickNote.Id,
+                    relatedEntityType: "QuickNote"
+                );
 
                 return Ok(new
                 {
@@ -147,9 +172,22 @@ namespace PlanYonetimAraclari.Controllers
                 {
                     return NotFound(new { success = false, error = "Not bulunamadı" });
                 }
+                
+                // Not içeriğini saklayalım
+                var noteContent = quickNote.Content.Length > 50 ? quickNote.Content.Substring(0, 47) + "..." : quickNote.Content;
 
                 _context.QuickNotes.Remove(quickNote);
                 await _context.SaveChangesAsync();
+                
+                // Etkinlik kaydı oluştur
+                await _activityService.LogActivityAsync(
+                    userId: userId,
+                    type: ActivityType.NoteDeleted,
+                    title: "Not silindi",
+                    description: noteContent,
+                    relatedEntityId: null,
+                    relatedEntityType: "QuickNote"
+                );
 
                 return Ok(new { success = true });
             }

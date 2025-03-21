@@ -365,10 +365,6 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Id": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\logo.png",
-      "PackagePath": "staticwebassets\\logo.png"
-    },
-    {
       "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.PlanYonetimAraclari.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
     },

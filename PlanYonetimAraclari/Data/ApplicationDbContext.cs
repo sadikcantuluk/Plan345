@@ -16,6 +16,8 @@ namespace PlanYonetimAraclari.Data
         public DbSet<TwoFactorCode> TwoFactorCodes { get; set; }
         public DbSet<ProjectTeamMember> ProjectTeamMembers { get; set; }
         public DbSet<ProjectInvitation> ProjectInvitations { get; set; }
+        public DbSet<CalendarNote> CalendarNotes { get; set; }
+        public DbSet<QuickNote> QuickNotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -290,8 +290,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.Core.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Common.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Bcl.AsyncInterfaces.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Bcl.TimeProvider.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.CodeAnalysis.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.CodeAnalysis.CSharp.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.CodeAnalysis.Razor.dll
@@ -312,7 +310,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Hosting.Abstractions.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Identity.Core.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Identity.Stores.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Logging.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.ObjectPool.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\Microsoft.Extensions.Options.dll
@@ -332,7 +329,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Formats.Asn1.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.IO.Pipelines.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Net.ServerSentEvents.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Net.WebSockets.WebSocketProtocol.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Runtime.Caching.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Security.Cryptography.Pkcs.dll
@@ -340,7 +336,6 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Security.Permissions.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Text.Encoding.CodePages.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Text.Encodings.Web.dll
-C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Text.Json.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Threading.Channels.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\System.Windows.Extensions.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\cs\Microsoft.CodeAnalysis.resources.dll
@@ -411,3 +406,12 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\obj\Debug\net6.0\PlanYonetimAraclari.pdb
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\obj\Debug\net6.0\PlanYonetimAraclari.genruntimeconfig.cache
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\obj\Debug\net6.0\ref\PlanYonetimAraclari.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.AspNetCore.Connections.Abstractions.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.AspNetCore.Http.Connections.Common.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.AspNetCore.SignalR.Common.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.Extensions.Features.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.Extensions.Logging.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Json.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll

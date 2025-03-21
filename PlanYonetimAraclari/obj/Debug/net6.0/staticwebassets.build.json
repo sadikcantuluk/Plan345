@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "nGQAUpxtvTUs0mPvZdfh1k6R25xQkK8AtIr/+teDeuU=",
+  "Hash": "iHxH3th2E1ufTR3+1K7tWk7ruhNWhoIIf8mC3CiBo3c=",
   "Source": "PlanYonetimAraclari",
   "BasePath": "_content/PlanYonetimAraclari",
   "Mode": "Default",
@@ -1613,27 +1613,6 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
     },
     {
-      "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\logo.png",
-      "SourceId": "PlanYonetimAraclari",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\",
-      "BasePath": "_content/PlanYonetimAraclari",
-      "RelativePath": "logo#[.{fingerprint}]?.png",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "jnxvm8vheq",
-      "Integrity": "4R3lTWvCtAGbmZ2L7zKOFXa3+Xx/is8iEFGxDrznmck=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\logo.png"
-    },
-    {
       "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\index.html",
       "SourceId": "PlanYonetimAraclari",
       "SourceType": "Discovered",
@@ -1732,8 +1711,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "ki5bw5posf",
-      "Integrity": "VCuYeqHsiOCV21gY98n1BulxtYoEYAQ098pOPOAUA8M=",
+      "Fingerprint": "wrztty046y",
+      "Integrity": "XF89ZgvlOr1EMOe/r/5qhjW/Nc3wqbQ8TFf+xHQIUWQ=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Template\\src\\js\\dashboard.js"
@@ -8040,88 +8019,6 @@
       ]
     },
     {
-      "Route": "logo.jnxvm8vheq.png",
-      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\logo.png",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "11894"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "image/png"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"4R3lTWvCtAGbmZ2L7zKOFXa3+Xx/is8iEFGxDrznmck=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Fri, 21 Mar 2025 12:37:31 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "jnxvm8vheq"
-        },
-        {
-          "Name": "label",
-          "Value": "logo.png"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-4R3lTWvCtAGbmZ2L7zKOFXa3+Xx/is8iEFGxDrznmck="
-        }
-      ]
-    },
-    {
-      "Route": "logo.png",
-      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\logo.png",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "11894"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "image/png"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"4R3lTWvCtAGbmZ2L7zKOFXa3+Xx/is8iEFGxDrznmck=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Fri, 21 Mar 2025 12:37:31 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=3600, must-revalidate"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-4R3lTWvCtAGbmZ2L7zKOFXa3+Xx/is8iEFGxDrznmck="
-        }
-      ]
-    },
-    {
       "Route": "PlanYonetimAraclari.bundle.scp.css",
       "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\PlanYonetimAraclari.bundle.scp.css",
       "Selectors": [],
@@ -8624,7 +8521,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "10592"
+          "Value": "16274"
         },
         {
           "Name": "Content-Type",
@@ -8632,11 +8529,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"VCuYeqHsiOCV21gY98n1BulxtYoEYAQ098pOPOAUA8M=\""
+          "Value": "\"XF89ZgvlOr1EMOe/r/5qhjW/Nc3wqbQ8TFf+xHQIUWQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 11 Mar 2025 17:38:29 GMT"
+          "Value": "Fri, 21 Mar 2025 15:16:53 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -8646,12 +8543,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-VCuYeqHsiOCV21gY98n1BulxtYoEYAQ098pOPOAUA8M="
+          "Value": "sha256-XF89ZgvlOr1EMOe/r/5qhjW/Nc3wqbQ8TFf+xHQIUWQ="
         }
       ]
     },
     {
-      "Route": "Template/src/js/dashboard.ki5bw5posf.js",
+      "Route": "Template/src/js/dashboard.wrztty046y.js",
       "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\Template\\src\\js\\dashboard.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -8661,7 +8558,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "10592"
+          "Value": "16274"
         },
         {
           "Name": "Content-Type",
@@ -8669,11 +8566,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"VCuYeqHsiOCV21gY98n1BulxtYoEYAQ098pOPOAUA8M=\""
+          "Value": "\"XF89ZgvlOr1EMOe/r/5qhjW/Nc3wqbQ8TFf+xHQIUWQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 11 Mar 2025 17:38:29 GMT"
+          "Value": "Fri, 21 Mar 2025 15:16:53 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -8683,7 +8580,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "ki5bw5posf"
+          "Value": "wrztty046y"
         },
         {
           "Name": "label",
@@ -8691,7 +8588,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-VCuYeqHsiOCV21gY98n1BulxtYoEYAQ098pOPOAUA8M="
+          "Value": "sha256-XF89ZgvlOr1EMOe/r/5qhjW/Nc3wqbQ8TFf+xHQIUWQ="
         }
       ]
     },

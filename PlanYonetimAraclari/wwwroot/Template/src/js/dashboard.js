@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initResponsive();
     initProjectsDropdown();
     initProjectCreation();
+    initQuickNotes();
 });
 
 /**
@@ -290,4 +291,171 @@ function saveProject(project) {
     
     // UI'ı güncelle
     loadProjects();
+}
+
+/**
+ * Hızlı Notlar işlevselliği
+ */
+function initQuickNotes() {
+    const quickNoteInput = document.getElementById('quickNoteInput');
+    const addQuickNoteBtn = document.getElementById('addQuickNoteBtn');
+    const quickNotesContainer = document.getElementById('quickNotesContainer');
+
+    // Not ekleme butonu tıklama olayı
+    addQuickNoteBtn.addEventListener('click', () => {
+        addQuickNote();
+    });
+
+    // Enter tuşu ile not ekleme
+    quickNoteInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            addQuickNote();
+        }
+    });
+
+    // Not ekleme fonksiyonu
+    function addQuickNote() {
+        const content = quickNoteInput.value.trim();
+        if (!content) return;
+
+        // API'ye not ekleme isteği
+        fetch('/api/quicknotes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: content })
+        })
+        .then(response => response.json())
+        .then(note => {
+            // Başarılı ise notu UI'a ekle
+            addNoteToUI(note);
+            quickNoteInput.value = ''; // Input'u temizle
+        })
+        .catch(error => {
+            console.error('Not eklenirken hata oluştu:', error);
+            // Hata mesajını göster
+            showNotification('Not eklenirken bir hata oluştu', 'error');
+        });
+    }
+
+    // Notu UI'a ekleme fonksiyonu
+    function addNoteToUI(note) {
+        const noteElement = document.createElement('div');
+        noteElement.className = 'border-b border-gray-100 pb-4';
+        noteElement.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0 h-8 w-8 bg-primary-100 text-primary-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-sticky-note text-xs"></i>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm text-gray-700">${note.content}</p>
+                    <p class="text-xs text-gray-400 mt-1">${formatDate(note.createdAt)}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="deleteQuickNote(${note.id})" class="text-gray-400 hover:text-red-500 transition-colors duration-200">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Yeni notu en üste ekle
+        if (quickNotesContainer.firstChild) {
+            quickNotesContainer.insertBefore(noteElement, quickNotesContainer.firstChild);
+        } else {
+            quickNotesContainer.appendChild(noteElement);
+        }
+    }
+
+    // Notları yükleme fonksiyonu
+    function loadQuickNotes() {
+        fetch('/api/quicknotes')
+            .then(response => response.json())
+            .then(notes => {
+                quickNotesContainer.innerHTML = ''; // Container'ı temizle
+                notes.forEach(note => addNoteToUI(note));
+            })
+            .catch(error => {
+                console.error('Notlar yüklenirken hata oluştu:', error);
+                quickNotesContainer.innerHTML = '<p class="text-center text-gray-500 py-4">Notlar yüklenemedi</p>';
+            });
+    }
+
+    // Sayfa yüklendiğinde notları yükle
+    loadQuickNotes();
+}
+
+// Not silme fonksiyonu (global scope'ta olmalı)
+function deleteQuickNote(noteId) {
+    if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
+        fetch(`/api/quicknotes/${noteId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                // UI'dan notu kaldır
+                const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+                if (noteElement) {
+                    noteElement.remove();
+                }
+                showNotification('Not başarıyla silindi', 'success');
+            } else {
+                throw new Error('Not silinirken bir hata oluştu');
+            }
+        })
+        .catch(error => {
+            console.error('Not silinirken hata oluştu:', error);
+            showNotification('Not silinirken bir hata oluştu', 'error');
+        });
+    }
+}
+
+// Tarih formatlama yardımcı fonksiyonu
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 60) {
+        return `${diffMinutes} dakika önce`;
+    } else if (diffHours < 24) {
+        return `${diffHours} saat önce`;
+    } else if (diffDays < 30) {
+        return `${diffDays} gün önce`;
+    } else {
+        return date.toLocaleDateString('tr-TR', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric'
+        });
+    }
+}
+
+// Bildirim gösterme fonksiyonu
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white z-50 transform transition-all duration-300 translate-y-full opacity-0`;
+    
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+    
+    // Animasyon için setTimeout
+    setTimeout(() => {
+        notification.classList.remove('translate-y-full', 'opacity-0');
+    }, 100);
+    
+    // 3 saniye sonra bildirimi kaldır
+    setTimeout(() => {
+        notification.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 } 

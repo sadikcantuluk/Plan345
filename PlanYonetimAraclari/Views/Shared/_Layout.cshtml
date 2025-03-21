@@ -152,6 +152,11 @@
                         <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                     }
                 </a>
+                
+                <!-- Hızlı Notlar -->
+                <a href="/QuickNotes" class="relative p-2 text-gray-500 hover:text-primary-500 focus:outline-none">
+                    <i class="fas fa-sticky-note text-xl"></i>
+                </a>
 
                 <!-- Kullanıcı Menüsü -->
                 <div class="relative" id="user-menu">
@@ -243,15 +248,21 @@
                     </div>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <a href="/Team" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Team") && !Context.Request.Path.Value.Contains("Notifications") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-users text-lg"></i>
+                        <span>Ekip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Calendar" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Calendar") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
                         <i class="fas fa-calendar text-lg"></i>
                         <span>Takvim</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/Team" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Team") && !Context.Request.Path.Value.Contains("Notifications") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
-                        <i class="fas fa-users text-lg"></i>
-                        <span>Ekip</span>
+                    <a href="/QuickNotes" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/QuickNotes") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-sticky-note text-lg"></i>
+                        <span>Hızlı Notlar</span>
                     </a>
                 </li>
                 <li>

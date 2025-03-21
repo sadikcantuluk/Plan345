@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.28" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.25" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.28" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.28" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.28">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

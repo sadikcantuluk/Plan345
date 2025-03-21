@@ -64,6 +64,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Calendar/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Dashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -90,6 +94,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Project/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/QuickNotes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVpY2tOb3Rlc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/sadik/OneDrive/Masaüstü/Yeni klasör/ProjeYonetimArarci/Plan345/PlanYonetimAraclari/Views/Shared/Error.cshtml]

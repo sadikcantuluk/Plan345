@@ -68,7 +68,7 @@
             },
             "Microsoft.AspNetCore.SignalR.Client": {
               "target": "Package",
-              "version": "[9.0.3, )"
+              "version": "[6.0.28, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",

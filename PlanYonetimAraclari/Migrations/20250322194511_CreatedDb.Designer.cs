@@ -12,8 +12,8 @@ using PlanYonetimAraclari.Data;
 namespace PlanYonetimAraclari.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250321155648_AddActivityLog")]
-    partial class AddActivityLog
+    [Migration("20250322194511_CreatedDb")]
+    partial class CreatedDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -499,6 +499,9 @@ namespace PlanYonetimAraclari.Migrations
                     b.Property<string>("AssignedMemberId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("CreatedByUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -525,6 +528,9 @@ namespace PlanYonetimAraclari.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("UpdatedByUserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

@@ -12,6 +12,114 @@
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"oq8r4nbcb2"},{"Name":"integrity","Value":"sha256-AKvNjO3dCPPS0eSU1Ez8T2wI280i08yGycV9ndytL\u002Bc="},{"Name":"label","Value":"_content/PlanYonetimAraclari/css/site.css"}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"194"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022AKvNjO3dCPPS0eSU1Ez8T2wI280i08yGycV9ndytL\u002Bc=\u0022"},{"Name":"Last-Modified","Value":"Thu, 13 Mar 2025 14:24:50 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/alperen.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\alperen.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-GMIPkRaNZxntDgzLvfFXv5yjPwX5qYoAb\u002Bx8\u002B5UcekM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"51558"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022GMIPkRaNZxntDgzLvfFXv5yjPwX5qYoAb\u002Bx8\u002B5UcekM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:20:39 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/alperen.sfbg08snup.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\alperen.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"sfbg08snup"},{"Name":"integrity","Value":"sha256-GMIPkRaNZxntDgzLvfFXv5yjPwX5qYoAb\u002Bx8\u002B5UcekM="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/alperen.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"51558"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022GMIPkRaNZxntDgzLvfFXv5yjPwX5qYoAb\u002Bx8\u002B5UcekM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:20:39 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/beyza.h22gay9th5.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\beyza.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"h22gay9th5"},{"Name":"integrity","Value":"sha256-eVDfZGGY/GRck36RabqCGsXsHq4MiIw\u002BLJIVBUO2CUM="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/beyza.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"18315"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022eVDfZGGY/GRck36RabqCGsXsHq4MiIw\u002BLJIVBUO2CUM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:57 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/beyza.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\beyza.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-eVDfZGGY/GRck36RabqCGsXsHq4MiIw\u002BLJIVBUO2CUM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"18315"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022eVDfZGGY/GRck36RabqCGsXsHq4MiIw\u002BLJIVBUO2CUM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:57 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/busra.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\busra.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-MbLohooAupKs42tUrdaVmf\u002BfSSbugkwhDsUlRDr0pu8="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"29407"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022MbLohooAupKs42tUrdaVmf\u002BfSSbugkwhDsUlRDr0pu8=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/busra.nq9y0qojqy.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\busra.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"nq9y0qojqy"},{"Name":"integrity","Value":"sha256-MbLohooAupKs42tUrdaVmf\u002BfSSbugkwhDsUlRDr0pu8="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/busra.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"29407"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022MbLohooAupKs42tUrdaVmf\u002BfSSbugkwhDsUlRDr0pu8=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/gamze.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\gamze.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-qrRMNDiVMpirlyWE65pP8rZ663iOWoAW9pWGjkxsZtk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"54112"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qrRMNDiVMpirlyWE65pP8rZ663iOWoAW9pWGjkxsZtk=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:01 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/gamze.mslsq9991j.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\gamze.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"mslsq9991j"},{"Name":"integrity","Value":"sha256-qrRMNDiVMpirlyWE65pP8rZ663iOWoAW9pWGjkxsZtk="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/gamze.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"54112"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qrRMNDiVMpirlyWE65pP8rZ663iOWoAW9pWGjkxsZtk=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:01 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/hacer.0l6skwtojn.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\hacer.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"0l6skwtojn"},{"Name":"integrity","Value":"sha256-VPTChwPhxJwXW5hLiNgxbuQOM\u002B08SgqEgsFVx3VDUj8="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/hacer.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"100761"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022VPTChwPhxJwXW5hLiNgxbuQOM\u002B08SgqEgsFVx3VDUj8=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:23:45 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/hacer.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\hacer.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-VPTChwPhxJwXW5hLiNgxbuQOM\u002B08SgqEgsFVx3VDUj8="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"100761"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022VPTChwPhxJwXW5hLiNgxbuQOM\u002B08SgqEgsFVx3VDUj8=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:23:45 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/nazar.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\nazar.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-yR3GB1tLZfVWuuJqw3xHflm9r1bknYcBnAiNmsQyO/o="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"121246"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022yR3GB1tLZfVWuuJqw3xHflm9r1bknYcBnAiNmsQyO/o=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/nazar.poduphu0nw.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\nazar.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"poduphu0nw"},{"Name":"integrity","Value":"sha256-yR3GB1tLZfVWuuJqw3xHflm9r1bknYcBnAiNmsQyO/o="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/nazar.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"121246"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022yR3GB1tLZfVWuuJqw3xHflm9r1bknYcBnAiNmsQyO/o=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:24:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/omer.8grjuzlq19.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\omer.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"8grjuzlq19"},{"Name":"integrity","Value":"sha256-SNQoIzX91gq7YLLhk2MMaznZC3ep03CQ4x4ngI\u002BUAY4="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/omer.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"56183"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022SNQoIzX91gq7YLLhk2MMaznZC3ep03CQ4x4ngI\u002BUAY4=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:23:17 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/omer.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\omer.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-SNQoIzX91gq7YLLhk2MMaznZC3ep03CQ4x4ngI\u002BUAY4="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"56183"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022SNQoIzX91gq7YLLhk2MMaznZC3ep03CQ4x4ngI\u002BUAY4=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:23:17 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/sadik.e8t3bjjgtl.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\sadik.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"e8t3bjjgtl"},{"Name":"integrity","Value":"sha256-QgImcfOg6P3\u002BAdiX0wvRxF3/dOeoUuSTKNVieHs/cok="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/sadik.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"21213"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022QgImcfOg6P3\u002BAdiX0wvRxF3/dOeoUuSTKNVieHs/cok=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:54 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/sadik.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\sadik.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-QgImcfOg6P3\u002BAdiX0wvRxF3/dOeoUuSTKNVieHs/cok="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"21213"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022QgImcfOg6P3\u002BAdiX0wvRxF3/dOeoUuSTKNVieHs/cok=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:54 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/semih.clvslirows.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\semih.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"clvslirows"},{"Name":"integrity","Value":"sha256-EAS1aUhc6/noFT1fWC\u002BSXo6tHytL9iRKzSsz6iAfDPA="},{"Name":"label","Value":"_content/PlanYonetimAraclari/ekip_resimleri/semih.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"38929"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022EAS1aUhc6/noFT1fWC\u002BSXo6tHytL9iRKzSsz6iAfDPA=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/ekip_resimleri/semih.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\ekip_resimleri\semih.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-EAS1aUhc6/noFT1fWC\u002BSXo6tHytL9iRKzSsz6iAfDPA="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"38929"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022EAS1aUhc6/noFT1fWC\u002BSXo6tHytL9iRKzSsz6iAfDPA=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 17:22:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/icons8-plan-96.lqqzkuy960.png">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\icons8-plan-96.png'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

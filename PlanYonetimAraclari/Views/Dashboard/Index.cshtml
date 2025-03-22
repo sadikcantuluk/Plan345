@@ -249,7 +249,7 @@
                                          data-activity-title="@activity.Title.Replace("\"", "&quot;")"
                                          data-activity-description="@(activity.Description?.Replace("\"", "&quot;") ?? "")"
                                          data-activity-date="@activity.CreatedAt.AddHours(-3).ToString("dd.MM.yyyy HH:mm")"
-                                         data-activity-user="@activity.User.FullName.Replace("\"", "&quot;")"
+                                         data-activity-user="@(activity.User != null ? activity.User.FullName.Replace("\"", "&quot;") : "Sistem")"
                                          data-activity-type="@activity.Type"
                                          onclick="showActivityDetails(this)">
                                         <div class="flex flex-col h-full">
@@ -269,15 +269,15 @@
                                                 @if (activity.Type == ActivityType.TaskCreated || activity.Type == ActivityType.TaskUpdated || 
                                                      activity.Type == ActivityType.TaskCompleted || activity.Type == ActivityType.TaskDeleted)
                                                 {
-                                                    <span>Görev İşlemi: @activity.User.FullName</span>
+                                                    <span>Görev İşlemi: @(activity.User != null ? activity.User.FullName : "Sistem")</span>
                                                 }
                                                 else if (activity.Type == ActivityType.TeamMemberAdded || activity.Type == ActivityType.TeamMemberRemoved)
                                                 {
-                                                    <span>@activity.User.FullName</span>
+                                                    <span>@(activity.User != null ? activity.User.FullName : "Sistem")</span>
                                                 }
                                                 else
                                                 {
-                                                    <span>@activity.User.FullName</span>
+                                                    <span>@(activity.User != null ? activity.User.FullName : "Sistem")</span>
                                                 }
                                                 </p>
                                             </div>

@@ -1,5 +1,6 @@
 ﻿@{
-    ViewData["Title"] = "Plan345 - Modern Proje Yönetimi";
+    // ViewData["Title"] = "Plan345 - Modern Proje Yönetimi";
+    ViewData["Title"] = "Plan345";
     Layout = null;
 }
 
@@ -10,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
     <link type="image/png" sizes="96x96" rel="icon" href="~/icons8-plan-96.png">
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -45,18 +46,18 @@
             }
         }
     </script>
-    
+
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/Template/src/styles/main.css">
 </head>
@@ -85,7 +86,7 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Mobil Menü -->
         <div class="mobile-menu hidden md:hidden px-6 py-4 bg-white border-t border-gray-100">
             <a href="#features" class="block py-2 text-gray-700 hover:text-primary-500 font-medium">Özellikler</a>
@@ -105,7 +106,7 @@
             <div class="absolute inset-0 bg-primary-900 bg-opacity-75 backdrop-blur-sm"></div>
             <img src="~/Template/src/assets/images/dashboard.png" alt="" class="w-full h-full object-cover opacity-30" />
         </div>
-        
+
         <!-- Ana içerik -->
         <div class="container relative z-10 mx-auto px-4">
             <div class="text-center max-w-4xl mx-auto">
@@ -115,7 +116,7 @@
                 <p class="text-xl text-gray-200 mb-10 max-w-3xl mx-auto">
                     Ekibinizle birlikte projelerinizi kolayca yönetin, görevleri organize edin ve verimliliğinizi artırın.
                 </p>
-                
+
                 <!-- Aksiyon butonları -->
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <a href="/Account/Register" class="btn-custom bg-primary-500 text-white hover:bg-primary-600 px-8 py-3 rounded-lg font-medium shadow-md">
@@ -125,7 +126,7 @@
                         <i class="fas fa-play text-primary-500 mr-2"></i> Demo İzleyin
                     </a>
                 </div>
-                
+
                 <!-- Dashboard özellikleri vurgusu -->
                 <div class="grid grid-cols-3 gap-4 md:gap-8 mt-16 text-white">
                     <div class="backdrop-blur-md bg-white bg-opacity-10 p-4 rounded-lg">
@@ -236,7 +237,7 @@
                     <div class="relative">
                         <h3 class="text-2xl font-bold mb-6 text-gray-900">Modern Proje Yönetiminde <span class="text-primary-500">Güvenilir Çözüm Ortağınız</span></h3>
                         <p class="text-gray-600 mb-8 leading-relaxed">2020 yılından bu yana, işletmelerin dijital dönüşüm süreçlerinde yanlarında olarak, proje yönetimi alanında yenilikçi çözümler sunuyoruz. Deneyimli ekibimiz ve sürekli gelişen teknolojik altyapımız ile müşterilerimizin iş süreçlerini optimize ediyor, verimliliği artırıyor ve başarılarına katkıda bulunuyoruz.</p>
-                        
+
                         <div class="grid md:grid-cols-2 gap-6">
                             <div class="p-5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                                 <div class="flex items-center space-x-3 mb-3">
@@ -273,50 +274,16 @@
             <div class="relative team-container">
                 <div class="overflow-hidden">
                     <div class="flex transition-transform duration-300 ease-in-out team-slider">
-                        <!-- Ekip Üyesi 1 -->
+                        <!-- Ömer Faruk Kasapoğlu -->
                         <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
                             <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
                                 <div class="relative w-32 h-32 mx-auto mb-4">
                                     <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=11" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                    <img src="~/ekip_resimleri/omer.jpeg" alt="Ömer Faruk Kasapoğlu" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
                                 </div>
-                                <h4 class="font-semibold text-lg mb-1">Ahmet Yılmaz</h4>
-                                <p class="text-primary-500 mb-3">CEO & Kurucu</p>
-                                <p class="text-gray-600 text-sm mb-4">10+ yıl teknoloji ve proje yönetimi deneyimi</p>
-                                <div class="flex justify-center space-x-3">
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ekip Üyesi 2 -->
-                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
-                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
-                                <div class="relative w-32 h-32 mx-auto mb-4">
-                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=12" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
-                                </div>
-                                <h4 class="font-semibold text-lg mb-1">Ayşe Demir</h4>
-                                <p class="text-primary-500 mb-3">Ürün Müdürü</p>
-                                <p class="text-gray-600 text-sm mb-4">8+ yıl ürün geliştirme deneyimi</p>
-                                <div class="flex justify-center space-x-3">
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ekip Üyesi 3 -->
-                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
-                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
-                                <div class="relative w-32 h-32 mx-auto mb-4">
-                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=13" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
-                                </div>
-                                <h4 class="font-semibold text-lg mb-1">Mehmet Kaya</h4>
-                                <p class="text-primary-500 mb-3">Baş Mühendis</p>
-                                <p class="text-gray-600 text-sm mb-4">12+ yıl yazılım geliştirme deneyimi</p>
+                                <h4 class="font-semibold text-lg mb-1">Ömer Faruk Kasapoğlu</h4>
+                                <p class="text-primary-500 mb-3">Product Owner</p>
+                                <p class="text-gray-600 text-sm mb-4">Ürün vizyonunu yöneten deneyimli lider</p>
                                 <div class="flex justify-center space-x-3">
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
@@ -324,67 +291,16 @@
                             </div>
                         </div>
 
-                        <!-- Ekip Üyesi 4 -->
+                        <!-- Aybüke Küçük -->
                         <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
                             <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
                                 <div class="relative w-32 h-32 mx-auto mb-4">
                                     <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=14" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                    <img src="~/ekip_resimleri/busra.jpeg" alt="Aybüke Küçük" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
                                 </div>
-                                <h4 class="font-semibold text-lg mb-1">Zeynep Arslan</h4>
-                                <p class="text-primary-500 mb-3">UX Tasarımcısı</p>
-                                <p class="text-gray-600 text-sm mb-4">6+ yıl kullanıcı deneyimi tasarımı</p>
-                                <div class="flex justify-center space-x-3">
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-dribbble"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ekip Üyesi 5 -->
-                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
-                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
-                                <div class="relative w-32 h-32 mx-auto mb-4">
-                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=15" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
-                                </div>
-                                <h4 class="font-semibold text-lg mb-1">Can Öztürk</h4>
-                                <p class="text-primary-500 mb-3">Pazarlama Müdürü</p>
-                                <p class="text-gray-600 text-sm mb-4">7+ yıl dijital pazarlama deneyimi</p>
-                                <div class="flex justify-center space-x-3">
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-twitter"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ekip Üyesi 6 -->
-                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
-                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
-                                <div class="relative w-32 h-32 mx-auto mb-4">
-                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=16" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
-                                </div>
-                                <h4 class="font-semibold text-lg mb-1">Elif Yıldız</h4>
-                                <p class="text-primary-500 mb-3">Müşteri Başarı Yöneticisi</p>
-                                <p class="text-gray-600 text-sm mb-4">5+ yıl müşteri ilişkileri deneyimi</p>
-                                <div class="flex justify-center space-x-3">
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
-                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-instagram"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ekip Üyesi 7 -->
-                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
-                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
-                                <div class="relative w-32 h-32 mx-auto mb-4">
-                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=17" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
-                                </div>
-                                <h4 class="font-semibold text-lg mb-1">Burak Şahin</h4>
-                                <p class="text-primary-500 mb-3">Frontend Geliştirici</p>
-                                <p class="text-gray-600 text-sm mb-4">4+ yıl web geliştirme deneyimi</p>
+                                <h4 class="font-semibold text-lg mb-1">Aybüke Küçük</h4>
+                                <p class="text-primary-500 mb-3">Database Manager</p>
+                                <p class="text-gray-600 text-sm mb-4">Veritabanı yönetimi ve optimizasyon uzmanı</p>
                                 <div class="flex justify-center space-x-3">
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
@@ -392,16 +308,16 @@
                             </div>
                         </div>
 
-                        <!-- Ekip Üyesi 8 -->
+                        <!-- Semih Eseroğlu -->
                         <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
                             <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
                                 <div class="relative w-32 h-32 mx-auto mb-4">
                                     <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=18" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                    <img src="~/ekip_resimleri/semih.jpeg" alt="Semih Eseroğlu" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
                                 </div>
-                                <h4 class="font-semibold text-lg mb-1">Selin Aydın</h4>
-                                <p class="text-primary-500 mb-3">Backend Geliştirici</p>
-                                <p class="text-gray-600 text-sm mb-4">6+ yıl sistem mimarisi deneyimi</p>
+                                <h4 class="font-semibold text-lg mb-1">Semih Eseroğlu</h4>
+                                <p class="text-primary-500 mb-3">Team Leader</p>
+                                <p class="text-gray-600 text-sm mb-4">Ekip liderliği ve proje koordinasyonu</p>
                                 <div class="flex justify-center space-x-3">
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
@@ -409,16 +325,101 @@
                             </div>
                         </div>
 
-                        <!-- Ekip Üyesi 9 -->
+                        <!-- Beyza Gül Demir -->
                         <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
                             <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
                                 <div class="relative w-32 h-32 mx-auto mb-4">
                                     <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
-                                    <img src="https://i.pravatar.cc/128?img=19" alt="Ekip Üyesi" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                    <img src="~/ekip_resimleri/beyza.jpeg" alt="Beyza Gül Demir" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
                                 </div>
-                                <h4 class="font-semibold text-lg mb-1">Deniz Korkmaz</h4>
-                                <p class="text-primary-500 mb-3">DevOps Mühendisi</p>
-                                <p class="text-gray-600 text-sm mb-4">5+ yıl altyapı yönetimi deneyimi</p>
+                                <h4 class="font-semibold text-lg mb-1">Beyza Gül Demir</h4>
+                                <p class="text-primary-500 mb-3">Developer Team</p>
+                                <p class="text-gray-600 text-sm mb-4">Yazılım geliştirme uzmanı</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hacer Kırışoğlu -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="~/ekip_resimleri/hacer.jpeg" alt="Hacer Kırışoğlu" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Hacer Kırışoğlu</h4>
+                                <p class="text-primary-500 mb-3">Project Manager</p>
+                                <p class="text-gray-600 text-sm mb-4">Proje yönetimi ve süreç optimizasyonu</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gamze Aktaş -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="~/ekip_resimleri/gamze.jpeg" alt="Gamze Aktaş" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Gamze Aktaş</h4>
+                                <p class="text-primary-500 mb-3">Analyst</p>
+                                <p class="text-gray-600 text-sm mb-4">İş analizi ve süreç iyileştirme</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nazar Sıla Kazdal -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="~/ekip_resimleri/nazar.jpeg" alt="Nazar Sıla Kazdal" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Nazar Sıla Kazdal</h4>
+                                <p class="text-primary-500 mb-3">Analyst</p>
+                                <p class="text-gray-600 text-sm mb-4">İş analizi ve süreç iyileştirme</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sadıkcan Tuluk -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="~/ekip_resimleri/sadik.jpeg" alt="Sadıkcan Tuluk" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Sadıkcan Tuluk</h4>
+                                <p class="text-primary-500 mb-3">Developer Team</p>
+                                <p class="text-gray-600 text-sm mb-4">Yazılım geliştirme uzmanı</p>
+                                <div class="flex justify-center space-x-3">
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alperen Alaçeri -->
+                        <div class="team-card flex-none w-full md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] mx-2">
+                            <div class="bg-white p-6 rounded-xl shadow-soft border border-gray-100 text-center group">
+                                <div class="relative w-32 h-32 mx-auto mb-4">
+                                    <div class="absolute inset-0 bg-primary-50 rounded-full"></div>
+                                    <img src="~/ekip_resimleri/alperen.jpeg" alt="Alperen Alaçeri" class="w-full h-full object-cover rounded-full relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="font-semibold text-lg mb-1">Alperen Alaçeri</h4>
+                                <p class="text-primary-500 mb-3">Scrum Master</p>
+                                <p class="text-gray-600 text-sm mb-4">Agile süreç yönetimi ve takım koordinasyonu</p>
                                 <div class="flex justify-center space-x-3">
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-linkedin"></i></a>
                                     <a href="#" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fab fa-github"></i></a>
@@ -437,8 +438,8 @@
         </div>
     </section>
 
-     <!-- Testimonials Section -->
-     <section id="testimonials" class="py-20 bg-white">
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-bold mb-4">Müşterilerimiz Ne Diyor?</h2>
@@ -623,8 +624,7 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-lg mb-1">Telefon</h4>
-                                <p class="text-gray-600">+90 212 345 6789</p>
-                                <p class="text-gray-600">+90 212 987 6543</p>
+                                <p class="text-gray-600">+90 538 543 09 29</p>
                             </div>
                         </div>
                     </div>
@@ -636,8 +636,8 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-lg mb-1">E-posta</h4>
-                                <p class="text-gray-600">info@plan345.com</p>
-                                <p class="text-gray-600">destek@plan345.com</p>
+                                <p class="text-gray-600">plan345destek@gmail.com</p>
+                                <p class="text-gray-600">sadikcantuluk@gmail.com</p>
                             </div>
                         </div>
                     </div>
@@ -662,7 +662,7 @@
                 <div class="bg-white p-8 rounded-2xl shadow-soft">
                     <form id="contactForm" asp-controller="Home" asp-action="ContactForm" method="post" class="space-y-6">
                         @Html.AntiForgeryToken()
-                        
+
                         <!-- Başarı Mesajı -->
                         <div id="successMessage" class="mb-4 p-4 rounded-md bg-green-50 border border-green-200 hidden" style="transition: opacity 0.5s ease-in-out;">
                             <div class="flex items-center">
@@ -670,7 +670,7 @@
                                 <p class="text-green-800">Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.</p>
                             </div>
                         </div>
-                        
+
                         <!-- Hata Mesajı -->
                         <div id="errorMessage" class="mb-4 p-4 rounded-md bg-red-50 border border-red-200 hidden" style="transition: opacity 0.5s ease-in-out;">
                             <div class="flex items-center">
@@ -678,7 +678,7 @@
                                 <p id="errorText" class="text-red-800">Lütfen tüm alanları doğru şekilde doldurunuz.</p>
                             </div>
                         </div>
-                        
+
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-gray-700 font-medium mb-2" for="name">Ad Soyad</label>
@@ -701,7 +701,7 @@
                             <label for="AcceptPrivacy" class="flex items-center space-x-2 text-sm text-gray-600 bg-primary-50 p-3 rounded-lg border border-primary-100 w-full">
                                 <input type="checkbox" id="AcceptPrivacy" name="AcceptPrivacy" value="true" class="form-checkbox h-5 w-5 text-primary-500 rounded border-gray-300 focus:ring-primary-500" required>
                                 <span class="font-medium">
-                                    <a href="#" onclick="showKVKK(event)" class="text-blue-600 hover:underline">KVKK şartlarını</a> 
+                                    <a href="#" onclick="showKVKK(event)" class="text-blue-600 hover:underline">KVKK şartlarını</a>
                                     okudum ve kabul ediyorum <span class="text-red-500">*</span>
                                 </span>
                             </label>
@@ -753,10 +753,10 @@
                 <div>
                     <h4 class="text-white font-semibold text-lg mb-6">Ürün</h4>
                     <ul class="space-y-3">
-                        <li><a href="#features" class="text-gray-300 hover:text-white transition-colors">Özellikler</a></li>
-                        <li><a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Fiyatlandırma</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Güvenlik</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Entegrasyonlar</a></li>
+                        <li><a href="#about" class="text-gray-300 hover:text-white transition-colors">Hakkımızda</a></li>
+                        <li><a href="#team" class="text-gray-300 hover:text-white transition-colors">Ekibimiz</a></li>
+                        <li><a href="#testimonials" class="text-gray-300 hover:text-white transition-colors">Referanslar</a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-white transition-colors">İletişim</a></li>
                     </ul>
                 </div>
                 <div>
@@ -773,11 +773,11 @@
                     <ul class="space-y-3">
                         <li class="flex items-start">
                             <i class="fas fa-envelope text-primary-300 mt-1 mr-3"></i>
-                            <span class="text-gray-300">iletisim@plan345.com</span>
+                            <span class="text-gray-300">plan345destek@gmail.com</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-phone text-primary-300 mt-1 mr-3"></i>
-                            <span class="text-gray-300">+90 212 345 6789</span>
+                            <span class="text-gray-300">+90 538 543 09 29</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-map-marker-alt text-primary-300 mt-1 mr-3"></i>
@@ -804,7 +804,7 @@
 
     <!-- Custom JS -->
     <script src="~/Template/src/js/main.js"></script>
-    
+
     <!-- KVKK Modal ve Form JavaScript -->
     <script>
         // Form değerlerini saklamak için değişkenler
@@ -813,7 +813,7 @@
         // KVKK modalını göster
         function showKVKK(event) {
             event.preventDefault();
-            
+
             // Modal açılmadan önce form değerlerini kaydet
             contactFormValues = {
                 name: document.getElementById('name').value,
@@ -822,23 +822,23 @@
                 message: document.getElementById('message').value,
                 acceptPrivacy: document.getElementById('AcceptPrivacy').checked
             };
-            
+
             document.getElementById('kvkkModal').classList.remove('hidden');
         }
 
         // KVKK modalını kapat
         function closeKVKK(event) {
-            event.preventDefault(); 
+            event.preventDefault();
             document.getElementById('kvkkModal').classList.add('hidden');
-            
+
             // Modal kapandıktan sonra form değerlerini geri yükle
             document.getElementById('name').value = contactFormValues.name || '';
             document.getElementById('email').value = contactFormValues.email || '';
             document.getElementById('subject').value = contactFormValues.subject || '';
             document.getElementById('message').value = contactFormValues.message || '';
             document.getElementById('AcceptPrivacy').checked = contactFormValues.acceptPrivacy || false;
-            
-            return false; 
+
+            return false;
         }
 
         // Sayfa yüklendiğinde
@@ -848,7 +848,7 @@
             if (contactForm) {
                 contactForm.addEventListener('submit', function(event) {
                     event.preventDefault(); // Sayfanın yenilenmesini engelle
-                    
+
                     // KVKK kutucuğu işaretlenmediyse formu engelle ve hatırlatma göster
                     if (!document.getElementById('AcceptPrivacy').checked) {
                         document.getElementById('errorMessage').classList.remove('hidden');
@@ -857,30 +857,30 @@
                         setTimeout(function() {
                             document.getElementById('kvkkReminder').classList.add('translate-y-full');
                         }, 100);
-                        
+
                         // 5 saniye sonra otomatik kapat
                         setTimeout(function() {
                             closeKVKKReminder();
                         }, 5000);
-                        
+
                         // KVKK kutucuğunu vurgula
                         document.querySelector('label[for="AcceptPrivacy"]').classList.add('animate-pulse');
                         setTimeout(function() {
                             document.querySelector('label[for="AcceptPrivacy"]').classList.remove('animate-pulse');
                         }, 2000);
-                        
+
                         return false;
                     }
-                    
+
                     // Formu gönderme düğmesini devre dışı bırak ve yükleniyor durumunu göster
                     const submitButton = document.getElementById('submitButton');
                     const originalButtonText = submitButton.innerHTML;
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Gönderiliyor...';
-                    
+
                     // Form verilerini topla
                     const formData = new FormData(contactForm);
-                    
+
                     // AJAX isteği yap
                     fetch(contactForm.action, {
                         method: 'POST',
@@ -898,19 +898,19 @@
                     .then(data => {
                         // Formu sıfırla
                         contactForm.reset();
-                        
+
                         // Başarı mesajını göster
                         const successMessage = document.getElementById('successMessage');
                         successMessage.classList.remove('hidden');
                         successMessage.style.opacity = '1';
                         successMessage.style.transition = 'opacity 0.5s ease-in-out';
                         document.getElementById('errorMessage').classList.add('hidden');
-                        
+
                         // 5 saniye sonra başarı mesajını otomatik gizle
                         setTimeout(function() {
                             // Önce soluklaştır
                             successMessage.style.opacity = '0';
-                            
+
                             // Soluklaşma tamamlandıktan sonra tamamen gizle
                             setTimeout(function() {
                                 successMessage.classList.add('hidden');
@@ -918,14 +918,14 @@
                                 successMessage.style.opacity = '1';
                             }, 500);
                         }, 5000);
-                        
+
                         // Form alanlarını temizle
                         document.getElementById('name').value = '';
                         document.getElementById('email').value = '';
                         document.getElementById('subject').value = '';
                         document.getElementById('message').value = '';
                         document.getElementById('AcceptPrivacy').checked = false;
-                        
+
                         // Sayfa konumunu koru
                         document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
                     })
@@ -937,12 +937,12 @@
                         errorMessage.style.transition = 'opacity 0.5s ease-in-out';
                         document.getElementById('errorText').innerText = error.message || 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
                         document.getElementById('successMessage').classList.add('hidden');
-                        
+
                         // 5 saniye sonra hata mesajını otomatik gizle
                         setTimeout(function() {
                             // Önce soluklaştır
                             errorMessage.style.opacity = '0';
-                            
+
                             // Soluklaşma tamamlandıktan sonra tamamen gizle
                             setTimeout(function() {
                                 errorMessage.classList.add('hidden');
@@ -959,7 +959,7 @@
                 });
             }
         });
-        
+
         // KVKK hatırlatma modalını kapat
         function closeKVKKReminder() {
             document.getElementById('kvkkReminder').classList.remove('translate-y-full');
@@ -984,38 +984,38 @@
                     Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, Plan345 tarafından
                     kişisel verilerinizin işlenmesi ve korunması hakkında sizleri bilgilendirmek amacıyla hazırlanmıştır.
                 </p>
-                
+
                 <h4 class="font-medium mb-2">1. Veri Sorumlusu</h4>
                 <p class="mb-3">
-                    Plan345 Yazılım A.Ş., veri sorumlusu olarak kişisel verilerinizi işlemektedir. 
-                    İletişim Bilgileri: Atakum Teknoloji Merkezi, Samsun, Türkiye. 
+                    Plan345 Yazılım A.Ş., veri sorumlusu olarak kişisel verilerinizi işlemektedir.
+                    İletişim Bilgileri: Atakum Teknoloji Merkezi, Samsun, Türkiye.
                     E-posta: info@plan345.com, Tel: +90 212 345 6789
                 </p>
-                
+
                 <h4 class="font-medium mb-2">2. İşlenen Kişisel Verileriniz</h4>
                 <p class="mb-3">
-                    İletişim formunu doldurmanız halinde; ad-soyadınız, e-posta adresiniz, iletişim konusu ve mesaj içeriğiniz 
+                    İletişim formunu doldurmanız halinde; ad-soyadınız, e-posta adresiniz, iletişim konusu ve mesaj içeriğiniz
                     tarafımızca işlenmektedir.
                 </p>
-                
+
                 <h4 class="font-medium mb-2">3. Kişisel Verileri İşleme Amacı</h4>
                 <p class="mb-3">
                     Kişisel verileriniz, talebinizin/şikayetinizin değerlendirilmesi, cevaplandırılması ve müşteri memnuniyetinin sağlanması
                     amaçlarıyla sınırlı olarak işlenmektedir.
                 </p>
-                
+
                 <h4 class="font-medium mb-2">4. Kişisel Verilerin Aktarılması</h4>
                 <p class="mb-3">
                     Kişisel verileriniz, talebinizin/şikayetinizin değerlendirilmesi amacıyla yetkili departmanlarımız ile paylaşılabilir.
                     Bunun dışında, kişisel verileriniz, yasal zorunluluklar dışında, açık rızanız olmaksızın üçüncü kişilerle paylaşılmaz.
                 </p>
-                
+
                 <h4 class="font-medium mb-2">5. Kişisel Verilerin Korunması ve Saklama Süresi</h4>
                 <p class="mb-3">
                     Plan345, kişisel verilerinizin güvenliğini sağlamak için gerekli teknik ve idari tedbirleri almaktadır.
                     Kişisel verileriniz, iletişiminizin tamamlanmasını takiben 2 yıl süre ile saklanmaktadır.
                 </p>
-                
+
                 <h4 class="font-medium mb-2">6. Yasal Haklarınız</h4>
                 <p>
                     KVKK'nın 11. maddesi uyarınca, kişisel verilerinizle ilgili olarak aşağıdaki haklara sahipsiniz:
@@ -1035,7 +1035,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- KVKK Hatırlatma Banner -->
     <div id="kvkkReminder" class="fixed bottom-0 inset-x-0 bg-red-600 text-white p-4 transform translate-y-full transition-transform duration-300 ease-in-out hidden z-50">
         <div class="container mx-auto flex justify-between items-center">
@@ -1078,17 +1078,17 @@
         tag.src = "https://www.youtube.com/iframe_api";
         let firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        
+
         let player;
-        
+
         // Demo izle butonuna tıklama olayı
         document.getElementById('watch-demo-btn').addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // Modalı göster
             let demoModal = new bootstrap.Modal(document.getElementById('demoVideoModal'));
             demoModal.show();
-            
+
             // Eğer player henüz oluşturulmadıysa oluştur
             if (!player) {
                 player = new YT.Player('youtube-player-container', {
@@ -1107,7 +1107,7 @@
                 player.playVideo();
             }
         });
-        
+
         // Modal kapandığında videoyu durdur
         document.getElementById('demoVideoModal').addEventListener('hidden.bs.modal', function () {
             if (player) {

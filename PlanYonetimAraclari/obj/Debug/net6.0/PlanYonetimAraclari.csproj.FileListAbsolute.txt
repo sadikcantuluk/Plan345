@@ -415,3 +415,4 @@ C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanY
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\Microsoft.Extensions.Logging.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\refs\System.Text.Json.dll
 C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
+C:\Users\sadik\OneDrive\Masaüstü\Yeni klasör\ProjeYonetimArarci\Plan345\PlanYonetimAraclari\bin\Debug\net6.0\appsettings.Production.json

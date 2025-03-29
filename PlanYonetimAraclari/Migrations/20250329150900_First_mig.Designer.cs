@@ -12,8 +12,8 @@ using PlanYonetimAraclari.Data;
 namespace PlanYonetimAraclari.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250322194511_CreatedDb")]
-    partial class CreatedDb
+    [Migration("20250329150900_First_mig")]
+    partial class First_mig
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

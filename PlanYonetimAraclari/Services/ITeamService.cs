@@ -6,7 +6,7 @@ namespace PlanYonetimAraclari.Services
 {
     public interface ITeamService
     {
-        Task<bool> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId);
+        Task<(bool success, string message)> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId);
         Task<bool> AcceptInvitation(string token);
         Task<bool> DeclineInvitation(string token);
         Task<bool> RemoveTeamMember(int projectId, string userId);

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PlanYonetimAraclari.Migrations
 {
-    public partial class CreatedDb : Migration
+    public partial class First_mig : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

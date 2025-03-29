@@ -855,18 +855,7 @@
                     taskCard.find('h4').text(task.name);
                     
                     // Açıklama alanını güncelle
-                    let descriptionElement = taskCard.find('p.text-sm.text-gray.600.mb-2');
-                    if (task.description) {
-                        if (descriptionElement.length === 0) {
-                            taskCard.find('div.flex.justify-between.items-start').after(
-                                `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
-                            );
-                        } else {
-                            descriptionElement.text(task.description);
-                        }
-                    } else if (descriptionElement.length > 0) {
-                        descriptionElement.remove();
-                    }
+                    updateTaskDescription(taskCard, task.description);
                     
                     // Önceliği güncelle
                     const prioritySpan = taskCard.find('span.rounded-full').first();
@@ -953,18 +942,7 @@
                     taskCard.find('h4').text(task.name);
                     
                     // Açıklama alanını güncelle
-                    let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
-                    if (task.description) {
-                        if (descriptionElement.length === 0) {
-                            taskCard.find('div.flex.justify-between.items-start').after(
-                                `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
-                            );
-                        } else {
-                            descriptionElement.text(task.description);
-                        }
-                    } else if (descriptionElement.length > 0) {
-                        descriptionElement.remove();
-                    }
+                    updateTaskDescription(taskCard, task.description);
                     
                     // Önceliği güncelle
                     const prioritySpan = taskCard.find('span.rounded-full').first();
@@ -1131,14 +1109,11 @@
                                 // Kullanıcıya bildir
                                 showNotification("Görev durumu güncellendi", "success");
                             });
-                        } else {
-                            showNotification("Hata: " + response.message, "error");
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error("Error updating task status:", error);
-                        console.error("Response:", xhr.responseText);
-                        showNotification("Bağlantı hatası oluştu", "error");
+                        showNotification("Bağlantı hatası oluştu. Lütfen tekrar deneyin.", "error");
+                        window.location.reload();
                     }
                 });
             });
@@ -1487,52 +1462,41 @@
                                 taskCard.find('h4').text(task.name);
                                 
                                 // Açıklama alanını güncelle
-                                let descriptionElement = taskCard.find('p.text-sm.text-gray-600.mb-2');
-                                if (task.description) {
-                                    if (descriptionElement.length === 0) {
-                                        taskCard.find('div.flex.justify-between.items-start').after(
-                                            `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${task.description}</p>`
-                                        );
-                        } else {
-                                    descriptionElement.text(task.description);
-                                }
-                            } else if (descriptionElement.length > 0) {
-                                descriptionElement.remove();
+                                updateTaskDescription(taskCard, task.description);
+                                
+                                // Önceliği güncelle
+                                const prioritySpan = taskCard.find('span.rounded-full').first();
+                                const priorityClasses = {
+                                    0: 'bg-blue-100 text-blue-800',
+                                    1: 'bg-amber-100 text-amber-800',
+                                    2: 'bg-orange-100 text-orange-800',
+                                    3: 'bg-red-100 text-red-800'
+                                };
+                                const priorityTexts = {
+                                    0: 'Düşük',
+                                    1: 'Orta',
+                                    2: 'Yüksek',
+                                    3: 'Acil'
+                                };
+                                
+                                prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
+                                prioritySpan.addClass(priorityClasses[task.priority]);
+                                prioritySpan.text(priorityTexts[task.priority]);
+                                
+                                // Görev atanmış kişiyi güncelle
+                                // Bu kısmı daha karmaşık olduğu için şimdilik sayfayı yenileme şeklinde ele alalım
+                                // Daha sonra iyileştirmek için bu bölüm geliştirilebilir
+                                
+                                // Formu sıfırla
+                                $("#edit-task-form")[0].reset();
+                            } else {
+                                showNotification("Hata: " + response.message, "error");
                             }
-                            
-                            // Önceliği güncelle
-                            const prioritySpan = taskCard.find('span.rounded-full').first();
-                            const priorityClasses = {
-                                0: 'bg-blue-100 text-blue-800',
-                                1: 'bg-amber-100 text-amber-800',
-                                2: 'bg-orange-100 text-orange-800',
-                                3: 'bg-red-100 text-red-800'
-                            };
-                            const priorityTexts = {
-                                0: 'Düşük',
-                                1: 'Orta',
-                                2: 'Yüksek',
-                                3: 'Acil'
-                            };
-                            
-                            prioritySpan.removeClass('bg-blue-100 text-blue-800 bg-amber-100 text-amber-800 bg-orange-100 text-orange-800 bg-red-100 text-red-800');
-                            prioritySpan.addClass(priorityClasses[task.priority]);
-                            prioritySpan.text(priorityTexts[task.priority]);
-                            
-                            // Görev atanmış kişiyi güncelle
-                            // Bu kısmı daha karmaşık olduğu için şimdilik sayfayı yenileme şeklinde ele alalım
-                            // Daha sonra iyileştirmek için bu bölüm geliştirilebilir
-                            
-                            // Formu sıfırla
-                            $("#edit-task-form")[0].reset();
-                        } else {
-                            showNotification("Hata: " + response.message, "error");
+                        },
+                        error: function() {
+                            showNotification("Bağlantı hatası oluştu", "error");
                         }
-                    },
-                    error: function() {
-                        showNotification("Bağlantı hatası oluştu", "error");
-                    }
-                });
+                    });
             });
             
             // Görev düzenleme modalı için düğme işleyicileri
@@ -1647,6 +1611,14 @@
                             newStatus = 2; // Done
                         }
                         
+                        // Önce göreve zaten eklenmiş açıklama var mı kontrol et ve sadece birini bırak
+                        const taskCard = $(evt.item);
+                        const descriptionElements = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                        if (descriptionElements.length > 1) {
+                            // İlk öğe hariç tüm açıklama elementlerini kaldır
+                            descriptionElements.slice(1).remove();
+                        }
+                        
                         // AJAX ile görev durumunu güncelle
                         $.ajax({
                             url: "@Url.Action("UpdateTaskStatus", "Project")",
@@ -1700,6 +1672,14 @@
                             newStatus = 0; // Todo
                         } else if (evt.to.id === 'done-tasks') {
                             newStatus = 2; // Done
+                        }
+                        
+                        // Önce göreve zaten eklenmiş açıklama var mı kontrol et ve sadece birini bırak
+                        const taskCard = $(evt.item);
+                        const descriptionElements = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                        if (descriptionElements.length > 1) {
+                            // İlk öğe hariç tüm açıklama elementlerini kaldır
+                            descriptionElements.slice(1).remove();
                         }
                         
                         // AJAX ile görev durumunu güncelle
@@ -1757,6 +1737,14 @@
                             newStatus = 1; // In Progress
                         }
                         
+                        // Önce göreve zaten eklenmiş açıklama var mı kontrol et ve sadece birini bırak
+                        const taskCard = $(evt.item);
+                        const descriptionElements = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                        if (descriptionElements.length > 1) {
+                            // İlk öğe hariç tüm açıklama elementlerini kaldır
+                            descriptionElements.slice(1).remove();
+                        }
+                        
                         // AJAX ile görev durumunu güncelle
                         $.ajax({
                             url: "@Url.Action("UpdateTaskStatus", "Project")",
@@ -1792,6 +1780,13 @@
         function updateTaskButtons(taskCard, newStatus) {
             // Task bilgilerini bul
             const taskId = taskCard.data('task-id');
+            
+            // Önce göreve zaten eklenmiş açıklama var mı kontrol et ve sadece birini bırak
+            const descriptionElements = taskCard.find('p.text-sm.text-gray-600.mb-2');
+            if (descriptionElements.length > 1) {
+                // İlk öğe hariç tüm açıklama elementlerini kaldır
+                descriptionElements.slice(1).remove();
+            }
             
             // Mevcut tüm taşıma butonlarını bulup temizle
             let buttonsContainer = taskCard.find('.flex.justify-between.items-center.mt-2, .flex.justify-end.items-center.mt-2, .flex.items-center.justify-end.space-x-1, .flex.space-x-2.mt-2');
@@ -1839,6 +1834,20 @@
                 taskCard.append(buttonsHtml);
                                 </text>
                             }
+            }
+            
+            // Açıklama alanını güncelleyen genel fonksiyon
+            function updateTaskDescription(taskCard, description) {
+                // Önce tüm mevcut açıklama elementlerini temizle
+                const descriptionElements = taskCard.find('p.text-sm.text-gray-600.mb-2');
+                descriptionElements.remove();
+                
+                // Eğer açıklama varsa yeni bir tane ekle
+                if (description) {
+                    taskCard.find('div.flex.justify-between.items-start').after(
+                        `<p class="text-sm text-gray-600 mb-2 break-words whitespace-normal" style="word-wrap: break-word; max-width: 100%; overflow-wrap: break-word;">${description}</p>`
+                    );
+                }
             }
             
             // Görev sayaçlarını güncelleme fonksiyonu

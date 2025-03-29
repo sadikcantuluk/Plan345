@@ -110,10 +110,10 @@ namespace PlanYonetimAraclari.Controllers
             }
 
             var result = await _teamService.InviteUserToProject(projectId, email, currentUser.Id);
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Davetiye başarıyla gönderildi.";
             else
-                TempData["ErrorMessage"] = "Davetiye gönderilemedi. Lütfen tekrar deneyin.";
+                TempData["ErrorMessage"] = result.message;
 
             return RedirectToAction(nameof(Members), new { projectId });
         }

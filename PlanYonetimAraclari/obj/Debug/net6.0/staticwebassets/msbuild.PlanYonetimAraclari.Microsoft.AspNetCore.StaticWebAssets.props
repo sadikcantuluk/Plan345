@@ -270,6 +270,24 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>PlanYonetimAraclari</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/PlanYonetimAraclari</BasePath>
+      <RelativePath>images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>2nulcxce0z</Fingerprint>
+      <Integrity>ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\710c49d6-8635-44b8-808e-f9c0a5dff83a_sadık.jpg'))">
       <SourceType>Package</SourceType>
       <SourceId>PlanYonetimAraclari</SourceId>

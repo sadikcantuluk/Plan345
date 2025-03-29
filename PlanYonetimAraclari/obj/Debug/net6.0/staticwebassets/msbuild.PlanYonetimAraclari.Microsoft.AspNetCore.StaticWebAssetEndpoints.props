@@ -180,6 +180,18 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-NxYlhPtZ06qLTXF5AHOFARN\u002BJMyqp8SfRtJHk0ewvnM="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"97107"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022NxYlhPtZ06qLTXF5AHOFARN\u002BJMyqp8SfRtJHk0ewvnM=\u0022"},{"Name":"Last-Modified","Value":"Thu, 13 Mar 2025 19:12:53 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.2nulcxce0z.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"2nulcxce0z"},{"Name":"integrity","Value":"sha256-ooH1\u002BflgjGWtaJ0xahHl4Kujw8TcGbRInKn\u002BvNpM92A="},{"Name":"label","Value":"_content/PlanYonetimAraclari/images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran g\u00F6r\u00FCnt\u00FCs\u00FC 2025-03-22 201020.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"163823"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022ooH1\u002BflgjGWtaJ0xahHl4Kujw8TcGbRInKn\u002BvNpM92A=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 19:50:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-ooH1\u002BflgjGWtaJ0xahHl4Kujw8TcGbRInKn\u002BvNpM92A="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"163823"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022ooH1\u002BflgjGWtaJ0xahHl4Kujw8TcGbRInKn\u002BvNpM92A=\u0022"},{"Name":"Last-Modified","Value":"Sat, 22 Mar 2025 19:50:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/710c49d6-8635-44b8-808e-f9c0a5dff83a_sadık.jpg">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\710c49d6-8635-44b8-808e-f9c0a5dff83a_sadık.jpg'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

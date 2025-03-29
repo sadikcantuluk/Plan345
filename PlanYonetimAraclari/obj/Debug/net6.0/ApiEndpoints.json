@@ -1,1 +1,169 @@
-[]
+[
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.ApiController",
+    "Method": "GetUserProjects",
+    "RelativePath": "api/Api/GetUserProjects",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "GetNotes",
+    "RelativePath": "api/calendar/notes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "start",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "end",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "AddNote",
+    "RelativePath": "api/calendar/notes",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "PlanYonetimAraclari.Controllers.CalendarNoteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "UpdateNote",
+    "RelativePath": "api/calendar/notes/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "PlanYonetimAraclari.Controllers.CalendarNoteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "DeleteNote",
+    "RelativePath": "api/calendar/notes/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "CheckNotifications",
+    "RelativePath": "api/calendar/notifications",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.CalendarApiController",
+    "Method": "CalendarView",
+    "RelativePath": "api/calendar/view",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.QuickNotesApiController",
+    "Method": "GetQuickNotes",
+    "RelativePath": "api/quicknotes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.QuickNotesApiController",
+    "Method": "AddQuickNote",
+    "RelativePath": "api/quicknotes",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "PlanYonetimAraclari.Controllers.QuickNoteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.QuickNotesApiController",
+    "Method": "UpdateQuickNote",
+    "RelativePath": "api/quicknotes/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "PlanYonetimAraclari.Controllers.QuickNoteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PlanYonetimAraclari.Controllers.QuickNotesApiController",
+    "Method": "DeleteQuickNote",
+    "RelativePath": "api/quicknotes/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "5beApEU/RpFLv8RuUP9bsIpikSnLYUtZdSkSS8cSEAI=",
+  "Hash": "xvvwgNQJtX7VV3O1oUjxKzRL2g3AZUYhdZPA0gEB0Qg=",
   "Source": "PlanYonetimAraclari",
   "BasePath": "_content/PlanYonetimAraclari",
   "Mode": "Default",
@@ -372,6 +372,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\profiles\\1a5bb0fa-3615-47f6-8e61-f2ce69441712_resim.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png",
+      "SourceId": "PlanYonetimAraclari",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\",
+      "BasePath": "_content/PlanYonetimAraclari",
+      "RelativePath": "images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "2nulcxce0z",
+      "Integrity": "ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\profiles\\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png"
     },
     {
       "Identity": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\710c49d6-8635-44b8-808e-f9c0a5dff83a_sadık.jpg",
@@ -3366,6 +3387,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-NxYlhPtZ06qLTXF5AHOFARN+JMyqp8SfRtJHk0ewvnM="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.2nulcxce0z.png",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "163823"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 22 Mar 2025 19:50:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "2nulcxce0z"
+        },
+        {
+          "Name": "label",
+          "Value": "images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png",
+      "AssetFile": "C:\\Users\\sadik\\OneDrive\\Masaüstü\\Yeni klasör\\ProjeYonetimArarci\\Plan345\\PlanYonetimAraclari\\wwwroot\\images\\profiles\\2eeb17b6-bd4a-4c1b-979e-65b4ad018e89_Ekran görüntüsü 2025-03-22 201020.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "163823"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 22 Mar 2025 19:50:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ooH1+flgjGWtaJ0xahHl4Kujw8TcGbRInKn+vNpM92A="
         }
       ]
     },

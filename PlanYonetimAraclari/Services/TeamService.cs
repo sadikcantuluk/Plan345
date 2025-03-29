@@ -25,74 +25,6 @@ namespace PlanYonetimAraclari.Services
             _activityService = activityService;
         }
 
-        public async Task<bool> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId)
-        {
-            try
-            {
-                var project = await _context.Projects.FindAsync(projectId);
-                if (project == null)
-                    return false;
-
-                var invitedByUser = await _context.Users.FindAsync(invitedByUserId);
-                if (invitedByUser == null)
-                    return false;
-
-                // Check if user is already a member
-                var existingMember = await _context.ProjectTeamMembers
-                    .FirstOrDefaultAsync(m => m.ProjectId == projectId && m.User.Email == invitedEmail);
-                if (existingMember != null)
-                    return false;
-
-                // Check if there's already a pending invitation
-                var existingInvitation = await _context.ProjectInvitations
-                    .FirstOrDefaultAsync(i => i.ProjectId == projectId && i.InvitedEmail == invitedEmail && i.Status == InvitationStatus.Pending);
-                if (existingInvitation != null)
-                    return false;
-
-                var token = GenerateInvitationToken();
-                var invitation = new ProjectInvitation
-                {
-                    ProjectId = projectId,
-                    InvitedEmail = invitedEmail,
-                    InvitedByUserId = invitedByUserId,
-                    InvitedDate = DateTime.UtcNow,
-                    ExpiryDate = DateTime.UtcNow.AddDays(2),
-                    Status = InvitationStatus.Pending,
-                    Token = token
-                };
-
-                _context.ProjectInvitations.Add(invitation);
-                await _context.SaveChangesAsync();
-
-                // Uygulama URL'sini yapılandırmadan alın veya varsayılan olarak localhost'u kullanın
-                var baseUrl = _emailSettings.ApplicationUrl ?? "https://localhost:7091";
-
-                // Send invitation email
-                var emailModel = new InvitationEmailModel
-                {
-                    LogoUrl = "https://plan345.com/images/logo.png",
-                    ProjectName = project.Name,
-                    InviterName = invitedByUser.FullName,
-                    TeamMemberCount = project.TeamMembers?.Count ?? 0,
-                    AcceptUrl = $"{baseUrl}/Team/AcceptInvitation?token={token}",
-                    DeclineUrl = $"{baseUrl}/Team/DeclineInvitation?token={token}"
-                };
-
-                var emailSubject = "Plan345 - Proje Daveti";
-                var emailBody = await RenderEmailTemplate("InvitationEmail", emailModel);
-
-                await _emailService.SendEmailAsync(invitedEmail, emailSubject, emailBody);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                // Hata yönetimi ekleyebilirsiniz
-                System.Diagnostics.Debug.WriteLine($"Davet gönderme hatası: {ex.Message}");
-                return false;
-            }
-        }
-
         public async Task<bool> AcceptInvitation(string token)
         {
             try
@@ -126,7 +58,8 @@ namespace PlanYonetimAraclari.Services
                     UserId = user.Id,
                     Status = "Accepted",
                     InvitedAt = invitation.InvitedDate,
-                    JoinedAt = DateTime.UtcNow
+                    JoinedAt = DateTime.UtcNow,
+                    Role = TeamMemberRole.Member
                 };
 
                 invitation.Status = InvitationStatus.Accepted;
@@ -304,8 +237,12 @@ namespace PlanYonetimAraclari.Services
             margin-bottom: 30px;
         }}
         .logo {{
-            max-width: 150px;
-            height: auto;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }}
+        .logo span {{
+            color: #4f46e5;
         }}
         .content {{
             background-color: #f8f9fa;
@@ -338,7 +275,7 @@ namespace PlanYonetimAraclari.Services
 </head>
 <body>
     <div class=""header"">
-        <img src=""{inviteModel.LogoUrl}"" alt=""Plan345 Logo"" class=""logo"" />
+        <div class=""logo"">Plan<span>345</span></div>
     </div>
 
     <div class=""content"">
@@ -393,6 +330,79 @@ namespace PlanYonetimAraclari.Services
             
             // Diğer e-posta şablonları için basit bir HTML oluştur
             return $@"<html><body><p>E-posta içeriği: {templateName}</p></body></html>";
+        }
+
+        public async Task<(bool success, string message)> InviteUserToProject(int projectId, string invitedEmail, string invitedByUserId)
+        {
+            try
+            {
+                var project = await _context.Projects.FindAsync(projectId);
+                if (project == null)
+                    return (false, "Proje bulunamadı.");
+
+                var invitedByUser = await _context.Users.FindAsync(invitedByUserId);
+                if (invitedByUser == null)
+                    return (false, "Davet eden kullanıcı bulunamadı.");
+
+                // Check if email exists in the user database
+                var userExists = await _context.Users.AnyAsync(u => u.Email == invitedEmail);
+                if (!userExists)
+                    return (false, "Bu kullanıcı kayıtlı değil. Lütfen davet göndermeden önce kaydolmalarını isteyin.");
+
+                // Check if user is already a member
+                var existingMember = await _context.ProjectTeamMembers
+                    .FirstOrDefaultAsync(m => m.ProjectId == projectId && m.User.Email == invitedEmail);
+                if (existingMember != null)
+                    return (false, "Bu kullanıcı zaten projenin bir üyesi.");
+
+                // Check if there's already a pending invitation
+                var existingInvitation = await _context.ProjectInvitations
+                    .FirstOrDefaultAsync(i => i.ProjectId == projectId && i.InvitedEmail == invitedEmail && i.Status == InvitationStatus.Pending);
+                if (existingInvitation != null)
+                    return (false, "Bu kullanıcıya zaten bir davet gönderilmiş ve beklemede.");
+
+                var token = GenerateInvitationToken();
+                var invitation = new ProjectInvitation
+                {
+                    ProjectId = projectId,
+                    InvitedEmail = invitedEmail,
+                    InvitedByUserId = invitedByUserId,
+                    InvitedDate = DateTime.UtcNow,
+                    ExpiryDate = DateTime.UtcNow.AddDays(2),
+                    Status = InvitationStatus.Pending,
+                    Token = token
+                };
+
+                _context.ProjectInvitations.Add(invitation);
+                await _context.SaveChangesAsync();
+
+                // Uygulama URL'sini yapılandırmadan alın veya varsayılan olarak localhost'u kullanın
+                var baseUrl = _emailSettings.ApplicationUrl ?? "https://localhost:7091";
+
+                // Send invitation email
+                var emailModel = new InvitationEmailModel
+                {
+                    LogoUrl = "https://plan345.com/images/logo.png",
+                    ProjectName = project.Name,
+                    InviterName = invitedByUser.FullName,
+                    TeamMemberCount = project.TeamMembers?.Count ?? 0,
+                    AcceptUrl = $"{baseUrl}/Team/AcceptInvitation?token={token}",
+                    DeclineUrl = $"{baseUrl}/Team/DeclineInvitation?token={token}"
+                };
+
+                var emailSubject = "Plan345 - Proje Daveti";
+                var emailBody = await RenderEmailTemplate("InvitationEmail", emailModel);
+
+                await _emailService.SendEmailAsync(invitedEmail, emailSubject, emailBody);
+
+                return (true, "Davetiye başarıyla gönderildi.");
+            }
+            catch (Exception ex)
+            {
+                // Hata yönetimi ekleyebilirsiniz
+                System.Diagnostics.Debug.WriteLine($"Davet gönderme hatası: {ex.Message}");
+                return (false, $"Davet gönderilirken bir hata oluştu: {ex.Message}");
+            }
         }
     }
 } 

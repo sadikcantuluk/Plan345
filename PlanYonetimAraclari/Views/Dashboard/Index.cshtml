@@ -108,6 +108,7 @@
         </div>
     </div>
 
+
     <!-- Projelerim ve Görevlerim -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- "Projeler" Bölümü -->
@@ -202,6 +203,172 @@
             </div>
         </div>
     </div>
+
+    <!-- Yaklaşan Görevler ve Hatırlatıcılar -->
+    <div class="mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <h3 class="font-semibold text-gray-900 mr-2">Yaklaşan Görevler & Hatırlatıcılar</h3>
+                    @* <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+                        <span>Öncelikli ve yaklaşan hatırlatmalarınız</span>
+                    </div> *@
+                </div>
+                <div>
+                    <button id="toggleTasksBtn" class="text-gray-500 hover:text-primary-500 p-2 rounded-full">
+                        <i class="fas fa-chevron-up" id="toggleTasksIcon"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="tasksContainer" style="display: block;">
+                @{
+                    // Tüm hatırlatıcıları bir araya getir ve tarihe göre sırala
+                    var allReminders = new List<dynamic>();
+                    
+                    // Görevleri ekle
+                    foreach (var task in Model.AssignedTasks)
+                    {
+                        allReminders.Add(new 
+                        {
+                            Type = "Task",
+                            Id = task.Id,
+                            Title = task.Name,
+                            Description = task.Description,
+                            DueDate = task.DueDate,
+                            Priority = task.Priority,
+                            ProjectId = task.ProjectId,
+                            ProjectName = Model.Projects.FirstOrDefault(p => p.Id == task.ProjectId)?.Name ?? "Bilinmeyen Proje"
+                        });
+                    }
+                    
+                    // Takvim notlarını ekle
+                    foreach (var note in Model.UpcomingCalendarNotes)
+                    {
+                        allReminders.Add(new 
+                        {
+                            Type = "CalendarNote",
+                            Id = note.Id,
+                            Title = note.Title,
+                            Description = note.Description,
+                            DueDate = (DateTime?)note.NoteDate
+                        });
+                    }
+                    
+                    // Tarihe göre sırala
+                    var sortedReminders = allReminders
+                        .OrderBy(r => r.DueDate)
+                        .ToList();
+                }
+                
+                @if (sortedReminders.Any())
+                {
+                    <div class="space-y-4 reminders-container" style="max-height: 520px; overflow-y: auto;">
+                        @foreach (var reminder in sortedReminders)
+                        {
+                            var dueDate = reminder.DueDate;
+                            var daysUntil = dueDate != null ? (((DateTime)dueDate).Date - DateTime.Today).Days : 0;
+                            var isOverdue = dueDate != null && ((DateTime)dueDate).Date < DateTime.Today;
+                            var dateClass = isOverdue ? "text-red-600 font-medium" : (daysUntil == 0 ? "text-orange-600 font-medium" : "text-gray-600");
+                            
+                            var cardClass = reminder.Type == "Task" && (reminder.Priority == TaskPriority.High || reminder.Priority == TaskPriority.Urgent) 
+                                ? "border-l-4 border-red-500" 
+                                : (reminder.Type == "Task" && reminder.Priority == TaskPriority.Medium 
+                                    ? "border-l-4 border-yellow-500" 
+                                    : "border-l-4 border-blue-500");
+                            
+                            <div class="bg-white rounded-lg shadow-sm p-4 @cardClass" data-reminder-type="@reminder.Type" data-id="@reminder.Id">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <h5 class="font-medium text-gray-800 mb-1">@reminder.Title</h5>
+                                        @if (reminder.Type == "Task")
+                                        {
+                                            <div class="flex items-center text-xs text-gray-500 mb-2">
+                                                <i class="fas fa-project-diagram mr-1"></i>
+                                                <span>@reminder.ProjectName</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="flex items-center">
+                                        @if (reminder.Type == "Task")
+                                        {
+                                            <span class="text-xs font-semibold px-2 py-1 rounded mr-2 @(reminder.Priority == TaskPriority.High || reminder.Priority == TaskPriority.Urgent ? "bg-red-100 text-red-800" : (reminder.Priority == TaskPriority.Medium ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"))">
+                                                @(reminder.Priority == TaskPriority.Urgent ? "Acil" : 
+                                                  reminder.Priority == TaskPriority.High ? "Yüksek" : 
+                                                  reminder.Priority == TaskPriority.Medium ? "Orta" : "Düşük")
+                                            </span>
+                                        }
+                                        <span class="text-xs @dateClass whitespace-nowrap">
+                                            @if (isOverdue)
+                                            {
+                                                <span>@Math.Abs(daysUntil) gün gecikti</span>
+                                            }
+                                            else if (daysUntil == 0)
+                                            {
+                                                <span>Bugün</span>
+                                            }
+                                            else if (daysUntil == 1)
+                                            {
+                                                <span>Yarın</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@daysUntil gün sonra</span>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(reminder.Description))
+                                {
+                                    <p class="text-sm text-gray-600 mb-2 line-clamp-2">@reminder.Description</p>
+                                }
+                                
+                                <div class="flex justify-between items-center mt-2">
+                                    <div class="text-xs text-gray-500">
+                                        @if (dueDate != null)
+                                        {
+                                            <span class="flex items-center">
+                                                <i class="far fa-calendar-alt mr-1"></i> 
+                                                @(reminder.Type == "CalendarNote" 
+                                                    ? ((DateTime)dueDate).ToString("dd.MM.yyyy HH:mm") 
+                                                    : ((DateTime)dueDate).ToString("dd.MM.yyyy"))
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        @if (reminder.Type == "CalendarNote")
+                                        {
+                                            <a href="/Calendar" class="text-xs px-2 py-1 bg-indigo-100 text-indigo-800 hover:bg-indigo-200 rounded-full">
+                                                <i class="fas fa-eye mr-1"></i> Görüntüle
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="/Project/Details/@reminder.ProjectId?taskId=@reminder.Id" class="text-xs px-2 py-1 bg-indigo-100 text-indigo-800 hover:bg-indigo-200 rounded-full">
+                                                <i class="fas fa-eye mr-1"></i> Görüntüle
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-gray-50 rounded-lg p-8 text-center">
+                        <div class="text-gray-400 mb-2">
+                            <i class="fas fa-inbox text-4xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-700 mb-1">Hiç yaklaşan görev veya hatırlatıcı bulunamadı</h4>
+                        <p class="text-sm text-gray-500">Yeni görevler oluşturarak veya takviminize notlar ekleyerek işlerinizi düzenleyebilirsiniz.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
     
     <!-- Son Etkinlikler Bölümü -->
     <div class="mb-8">
@@ -239,12 +406,12 @@
                 <div class="relative">
                     <!-- Etkinlikler Kaydırma Konteyneri -->
                     <div id="activity-slider" class="overflow-x-hidden">
-                        <div id="activity-track" class="flex space-x-4">
+                        <div id="activity-track" class="flex">
                             @if (Model.RecentActivities.Any())
                             {
                                 foreach (var activity in Model.RecentActivities.Take(20).ToList())
                                 {
-                                    <div class="activity-item w-[320px] bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 p-4 cursor-pointer" 
+                                    <div class="activity-item bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 p-4 cursor-pointer" 
                                          data-activity-id="@activity.Id"
                                          data-activity-title="@activity.Title.Replace("\"", "&quot;")"
                                          data-activity-description="@(activity.Description?.Replace("\"", "&quot;") ?? "")"
@@ -478,39 +645,54 @@
             
             if (!slider || !track || items.length === 0 || !leftBtn || !rightBtn) return;
             
-            // İlk 5 öğeyi göster, diğerlerini kaydırarak göster
-            const itemWidth = 300; // Her bir öğenin genişliği (w-[320px] ile aynı)
-            const gap = 16; // space-x-4 (1rem = 16px)
-            const visibleItems = 5; // Aynı anda görüntülenecek öğe sayısı
+            // Her bir öğenin genişliği ve boşluk değeri
+            const itemWidth = 300;
+            const gap = 16;
             
-            // Slider genişliğini ayarla
-            slider.style.width = `${(itemWidth + gap) * visibleItems - gap}px`;
+            // Slider'ı tam genişlikte bırak, responsive tasarımı CSS ve overflow ile sağla
+            slider.style.width = '100%';
             
+            // Kaydırma pozisyonu
             let position = 0;
-            const maxPosition = Math.max(0, items.length - visibleItems) * (itemWidth + gap);
+            // Maksimum kaydırma mesafesi: toplam içerik genişliği - görüntüleme alanı genişliği
+            let maxPosition = 0;
             
-            // Başlangıçta sol düğmeyi devre dışı bırak
-            leftBtn.disabled = true;
-            
-            // Eğer toplam öğe sayısı görünür öğe sayısından az veya eşitse, sağ düğmeyi de devre dışı bırak
-            if (items.length <= visibleItems) {
-                rightBtn.disabled = true;
+            // Görünür alan genişliğini hesaplama fonksiyonu
+            function calculateVisibleWidth() {
+                // Görünür alan genişliği (slider genişliği)
+                const visibleWidth = slider.offsetWidth;
+                
+                // Toplam içerik genişliği
+                const totalContentWidth = items.length * (itemWidth + gap) - gap;
+                
+                // Maksimum kaydırma mesafesi
+                maxPosition = Math.max(0, totalContentWidth - visibleWidth);
+                
+                // Eğer içerik slider'dan kısa ise (yani kaydırma gerekmiyorsa), düğmeleri devre dışı bırak
+                if (totalContentWidth <= visibleWidth) {
+                    leftBtn.disabled = true;
+                    rightBtn.disabled = true;
+                } else {
+                    // İlk durumda sadece sağ düğmeyi etkinleştir
+                    leftBtn.disabled = position === 0;
+                    rightBtn.disabled = false;
+                }
             }
             
-            // Sağa kaydırma
+            // İlk hesaplama
+            calculateVisibleWidth();
+            
+            // Kaydırma düğmelerine tıklama olayları
             rightBtn.addEventListener('click', () => {
-                if (position < maxPosition) {
-                    position += (itemWidth + gap);
-                    updateSliderPosition();
-                }
+                // Her tıklamada bir öğe genişliği kadar kaydır, ancak maksimum pozisyonu aşma
+                position = Math.min(position + itemWidth + gap, maxPosition);
+                updateSliderPosition();
             });
             
-            // Sola kaydırma
             leftBtn.addEventListener('click', () => {
-                if (position > 0) {
-                    position -= (itemWidth + gap);
-                    updateSliderPosition();
-                }
+                // Her tıklamada bir öğe genişliği kadar geri kaydır, ancak negatif pozisyona gitme
+                position = Math.max(position - (itemWidth + gap), 0);
+                updateSliderPosition();
             });
             
             // Slider pozisyonunu güncelle ve düğme durumlarını ayarla
@@ -521,6 +703,21 @@
                 leftBtn.disabled = position === 0;
                 rightBtn.disabled = position >= maxPosition;
             }
+            
+            // Pencere boyutu değiştiğinde yeniden hesapla
+            window.addEventListener('resize', () => {
+                // Mevcut pozisyon oranını kaydet (0-1 arası)
+                const scrollRatio = maxPosition > 0 ? position / maxPosition : 0;
+                
+                // Yeni boyuta göre maksimum pozisyonu hesapla
+                calculateVisibleWidth();
+                
+                // Yeni pozisyonu, önceki kaydırma oranına göre ayarla
+                position = Math.min(scrollRatio * maxPosition, maxPosition);
+                
+                // Pozisyonu güncelle
+                updateSliderPosition();
+            });
         }
 
         function validateForm() {
@@ -739,6 +936,8 @@
 
         // Bildirim gösterme fonksiyonu
         function showNotification(message, type = 'success') {
+            console.log(`Bildirim: ${message} (${type})`);
+            
             const notification = document.createElement('div');
             notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
                 type === 'success' ? 'bg-green-500' : 'bg-red-500'
@@ -856,6 +1055,12 @@
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
+            margin-right: 16px; /* Öğeler arası boşluk için */
+        }
+
+        /* Son öğenin sağ margin'ini kaldır */
+        .activity-item:last-child {
+            margin-right: 0;
         }
 
         /* Kaydırma butonları hover efektleri */
@@ -872,6 +1077,19 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        
+        /* Reminders Container - Görevler ve Hatırlatıcılar için stil */
+        .reminders-container {
+            scrollbar-width: thin;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            padding-right: 6px;
+        }
+        
+        /* En fazla 3 öğe gösterme (yaklaşık) - her öğe 160px */
+        .reminders-container {
+            max-height: 510px;
         }
     </style>
 
@@ -977,6 +1195,82 @@
         function handleEscKeypress(e) {
             if (e.key === 'Escape') {
                 closeActivityModal();
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initActivitySlider();
+            setupProjectModal();
+            setupActivityModal();
+            setupUpcomingTasksAndReminders();
+            
+            // Tüm bildirimleri otomatik gizleme
+            setTimeout(function() {
+                document.querySelectorAll('.auto-hide-message').forEach(function(el) {
+                    el.style.display = 'none';
+                });
+            }, 5000);
+        });
+        
+        // Project Modal JavaScript
+        function setupProjectModal() {
+            // Proje modalı için gerekli fonksiyonlar
+            console.log("Project modal setup complete");
+        }
+        
+        // Activity Modal JavaScript
+        function setupActivityModal() {
+            // Etkinlik modalı için gerekli fonksiyonlar
+            console.log("Activity modal setup complete");
+        }
+        
+        // Upcoming Tasks & Reminders JavaScript
+        function setupUpcomingTasksAndReminders() {
+            // Toggle tasks container
+            const toggleTasksBtn = document.getElementById('toggleTasksBtn');
+            const toggleTasksIcon = document.getElementById('toggleTasksIcon');
+            const tasksContainer = document.getElementById('tasksContainer');
+            
+            if (toggleTasksBtn) {
+                toggleTasksBtn.addEventListener('click', function() {
+                    if (tasksContainer.style.display === 'none') {
+                        tasksContainer.style.display = 'block';
+                        toggleTasksIcon.classList.remove('fa-chevron-down');
+                        toggleTasksIcon.classList.add('fa-chevron-up');
+                    } else {
+                        tasksContainer.style.display = 'none';
+                        toggleTasksIcon.classList.remove('fa-chevron-up');
+                        toggleTasksIcon.classList.add('fa-chevron-down');
+                    }
+                });
+            }
+            
+            // Apply custom scrollbar styling to reminders container
+            const remindersContainer = document.querySelector('.reminders-container');
+            if (remindersContainer) {
+                remindersContainer.classList.add('custom-scrollbar');
+            }
+        }
+        
+        // Check if there are any reminders left, and show empty state if none
+        function checkForEmptyReminders() {
+            const reminderCards = document.querySelectorAll('[data-reminder-type]');
+            const tasksContainer = document.getElementById('tasksContainer');
+            
+            console.log("Kalan hatırlatıcı sayısı: " + reminderCards.length);
+            
+            if (reminderCards.length === 0 && tasksContainer) {
+                tasksContainer.innerHTML = `
+                    <div class="bg-gray-50 rounded-lg p-8 text-center">
+                        <div class="text-gray-400 mb-2">
+                            <i class="fas fa-inbox text-4xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-700 mb-1">Hiç yaklaşan görev veya hatırlatıcı bulunamadı</h4>
+                        <p class="text-sm text-gray-500">Yeni görevler oluşturarak veya takviminize notlar ekleyerek işlerinizi düzenleyebilirsiniz.</p>
+                    </div>
+                `;
             }
         }
     </script>

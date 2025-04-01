@@ -293,6 +293,7 @@ namespace PlanYonetimAraclari.Controllers
             if (currentUser == null)
                 return RedirectToAction("Login", "Account");
 
+            // Get pending invitations
             var pendingInvitations = await _context.ProjectInvitations
                 .Include(i => i.Project)
                 .Include(i => i.InvitedByUser)
@@ -300,15 +301,39 @@ namespace PlanYonetimAraclari.Controllers
                 .OrderByDescending(i => i.InvitedDate)
                 .ToListAsync();
 
+            // Get tomorrow's tasks
+            var tomorrow = DateTime.Today.AddDays(1);
+            var tomorrowTasks = await _context.Tasks
+                .Include(t => t.Project)
+                .Where(t => t.AssignedMemberId == currentUser.Id 
+                       && t.DueDate.HasValue 
+                       && t.DueDate.Value.Date == tomorrow.Date 
+                       && t.Status != PlanYonetimAraclari.Models.TaskStatus.Done)
+                .OrderBy(t => t.Priority)
+                .ThenBy(t => t.DueDate)
+                .ToListAsync();
+
+            // Get tomorrow's calendar notes
+            var tomorrowNotes = await _context.CalendarNotes
+                .Where(n => n.UserId == currentUser.Id 
+                       && n.NoteDate.Date == tomorrow.Date 
+                       && !n.IsCompleted)
+                .OrderBy(n => n.NoteDate)
+                .ToListAsync();
+
             var viewModel = new NotificationsViewModel
             {
-                PendingInvitations = pendingInvitations
+                PendingInvitations = pendingInvitations,
+                TomorrowTasks = tomorrowTasks,
+                TomorrowCalendarNotes = tomorrowNotes,
+                UserFullName = $"{currentUser.FirstName} {currentUser.LastName}",
+                UserEmail = currentUser.Email,
+                UserProfileImage = currentUser.ProfileImageUrl
             };
 
-            // Add user information to ViewData for _Layout.cshtml
-            ViewData["UserFullName"] = $"{currentUser.FirstName} {currentUser.LastName}";
-            ViewData["UserEmail"] = currentUser.Email;
-            ViewData["UserProfileImage"] = currentUser.ProfileImageUrl;
+            ViewData["UserFullName"] = viewModel.UserFullName;
+            ViewData["UserEmail"] = viewModel.UserEmail;
+            ViewData["UserProfileImage"] = viewModel.UserProfileImage;
             ViewData["CurrentUserId"] = currentUser.Id;
 
             return View(viewModel);

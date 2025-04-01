@@ -19,17 +19,23 @@ namespace PlanYonetimAraclari.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IProjectService _projectService;
         private readonly ActivityService _activityService;
+        private readonly ITaskService _taskService;
+        private readonly ICalendarService _calendarService;
 
         public DashboardController(
             ILogger<DashboardController> logger,
             UserManager<ApplicationUser> userManager,
             IProjectService projectService,
-            ActivityService activityService)
+            ActivityService activityService,
+            ITaskService taskService,
+            ICalendarService calendarService)
         {
             _logger = logger;
             _userManager = userManager;
             _projectService = projectService;
             _activityService = activityService;
+            _taskService = taskService;
+            _calendarService = calendarService;
         }
 
         public async Task<IActionResult> Index()
@@ -126,6 +132,12 @@ namespace PlanYonetimAraclari.Controllers
                     };
                 }
                 
+                // Kullanıcıya atanmış ve yaklaşan görevleri al
+                var assignedTasks = await _taskService.GetUserAssignedTasksAsync(user.Id);
+                
+                // Kullanıcının yaklaşan takvim notlarını al
+                var upcomingNotes = await _calendarService.GetUserUpcomingNotesAsync(user.Id);
+                
                 // Dashboard model oluştur
                 var dashboardModel = new DashboardViewModel
                 {
@@ -143,7 +155,9 @@ namespace PlanYonetimAraclari.Controllers
                     CompletedProjectsCount = completedProjectsCount,
                     PendingProjectsCount = pendingProjectsCount,
                     RecentActivities = recentActivities,
-                    ActivityService = _activityService
+                    ActivityService = _activityService,
+                    AssignedTasks = assignedTasks ?? new List<TaskModel>(),
+                    UpcomingCalendarNotes = upcomingNotes ?? new List<CalendarNote>()
                 };
                 
                 // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
@@ -309,6 +323,105 @@ namespace PlanYonetimAraclari.Controllers
             {
                 _logger.LogError($"Projeler listelenirken hata oluştu: {ex.Message}");
                 return Json(new { success = false, message = "Projeler listelenirken bir hata oluştu." });
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> MarkTaskCompleted(int taskId)
+        {
+            try
+            {
+                // Kullanıcı ID'sini al
+                string userEmail = HttpContext.Session.GetString("UserEmail");
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Kullanıcı bulunamadı." });
+                }
+                
+                // Görevi tamamlandı olarak işaretle
+                bool result = await _taskService.MarkTaskAsCompletedAsync(taskId, user.Id);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Görev tamamlandı olarak işaretlendi." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Görev bulunamadı veya tamamlama yetkiniz bulunmuyor." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev tamamlanırken hata oluştu: {ex.Message}");
+                return Json(new { success = false, message = "Görev tamamlanırken bir hata oluştu." });
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> MarkNoteCompleted(int noteId)
+        {
+            try
+            {
+                // Kullanıcı ID'sini al
+                string userEmail = HttpContext.Session.GetString("UserEmail");
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Kullanıcı bulunamadı." });
+                }
+                
+                // Notu tamamlandı olarak işaretle
+                bool result = await _calendarService.MarkNoteAsCompletedAsync(noteId, user.Id);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Not tamamlandı olarak işaretlendi." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Not bulunamadı veya not sizin değil." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Not tamamlanırken hata oluştu: {ex.Message}");
+                return Json(new { success = false, message = "Not tamamlanırken bir hata oluştu." });
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> SnoozeNote(int noteId, DateTime newDate)
+        {
+            try
+            {
+                // Kullanıcı ID'sini al
+                string userEmail = HttpContext.Session.GetString("UserEmail");
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Kullanıcı bulunamadı." });
+                }
+                
+                // Notu ertele
+                bool result = await _calendarService.SnoozeNoteAsync(noteId, user.Id, newDate);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Not ertelendi." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Not bulunamadı veya not sizin değil." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Not ertelenirken hata oluştu: {ex.Message}");
+                return Json(new { success = false, message = "Not ertelenirken bir hata oluştu." });
             }
         }
     }

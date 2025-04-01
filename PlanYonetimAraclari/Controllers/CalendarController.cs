@@ -312,5 +312,34 @@ namespace PlanYonetimAraclari.Controllers
 
             return View();
         }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Kullanıcı bilgileri bulunamadı.";
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            // Takvim notunu veritabanından getir
+            var note = await _context.CalendarNotes
+                .FirstOrDefaultAsync(n => n.Id == id && n.UserId == user.Id);
+
+            if (note == null)
+            {
+                TempData["ErrorMessage"] = "Takvim notu bulunamadı veya not sizin değil.";
+                return RedirectToAction("Index");
+            }
+
+            ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
+            ViewData["UserEmail"] = user.Email;
+            ViewData["UserProfileImage"] = user.ProfileImageUrl;
+            ViewData["CurrentUserId"] = user.Id;
+
+            // Notu görüntülemek için view'e gönder
+            return RedirectToAction("Index", new { noteId = id });
+        }
     }
 } 

@@ -1007,5 +1007,84 @@ namespace PlanYonetimAraclari.Controllers
                 return Json(null);
             }
         }
+
+        // Görev detay sayfası
+        public async Task<IActionResult> TaskDetails(int id)
+        {
+            try
+            {
+                _logger.LogInformation($"TaskDetails action called for task ID: {id}");
+                
+                // Kullanıcıyı bul
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    _logger.LogWarning("Kullanıcı bulunamadı.");
+                    TempData["ErrorMessage"] = "Kullanıcı bilgileri bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Görevi doğrudan veritabanından ID'ye göre getir
+                var task = await _context.Tasks.FindAsync(id);
+                
+                if (task == null)
+                {
+                    _logger.LogWarning($"Görev bulunamadı: {id}");
+                    TempData["ErrorMessage"] = "Görev bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Projeyi getir
+                var project = await _projectService.GetProjectDetailsByIdAsync(task.ProjectId);
+                if (project == null)
+                {
+                    _logger.LogWarning($"Proje bulunamadı: {task.ProjectId}");
+                    TempData["ErrorMessage"] = "Görevin bağlı olduğu proje bulunamadı.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Proje sahibi veya ekip üyesi kontrolü
+                var isTeamMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == task.ProjectId && m.UserId == user.Id);
+                    
+                // Proje sahibi veya herhangi bir ekip üyesi görevi görüntüleyebilir
+                if (project.UserId != user.Id && !isTeamMember)
+                {
+                    _logger.LogWarning($"Kullanıcı ({user.Id}) görevi görüntüleme yetkisine sahip değil.");
+                    TempData["ErrorMessage"] = "Bu görevi görüntüleme yetkiniz yok.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                
+                // Atanan üye bilgilerini getir (eğer atanmışsa)
+                string assignedUserName = null;
+                if (!string.IsNullOrEmpty(task.AssignedMemberId))
+                {
+                    var assignedUser = await _userManager.FindByIdAsync(task.AssignedMemberId);
+                    if (assignedUser != null)
+                    {
+                        assignedUserName = assignedUser.FullName;
+                    }
+                }
+                
+                // Layout için gereken bilgileri ViewData'da sakla
+                ViewData["UserFullName"] = user.FullName;
+                ViewData["UserEmail"] = user.Email;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
+                ViewData["CurrentUserId"] = user.Id;
+                ViewData["ProjectId"] = task.ProjectId;
+                ViewData["ProjectName"] = project.Name;
+                
+                // Şimdilik görev detaylarını doğrudan görüntüleyelim
+                // Not: İleride daha detaylı bir TaskDetailsViewModel oluşturabilirsiniz
+                
+                return RedirectToAction("Details", new { id = task.ProjectId, taskId = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Görev detayları görüntülenirken hata: {ex.Message}");
+                TempData["ErrorMessage"] = "Görev detayları yüklenirken bir hata oluştu.";
+                return RedirectToAction("Index", "Dashboard");
+            }
+        }
     }
 } 

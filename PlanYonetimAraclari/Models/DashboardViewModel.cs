@@ -13,5 +13,9 @@ namespace PlanYonetimAraclari.Models
         public int PendingProjectsCount { get; set; }
         public List<ActivityLog> RecentActivities { get; set; } = new List<ActivityLog>();
         public ActivityService ActivityService { get; set; }
+        
+        // Upcoming Tasks & Reminders section
+        public List<TaskModel> AssignedTasks { get; set; } = new List<TaskModel>();
+        public List<CalendarNote> UpcomingCalendarNotes { get; set; } = new List<CalendarNote>();
     }
 } 

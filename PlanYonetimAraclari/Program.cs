@@ -22,6 +22,10 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<ActivityService>();
 
+// Görev ve takvim servisleri ekle
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
+
 // Arka plan servisleri
 builder.Services.AddHostedService<ActivityCleanupService>();
 

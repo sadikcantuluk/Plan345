@@ -38,9 +38,19 @@
         </div>
     }
 
-    <div class="bg-white rounded-lg shadow-md">
+    <!-- Proje Davetleri -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
         <div class="p-6">
-            <h2 class="text-xl font-semibold mb-4">Proje Davetleri</h2>
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-envelope text-primary-500 mr-2"></i>
+                Proje Davetleri
+                @if (Model.PendingInvitations.Any())
+                {
+                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        @Model.PendingInvitations.Count
+                    </span>
+                }
+            </h2>
             <div class="space-y-4">
                 @foreach (var invitation in Model.PendingInvitations)
                 {
@@ -75,7 +85,110 @@
                     <div class="text-center py-8">
                         <div class="text-gray-400">
                             <i class="fas fa-bell-slash text-4xl mb-2"></i>
-                            <p class="text-lg">Bekleyen bildiriminiz bulunmuyor.</p>
+                            <p class="text-lg">Bekleyen davet bulunmuyor.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Yarınki Hatırlatmalar -->
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-clock text-primary-500 mr-2"></i>
+                Yarınki Hatırlatmalar
+                @{
+                    int tomorrowCount = (Model.TomorrowTasks?.Count ?? 0) + (Model.TomorrowCalendarNotes?.Count ?? 0);
+                }
+                @if (tomorrowCount > 0)
+                {
+                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        @tomorrowCount
+                    </span>
+                }
+            </h2>
+            <div class="space-y-4">
+                @{
+                    var hasTomorrowReminders = (Model.TomorrowTasks?.Any() ?? false) || (Model.TomorrowCalendarNotes?.Any() ?? false);
+                }
+
+                @if (hasTomorrowReminders)
+                {
+                    <!-- Yarınki Görevler -->
+                    @if (Model.TomorrowTasks?.Any() ?? false)
+                    {
+                        foreach (var task in Model.TomorrowTasks)
+                        {
+                            <div class="border rounded-lg p-4 @(task.Priority == TaskPriority.High || task.Priority == TaskPriority.Urgent ? "border-l-4 border-l-red-500" : task.Priority == TaskPriority.Medium ? "border-l-4 border-l-yellow-500" : "")">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="flex items-center">
+                                            <h3 class="font-medium text-gray-900">@task.Name</h3>
+                                            <span class="ml-2 px-2 py-1 text-xs rounded-full @(task.Priority == TaskPriority.High || task.Priority == TaskPriority.Urgent ? "bg-red-100 text-red-800" : task.Priority == TaskPriority.Medium ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800")">
+                                                @(task.Priority == TaskPriority.Urgent ? "Acil" : 
+                                                  task.Priority == TaskPriority.High ? "Yüksek" : 
+                                                  task.Priority == TaskPriority.Medium ? "Orta" : "Düşük")
+                                            </span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(task.Description))
+                                        {
+                                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">@task.Description</p>
+                                        }
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            Son Tarih: @task.DueDate.Value.ToString("dd.MM.yyyy")
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="/Project/Details/@task.ProjectId?taskId=@task.Id" 
+                                           class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            Görüntüle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <!-- Yarınki Takvim Notları -->
+                    @if (Model.TomorrowCalendarNotes?.Any() ?? false)
+                    {
+                        foreach (var note in Model.TomorrowCalendarNotes)
+                        {
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">@note.Title</h3>
+                                        @if (!string.IsNullOrEmpty(note.Description))
+                                        {
+                                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">@note.Description</p>
+                                        }
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            @note.NoteDate.ToString("dd.MM.yyyy HH:mm")
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="/Calendar" 
+                                           class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            Görüntüle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-8">
+                        <div class="text-gray-400">
+                            <i class="fas fa-calendar-check text-4xl mb-2"></i>
+                            <p class="text-lg">Yarın için hatırlatma bulunmuyor.</p>
                         </div>
                     </div>
                 }

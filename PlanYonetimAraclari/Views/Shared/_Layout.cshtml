@@ -147,7 +147,7 @@
                 <!-- Bildirimler -->
                 <a href="@Url.Action("Notifications", "Team")" class="relative p-2 text-gray-500 hover:text-primary-500 focus:outline-none">
                     <i class="fas fa-bell text-xl"></i>
-                    @if (ViewData["HasPendingInvitations"] != null && (bool)ViewData["HasPendingInvitations"])
+                    @if (ViewData["HasAnyNotifications"] != null && (bool)ViewData["HasAnyNotifications"])
                     {
                         <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                     }
@@ -266,7 +266,7 @@
                     <a href="/Team/Notifications" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Team/Notifications") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
                         <i class="fas fa-bell text-lg"></i>
                         <span>Bildirimler</span>
-                        @if (ViewData["HasPendingInvitations"] != null && (bool)ViewData["HasPendingInvitations"])
+                        @if (ViewData["HasAnyNotifications"] != null && (bool)ViewData["HasAnyNotifications"])
                         {
                             <span class="flex h-2 w-2 relative">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -530,6 +530,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html> 

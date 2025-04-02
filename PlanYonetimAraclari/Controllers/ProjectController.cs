@@ -1086,5 +1086,72 @@ namespace PlanYonetimAraclari.Controllers
                 return RedirectToAction("Index", "Dashboard");
             }
         }
+
+        // Yeni proje oluşturma
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProjectModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Form bilgilerinde eksiklik var. Lütfen gerekli alanları doldurun.";
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return RedirectToAction("Login", "Account");
+
+                // Kullanıcının proje limitini kontrol et - SADECE sahip olduğu projeler sayılır
+                var userOwnedProjectsCount = await _context.Projects
+                    .CountAsync(p => p.UserId == user.Id);
+
+                _logger.LogInformation($"Kullanıcı {user.Email} için proje sayısı: {userOwnedProjectsCount}, limit: {user.MaxProjectsAllowed}");
+
+                if (userOwnedProjectsCount >= user.MaxProjectsAllowed)
+                {
+                    _logger.LogWarning($"Kullanıcı {user.Email} maksimum proje limitine ulaştı ({user.MaxProjectsAllowed})");
+                    TempData["ErrorMessage"] = $"Maksimum proje limitine ulaştınız ({user.MaxProjectsAllowed}). Yeni proje oluşturmak için mevcut projelerinizden birini silmeniz veya admin ile iletişime geçmeniz gerekiyor.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                model.UserId = user.Id;
+                model.CreatedDate = DateTime.Now;
+                model.LastUpdatedDate = DateTime.Now;
+                model.Status = ProjectStatus.InProgress;
+
+                // Veritabanına ekle
+                _context.Projects.Add(model);
+                await _context.SaveChangesAsync();
+
+                // Aktivite kaydı ekle
+                var activity = new ActivityLog
+                {
+                    UserId = user.Id,
+                    Type = ActivityType.ProjectCreated,
+                    Title = "Proje Oluşturuldu",
+                    Description = model.Name,
+                    RelatedEntityId = model.Id,
+                    RelatedEntityType = "Project",
+                    CreatedAt = DateTime.Now
+                };
+                _context.ActivityLogs.Add(activity);
+                await _context.SaveChangesAsync();
+
+                // Başarılı mesajı göster
+                TempData["SuccessMessage"] = "Proje başarıyla oluşturuldu.";
+                
+                // Proje detay sayfasına yönlendir
+                return RedirectToAction("Details", "Project", new { id = model.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Proje oluşturulurken hata oluştu: {ex.Message}");
+                TempData["ErrorMessage"] = "Proje oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.";
+                return RedirectToAction("Index", "Dashboard");
+            }
+        }
     }
 } 

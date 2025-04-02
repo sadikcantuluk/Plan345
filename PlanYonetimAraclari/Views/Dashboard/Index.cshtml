@@ -108,6 +108,64 @@
         </div>
     </div>
 
+    <!-- Kullanıcı Limitleri Bilgisi -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-lg text-gray-900">Hesap Limitleri</h3>
+            <span class="text-gray-500 text-sm">
+                <i class="fas fa-info-circle mr-1"></i> Güncel durum
+            </span>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
+            <!-- Proje Limiti -->
+            <div class="flex items-center space-x-4">
+                <div class="h-12 w-12 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Proje oluşturma hakkınız</p>
+                    <div class="flex items-center mt-1">
+                        <div class="flex-1 bg-gray-200 rounded-full h-2 mr-3">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: @(((float)ViewBag.OwnedProjectsCount / ViewBag.MaxProjectsAllowed) * 100)%;"></div>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">@ViewBag.OwnedProjectsCount / @ViewBag.MaxProjectsAllowed</span>
+                    </div>
+                    <p class="text-xs text-@(ViewBag.RemainingProjectsCount > 0 ? "green" : "red")-600 mt-1">
+                        @if (ViewBag.RemainingProjectsCount > 0)
+                        {
+                            <span><i class="fas fa-check-circle mr-1"></i> @ViewBag.RemainingProjectsCount adet daha proje oluşturabilirsiniz</span>
+                        }
+                        else
+                        {
+                            <span><i class="fas fa-exclamation-circle mr-1"></i> Maksimum proje limitine ulaştınız</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Proje Üye Limiti -->
+            <div class="flex items-center space-x-4">
+                <div class="h-12 w-12 flex items-center justify-center rounded-full bg-purple-50 text-purple-500">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Proje başına üye limiti</p>
+                    <p class="text-lg font-medium text-gray-800">@ViewBag.MaxMembersPerProject <span class="text-sm text-gray-500">kişi</span></p>
+                    <p class="text-xs text-gray-600 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i> Her projeye maksimum @ViewBag.MaxMembersPerProject üye ekleyebilirsiniz
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin İletişim Bilgisi -->
+        <div class="mt-2">
+            <span class="text-xs text-blue-700 bg-blue-50 px-3 py-2 rounded-lg inline-flex items-center">
+                <i class="fas fa-info-circle mr-1"></i> Limit değişikliği için lütfen admin ile iletişime geçin.
+            </span>
+        </div>
+    </div>
 
     <!-- Projelerim ve Görevlerim -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -560,6 +618,14 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // URL'de openProjectModal=true parametresi varsa proje modalını aç
+            if (new URLSearchParams(window.location.search).get('openProjectModal') === 'true') {
+                $("#create-project-modal").removeClass("hidden");
+                $("body").css("overflow", "hidden");
+                // URL'i temizle, ama sayfa yenilenmeden
+                history.replaceState(null, '', window.location.pathname);
+            }
+            
             // Yeni Proje Oluştur butonları
             $("#create-project-btn, .create-project-btn").on("click", function () {
                 $("#create-project-modal").removeClass("hidden");

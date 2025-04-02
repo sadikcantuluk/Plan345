@@ -26,5 +26,6 @@ namespace PlanYonetimAraclari.Services
         Task<TaskModel> UpdateTaskAsync(TaskModel task);
         Task<bool> DeleteTaskAsync(int taskId);
         Task<bool> DeleteProjectAsync(int projectId, bool forceDelete = false);
+        Task<int> GetUserOwnedProjectsCountAsync(string userId);
     }
 } 

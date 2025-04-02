@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace PlanYonetimAraclari.Models
@@ -83,11 +84,38 @@ namespace PlanYonetimAraclari.Models
     public class UserViewModel
     {
         public string Id { get; set; }
+        
+        [Required(ErrorMessage = "Ad alanı zorunludur")]
+        [Display(Name = "Ad")]
         public string FirstName { get; set; }
+        
+        [Required(ErrorMessage = "Soyad alanı zorunludur")]
+        [Display(Name = "Soyad")]
         public string LastName { get; set; }
+        
+        [Required(ErrorMessage = "E-posta alanı zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        [Display(Name = "E-posta")]
         public string Email { get; set; }
+        
         public string Role { get; set; }
-        public string FullName => $"{FirstName} {LastName}";
+        
+        // Yeni eklenen özellikler
+        public string ProfileImageUrl { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? LastLoginTime { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        
+        // Projeler ve görevler hakkında bilgiler
+        public int ProjectCount { get; set; }
+        public int TaskCount { get; set; }
+        
+        // Tam adı döndüren özellik
+        public string FullName
+        {
+            get { return $"{FirstName} {LastName}"; }
+        }
     }
 
     public class EditUserViewModel

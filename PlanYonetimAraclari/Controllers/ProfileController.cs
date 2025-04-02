@@ -463,6 +463,29 @@ namespace PlanYonetimAraclari.Controllers
                 _dbContext.Projects.RemoveRange(userProjects);
                 _logger.LogInformation($"Kullanıcı {user.Id} için {userProjects.Count} proje silindi");
                 
+                // Kullanıcının profil resmini silme işlemi
+                if (!string.IsNullOrEmpty(user.ProfileImageUrl) && !user.ProfileImageUrl.Contains("default"))
+                {
+                    try
+                    {
+                        // Profil resim yolundan dosya sistemindeki tam yolu elde et
+                        string profileImagePath = user.ProfileImageUrl.TrimStart('/');
+                        string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, profileImagePath);
+                        
+                        // Dosya mevcutsa sil
+                        if (System.IO.File.Exists(fullPath))
+                        {
+                            System.IO.File.Delete(fullPath);
+                            _logger.LogInformation($"Kullanıcı profil resmi silindi: {fullPath}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Profil resmi silinirken hata olursa loglayalım ama işleme devam edelim
+                        _logger.LogWarning($"Kullanıcı profil resmi silinirken hata oluştu: {ex.Message}");
+                    }
+                }
+                
                 // Veritabanındaki değişiklikleri kaydet
                 await _dbContext.SaveChangesAsync();
                 

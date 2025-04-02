@@ -80,6 +80,9 @@ namespace PlanYonetimAraclari.Controllers
                 int completedProjectsCount = await _projectService.GetUserCompletedProjectsCountAsync(user.Id);
                 int pendingProjectsCount = await _projectService.GetUserPendingProjectsCountAsync(user.Id);
                 
+                // Kullanıcının sahip olduğu proje sayısını al (maximum limitini karşılaştırmak için)
+                int ownedProjectsCount = await _projectService.GetUserOwnedProjectsCountAsync(user.Id);
+                
                 // Son etkinlikleri getir
                 var recentActivities = await _activityService.GetUserAndTeamActivitiesAsync(user.Id, 20);
                 
@@ -175,6 +178,12 @@ namespace PlanYonetimAraclari.Controllers
                 ViewData["UserProfileImage"] = profileImageUrl;
                 ViewBag.CurrentUserId = user.Id;
                 
+                // Kullanıcının limit bilgilerini ViewBag'e aktar
+                ViewBag.MaxProjectsAllowed = user.MaxProjectsAllowed;
+                ViewBag.OwnedProjectsCount = ownedProjectsCount;
+                ViewBag.RemainingProjectsCount = user.MaxProjectsAllowed - ownedProjectsCount;
+                ViewBag.MaxMembersPerProject = user.MaxMembersPerProject;
+                
                 return View(dashboardModel);
             }
             catch (Exception ex)
@@ -247,6 +256,19 @@ namespace PlanYonetimAraclari.Controllers
             
             try
             {
+                // Kullanıcının proje limitini kontrol et - SADECE sahip olduğu projeler sayılır
+                // DbContext'e doğrudan erişimimiz olmadığı için ProjectService üzerinden özel bir metod çağırıyoruz
+                var userOwnedProjectsCount = await _projectService.GetUserOwnedProjectsCountAsync(user.Id);
+                
+                _logger.LogInformation($"Kullanıcı {user.Email} için proje sayısı: {userOwnedProjectsCount}, limit: {user.MaxProjectsAllowed}");
+                
+                if (userOwnedProjectsCount >= user.MaxProjectsAllowed)
+                {
+                    _logger.LogWarning($"Kullanıcı {user.Email} maksimum proje limitine ulaştı ({user.MaxProjectsAllowed})");
+                    TempData["ErrorMessage"] = $"Maksimum proje limitine ulaştınız ({user.MaxProjectsAllowed}). Yeni proje oluşturmak için mevcut projelerinizden birini silmeniz veya admin ile iletişime geçmeniz gerekiyor.";
+                    return RedirectToAction("Index");
+                }
+                
                 // ModelState'i temizle - doğrulama hatalarını bypass et
                 ModelState.Clear();
                 

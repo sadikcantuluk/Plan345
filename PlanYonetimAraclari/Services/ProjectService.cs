@@ -607,5 +607,25 @@ namespace PlanYonetimAraclari.Services
                 throw;
             }
         }
+
+        public async Task<int> GetUserOwnedProjectsCountAsync(string userId)
+        {
+            try
+            {
+                _logger.LogInformation($"Kullanıcının sahip olduğu proje sayısı alınıyor: {userId}");
+                
+                // Sadece kullanıcının sahip olduğu projeleri say (ekip üyesi olduğu projeleri sayma)
+                var ownedProjectsCount = await _context.Projects
+                    .CountAsync(p => p.UserId == userId);
+
+                _logger.LogInformation($"Kullanıcının sahip olduğu proje sayısı: {ownedProjectsCount}");
+                return ownedProjectsCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Kullanıcının sahip olduğu proje sayısı alınırken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
     }
 } 

@@ -1,11 +1,13 @@
-@model List<UserViewModel>
+@model PlanYonetimAraclari.Models.AdminViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<PlanYonetimAraclari.Models.ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Admin Panel - Plan345";
     Layout = null;
 }
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,20 +44,49 @@
         .custom-loader {
             width: 50px;
             height: 50px;
+            display: grid;
+            border: 4px solid #0000;
             border-radius: 50%;
-            border: 8px solid;
-            border-color: #766DF4 #0000;
-            animation: spinner-e04l1k 1s infinite;
+            border-color: #4F46E5 #0000;
+            animation: s6 1s infinite linear;
         }
-
-        @@keyframes spinner-e04l1k {
-            to {
-                transform: rotate(.5turn);
-            }
+        .custom-loader::before,
+        .custom-loader::after {
+            content: "";
+            grid-area: 1/1;
+            margin: 2px;
+            border: inherit;
+            border-radius: 50%;
+        }
+        .custom-loader::before {
+            border-color: #6366F1 #0000;
+            animation: inherit;
+            animation-duration: .5s;
+            animation-direction: reverse;
+        }
+        .custom-loader::after {
+            margin: 8px;
+        }
+        @@keyframes s6 {
+            100% {transform: rotate(1turn)}
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        footer {
+            margin-top: auto;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 flex flex-col min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -81,7 +112,7 @@
     </header>
     
     <!-- Ana İçerik -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow mb-20">
         <!-- Başlık ve İşlemler -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
@@ -92,6 +123,103 @@
                 <a href="/Admin/EditProfile" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                     <i class="fas fa-user-cog mr-2"></i> Admin Bilgilerini Düzenle
                 </a>
+            </div>
+        </div>
+        
+        <!-- İstatistik Kartları -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Toplam Kullanıcı</p>
+                        <p class="text-2xl font-bold text-gray-900">@Model.TotalUsers</p>
+                    </div>
+                    <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <span class="text-green-500 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                            <span class="ml-1 text-sm">%@Model.NewUserGrowth</span>
+                        </span>
+                        <span class="text-sm text-gray-500 ml-2">son 30 günde</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Admin Kullanıcılar</p>
+                        <p class="text-2xl font-bold text-gray-900">@Model.AdminUsers</p>
+                    </div>
+                    <div class="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        @{
+                            var adminPercentage = Model.TotalUsers > 0 ? ((double)Model.AdminUsers / Model.TotalUsers * 100).ToString("0.0") : "0.0";
+                        }
+                        <span class="text-sm text-gray-500">Kullanıcıların %@adminPercentage'i</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Doğrulanmış E-postalar</p>
+                        <p class="text-2xl font-bold text-gray-900">@Model.VerifiedUsers</p>
+                    </div>
+                    <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        @{
+                            var verifiedPercentage = Model.TotalUsers > 0 ? ((double)Model.VerifiedUsers / Model.TotalUsers * 100).ToString("0.0") : "0.0";
+                        }
+                        <span class="text-sm text-gray-500">Kullanıcıların %@verifiedPercentage'i</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Toplam Proje</p>
+                        <p class="text-2xl font-bold text-gray-900">@Model.TotalProjects</p>
+                    </div>
+                    <div class="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <span class="text-green-500 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                            <span class="ml-1 text-sm">%@Model.NewProjectGrowth</span>
+                        </span>
+                        <span class="text-sm text-gray-500 ml-2">son 30 günde</span>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -126,111 +254,151 @@
         }
         
         <!-- Kullanıcı Tablosu -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="p-6">
-                <!-- Yükleniyor Göstergesi -->
-                <div id="loading" class="flex items-center justify-center my-8" style="display: none;">
-                    <div class="custom-loader"></div>
-                </div>
-                
-                <!-- Kullanıcı Tablosu -->
-                <div id="userTableContainer">
-                    <table id="userTable" class="w-full">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ad Soyad</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-posta</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roller</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="username">
+                            <div class="flex items-center">
+                                Kullanıcı Adı
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                </svg>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="email">
+                            <div class="flex items-center">
+                                E-posta
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                </svg>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Rol
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="registerDate">
+                            <div class="flex items-center">
+                                Kayıt Tarihi
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                </svg>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Durum
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            İşlemler
+                        </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach (var user in Model)
+                <tbody class="bg-white divide-y divide-gray-200" id="userTableBody">
+                    @foreach (var user in Model.Users)
                             {
-                                <tr>
+                        <tr class="hover:bg-gray-50 user-row">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700">
-                                                @user.FullName[0]
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        @if (string.IsNullOrEmpty(user.ProfileImageUrl))
+                                        {
+                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-xl">
+                                                @(user.UserName.Substring(0, 1).ToUpper())
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <img class="h-10 w-10 rounded-full object-cover" src="@user.ProfileImageUrl" alt="Profile">
+                                        }
                                             </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">@user.FullName</div>
+                                        <div class="text-sm font-medium text-gray-900">@user.UserName</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">@user.Email</div>
+                                <div class="text-xs text-gray-500">
+                                    @if (user.IsEmailVerified)
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="mr-1 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            Doğrulanmış
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <svg class="mr-1 h-2 w-2 text-yellow-400" fill="currentColor" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            Doğrulanmamış
+                                        </span>
+                                    }
+                                </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @{
-                                            var roles = ViewData[$"Roles_{user.Id}"]?.ToString() ?? "";
-                                            var isAdmin = roles.Contains("Admin");
-                                        }
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-@(isAdmin ? "purple" : "green")-100 text-@(isAdmin ? "purple" : "green")-800">
-                                            @(roles)
+                                    var isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
+                                }
+                                @if (isAdmin)
+                                {
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        Admin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Kullanıcı
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                @user.CreatedDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Aktif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
-                                            @if (!isAdmin) // Admin olmayan kullanıcılar için silme butonu
-                                            {
-                                                <button onclick="confirmDelete('@user.Id', '@user.FullName')" class="text-red-600 hover:text-red-900" title="Sil">
-                                                    <i class="fas fa-trash"></i>
+                                    <button type="button" class="text-indigo-600 hover:text-indigo-900 view-details" data-user-id="@user.Id">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="text-blue-600 hover:text-blue-900 edit-role" 
+                                            data-user-id="@user.Id" 
+                                            data-username="@user.UserName" 
+                                            data-is-admin="@((await UserManager.IsInRoleAsync(user, "Admin")).ToString().ToLower())">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="text-red-600 hover:text-red-900 delete-user" data-user-id="@user.Id" data-username="@user.UserName">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
                                                 </button>
-                                            }
                                         </div>
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Özet Bilgiler -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-medium text-gray-900">Toplam Kullanıcı</h2>
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-                <p class="mt-2 text-3xl font-semibold text-gray-900">@Model.Count</p>
-                <p class="mt-1 text-sm text-gray-500">Sistemde kayıtlı tüm kullanıcılar</p>
-            </div>
             
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-medium text-gray-900">Admin Sayısı</h2>
-                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                </div>
-                <p class="mt-2 text-3xl font-semibold text-gray-900">
-                    @Model.Count(u => ViewData[$"Roles_{u.Id}"]?.ToString().Contains("Admin") == true)
-                </p>
-                <p class="mt-1 text-sm text-gray-500">Yönetici yetkisine sahip kullanıcılar</p>
-            </div>
-            
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-medium text-gray-900">Standart Kullanıcı</h2>
-                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
-                <p class="mt-2 text-3xl font-semibold text-gray-900">
-                    @Model.Count(u => ViewData[$"Roles_{u.Id}"]?.ToString().Contains("User") == true)
-                </p>
-                <p class="mt-1 text-sm text-gray-500">Standart yetkiye sahip kullanıcılar</p>
-            </div>
+            <!-- Sayfalama alanı -->
+            <div class="py-4 flex items-center justify-between" id="paginationContainer"></div>
         </div>
     </main>
     
     <!-- Footer -->
-    <footer class="bg-white mt-12 py-6 border-t border-gray-200">
+    <footer class="bg-white py-6 border-t border-gray-200 w-full mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-center text-sm text-gray-500">
                 &copy; @DateTime.Now.Year Plan345 - Tüm hakları saklıdır.
@@ -238,104 +406,585 @@
         </div>
     </footer>
     
-    <!-- Silme Onay Modalı -->
-    <div id="deleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+    <!-- Kullanıcı Detay Modalı -->
+    <div class="fixed inset-0 z-50 overflow-y-auto hidden" id="userDetailModal">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="userDetailTitle">Kullanıcı Detayları</h3>
+                        <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="userDetailContent" class="space-y-4">
+                        <div class="flex items-center justify-center mb-4">
+                            <div id="userDetailImage" class="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-4xl overflow-hidden">
+                                <!-- Profil resmi veya baş harfi burada gösterilecek -->
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Kullanıcı Adı</h4>
+                                <p id="detailUsername" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">E-posta</h4>
+                                <p id="detailEmail" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Rol</h4>
+                                <p id="detailRole" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">E-posta Doğrulama</h4>
+                                <p id="detailEmailVerified" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Kayıt Tarihi</h4>
+                                <p id="detailRegisterDate" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Toplam Proje Sayısı</h4>
+                                <p id="detailProjectCount" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Son Giriş</h4>
+                                <p id="detailLastLogin" class="mt-1 text-sm text-gray-900"></p>
+                            </div>
+                            
+                            <div class="border-t pt-3">
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Limit Ayarları</h4>
+                                <div class="grid grid-cols-2 gap-4 mt-2">
+                                    <div>
+                                        <label for="maxProjectsAllowed" class="block text-xs font-medium text-gray-700">Maksimum Proje Sayısı</label>
+                                        <input type="number" id="maxProjectsAllowed" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                    </div>
+                                    <div>
+                                        <label for="maxMembersPerProject" class="block text-xs font-medium text-gray-700">Proje Başına Maksimum Üye</label>
+                                        <input type="number" id="maxMembersPerProject" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                    </div>
+                                </div>
+                                <button type="button" id="saveUserLimits" class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-sm">
+                                    Limitleri Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="close-modal w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rol Değiştirme Modalı -->
+    <div class="fixed inset-0 z-50 overflow-y-auto hidden" id="changeRoleModal">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form id="changeRoleForm">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="flex justify-between mb-4">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="changeRoleTitle">Rol Değiştir</h3>
+                            <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div>
+                            <input type="hidden" id="editUserId" name="userId" />
+                            <p class="mb-4 text-sm text-gray-700">
+                                <span id="editUsername"></span> kullanıcısının rolünü değiştirmek üzeresiniz.
+                            </p>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Rol</label>
+                                <select id="editUserRole" name="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="User">Kullanıcı</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Kaydet
+                        </button>
+                        <button type="button" class="close-modal mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcı Silme Modalı -->
+    <div class="fixed inset-0 z-50 overflow-y-auto hidden" id="deleteUserModal">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                            Kullanıcıyı Sil
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="deleteUserTitle">
+                                Kullanıcı Sil
                         </h3>
                         <div class="mt-2">
-                            <p class="text-sm text-gray-500" id="modal-description">
-                                Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                                <p class="text-sm text-gray-500" id="deleteUserText">
+                                    Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm kullanıcı verileri silinecektir.
                             </p>
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button" id="confirmDeleteBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                    Sil
+                        Kullanıcıyı Sil
                 </button>
-                <button type="button" onclick="closeDeleteModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    <button type="button" class="close-modal mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                     İptal
                 </button>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // DataTable'ı başlat
-            $('#userTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
-                },
-                pageLength: 10,
-                responsive: true
-            });
-            
-            // Yükleniyor göstergesini gizle
-            $('#loading').hide();
-            $('#userTableContainer').show();
-        });
-        
-        // Silme işlemi için onay modalını göster
-        function confirmDelete(userId, userName) {
-            document.getElementById('modal-description').textContent = `"${userName}" kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`;
-            
-            // Silme butonuna tıklandığında çalışacak fonksiyonu ayarla
-            document.getElementById('confirmDeleteBtn').onclick = function() {
-                deleteUser(userId);
-            };
-            
-            // Modalı göster
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
-        
-        // Silme modalını kapat
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-        }
-        
-        // Kullanıcı silme işlemini gerçekleştir
-        function deleteUser(userId) {
-            // AJAX ile silme isteği gönder
-            $.ajax({
-                url: '/Admin/DeleteUser',
-                type: 'POST',
-                data: { 
-                    id: userId,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Başarılı olursa sayfayı yenile
-                        alert('Kullanıcı başarıyla silindi.');
-                        location.reload();
-                    } else {
-                        // Hata durumunda kullanıcıya bilgi ver
-                        alert('Hata: ' + response.message);
-                    }
-                    closeDeleteModal();
-                },
-                error: function(xhr, status, error) {
-                    alert('Bir hata oluştu: ' + error);
-                    closeDeleteModal();
-                }
-            });
-        }
-    </script>
-    
     <!-- CSRF Token için gizli input -->
     @Html.AntiForgeryToken()
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Yükleniyor göstergesini gizle
+            document.getElementById('loading')?.classList.add('hidden');
+            document.getElementById('userTableContainer')?.classList.remove('hidden');
+            
+            // Modalları yönetme
+            const closeButtons = document.querySelectorAll('.close-modal');
+            const userDetailModal = document.getElementById('userDetailModal');
+            const changeRoleModal = document.getElementById('changeRoleModal');
+            const deleteUserModal = document.getElementById('deleteUserModal');
+            const viewDetailsButtons = document.querySelectorAll('.view-details');
+            const editRoleButtons = document.querySelectorAll('.edit-role');
+            const deleteUserButtons = document.querySelectorAll('.delete-user');
+            
+            // Tüm modallar için kapatma fonksiyonu
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    userDetailModal.classList.add('hidden');
+                    changeRoleModal.classList.add('hidden');
+                    deleteUserModal.classList.add('hidden');
+                });
+            });
+            
+            // Kullanıcı detaylarını görüntüleme
+            viewDetailsButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const userId = button.getAttribute('data-user-id');
+                    await fetchUserDetails(userId);
+                    userDetailModal.classList.remove('hidden');
+                });
+            });
+            
+            // Rol düzenleme modalını açma
+            editRoleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const userId = button.getAttribute('data-user-id');
+                    const username = button.getAttribute('data-username');
+                    const isAdmin = button.getAttribute('data-is-admin') === 'true';
+                    
+                    document.getElementById('editUserId').value = userId;
+                    document.getElementById('editUsername').textContent = username;
+                    document.getElementById('editUserRole').value = isAdmin ? 'Admin' : 'User';
+                    
+                    changeRoleModal.classList.remove('hidden');
+                });
+            });
+            
+            // Silme modalını açma
+            deleteUserButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const userId = button.getAttribute('data-user-id');
+                    const username = button.getAttribute('data-username');
+                    
+                    document.getElementById('confirmDeleteBtn').setAttribute('data-user-id', userId);
+                    document.getElementById('deleteUserText').textContent = `"${username}" kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm kullanıcı verileri silinecektir.`;
+                    
+                    deleteUserModal.classList.remove('hidden');
+                });
+            });
+            
+            // Kullanıcı detaylarını getirme
+            async function fetchUserDetails(userId) {
+                try {
+                    const response = await fetch(`/Admin/GetUserDetails?id=${userId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Profil resmi veya baş harfini ayarla
+                        const userDetailImage = document.getElementById('userDetailImage');
+                        if (data.profileImageUrl) {
+                            userDetailImage.innerHTML = `<img src="${data.profileImageUrl}" alt="${data.userName}" class="h-full w-full object-cover">`;
+                        } else {
+                            userDetailImage.innerHTML = data.userName.substring(0, 1).toUpperCase();
+                        }
+                        
+                        // Diğer detayları doldur
+                        document.getElementById('detailUsername').textContent = data.userName;
+                        document.getElementById('detailEmail').textContent = data.email;
+                        document.getElementById('detailRole').textContent = data.isAdmin ? 'Admin' : 'Kullanıcı';
+                        document.getElementById('detailEmailVerified').textContent = data.isEmailVerified ? 'Doğrulanmış' : 'Doğrulanmamış';
+                        document.getElementById('detailRegisterDate').textContent = new Date(data.registerDate).toLocaleDateString('tr-TR');
+                        document.getElementById('detailProjectCount').textContent = data.projectCount || '0';
+                        document.getElementById('detailLastLogin').textContent = data.lastLoginDate ? new Date(data.lastLoginDate).toLocaleString('tr-TR') : 'Hiç giriş yapmadı';
+                        
+                        // Proje ve üye limitlerini doldur
+                        document.getElementById('maxProjectsAllowed').value = data.maxProjectsAllowed || 3;
+                        document.getElementById('maxMembersPerProject').value = data.maxMembersPerProject || 10;
+                        
+                        // Kaydet butonuna userId değerini ata
+                        document.getElementById('saveUserLimits').setAttribute('data-user-id', data.id);
+                    } else {
+                        console.error('Kullanıcı detayları alınamadı');
+                    }
+                } catch (error) {
+                    console.error('Kullanıcı detayları getirme hatası:', error);
+                }
+            }
+            
+            // Proje ve üye limitlerini kaydetme
+            document.getElementById('saveUserLimits').addEventListener('click', async function() {
+                const userId = this.getAttribute('data-user-id');
+                const maxProjectsAllowed = document.getElementById('maxProjectsAllowed').value;
+                const maxMembersPerProject = document.getElementById('maxMembersPerProject').value;
+                
+                // Değerleri kontrol et
+                if (!maxProjectsAllowed || maxProjectsAllowed < 1) {
+                    alert('Maksimum proje sayısı en az 1 olmalıdır.');
+                    return;
+                }
+                
+                if (!maxMembersPerProject || maxMembersPerProject < 1) {
+                    alert('Proje başına maksimum üye sayısı en az 1 olmalıdır.');
+                    return;
+                }
+                
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    const response = await fetch('/Admin/UpdateUserLimits', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({
+                            userId: userId,
+                            maxProjectsAllowed: parseInt(maxProjectsAllowed),
+                            maxMembersPerProject: parseInt(maxMembersPerProject)
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Kullanıcı limitleri başarıyla güncellendi.');
+                        // Güncel değerleri göster
+                        document.getElementById('maxProjectsAllowed').value = result.maxProjectsAllowed;
+                        document.getElementById('maxMembersPerProject').value = result.maxMembersPerProject;
+                    } else {
+                        alert('Kullanıcı limitleri güncellenirken bir hata oluştu: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Kullanıcı limitleri güncelleme hatası:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyiniz.');
+                }
+            });
+            
+            // Rol değiştirme formunu gönderme
+            document.getElementById('changeRoleForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const userId = document.getElementById('editUserId').value;
+                const role = document.getElementById('editUserRole').value;
+                
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    const response = await fetch('/Admin/ChangeUserRole', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({
+                            userId: userId,
+                            role: role
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        // Başarılı olduğunda sayfayı yenile
+                        window.location.reload();
+                    } else {
+                        alert('Rol değiştirme işlemi başarısız oldu. Lütfen tekrar deneyiniz.');
+                    }
+                } catch (error) {
+                    console.error('Rol değiştirme hatası:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyiniz.');
+                }
+            });
+            
+            // Kullanıcı silme işlemi
+            document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+                const userId = this.getAttribute('data-user-id');
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('id', userId);
+                    formData.append('__RequestVerificationToken', token);
+                    
+                    const response = await fetch('/Admin/DeleteUser', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Başarılı olduğunda sayfayı yenile
+                        window.location.reload();
+                    } else {
+                        alert('Kullanıcı silme işlemi başarısız oldu: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Kullanıcı silme hatası:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyiniz.');
+                }
+            });
+            
+            // Arama ve filtreleme
+            const searchInput = document.getElementById('searchInput');
+            const roleFilter = document.getElementById('roleFilter');
+            const emailVerifiedFilter = document.getElementById('emailVerifiedFilter');
+            const userRows = document.querySelectorAll('.user-row');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterUsers);
+            }
+            
+            if (roleFilter) {
+                roleFilter.addEventListener('change', filterUsers);
+            }
+            
+            if (emailVerifiedFilter) {
+                emailVerifiedFilter.addEventListener('change', filterUsers);
+            }
+            
+            function filterUsers() {
+                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+                const roleValue = roleFilter ? roleFilter.value : '';
+                const emailVerifiedValue = emailVerifiedFilter ? emailVerifiedFilter.value : '';
+                
+                userRows.forEach(row => {
+                    const username = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const role = row.querySelector('td:nth-child(3)').textContent.trim();
+                    const isAdmin = role.includes('Admin');
+                    const isEmailVerified = row.querySelector('td:nth-child(2)').textContent.includes('Doğrulanmış');
+                    
+                    const matchesSearch = username.includes(searchTerm) || email.includes(searchTerm);
+                    const matchesRole = roleValue === '' || 
+                                       (roleValue === 'Admin' && isAdmin) || 
+                                       (roleValue === 'User' && !isAdmin);
+                    const matchesEmailVerified = emailVerifiedValue === '' || 
+                                               (emailVerifiedValue === 'true' && isEmailVerified) || 
+                                               (emailVerifiedValue === 'false' && !isEmailVerified);
+                    
+                    if (matchesSearch && matchesRole && matchesEmailVerified) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                updatePagination();
+            }
+            
+            // Sıralama
+            const sortableHeaders = document.querySelectorAll('th[data-sort]');
+            
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortBy = header.getAttribute('data-sort');
+                    sortUsers(sortBy);
+                });
+            });
+            
+            let currentSort = { field: 'username', direction: 'asc' };
+            
+            function sortUsers(field) {
+                const direction = field === currentSort.field && currentSort.direction === 'asc' ? 'desc' : 'asc';
+                currentSort = { field, direction };
+                
+                const userRowsArray = Array.from(userRows);
+                
+                userRowsArray.sort((a, b) => {
+                    let valueA, valueB;
+                    
+                    if (field === 'username') {
+                        valueA = a.querySelector('td:nth-child(1)').textContent.trim().toLowerCase();
+                        valueB = b.querySelector('td:nth-child(1)').textContent.trim().toLowerCase();
+                    } else if (field === 'email') {
+                        valueA = a.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
+                        valueB = b.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
+                    } else if (field === 'registerDate') {
+                        valueA = new Date(a.querySelector('td:nth-child(4)').textContent.trim().split('/').reverse().join('-'));
+                        valueB = new Date(b.querySelector('td:nth-child(4)').textContent.trim().split('/').reverse().join('-'));
+                    }
+                    
+                    if (direction === 'asc') {
+                        return valueA > valueB ? 1 : -1;
+                    } else {
+                        return valueA < valueB ? 1 : -1;
+                    }
+                });
+                
+                const tbody = document.getElementById('userTableBody');
+                userRowsArray.forEach(row => tbody.appendChild(row));
+                
+                updatePagination();
+            }
+            
+            // Sayfalama
+            const itemsPerPage = 10;
+            let currentPage = 1;
+            
+            // İlk sayfalamayı başlat
+            if (userRows.length > 0) {
+                updatePagination();
+            }
+            
+            function updatePagination() {
+                const visibleRows = Array.from(userRows).filter(row => row.style.display !== 'none');
+                const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+                
+                // Sayfa numaraları ve navigasyon butonlarını oluştur
+                const paginationContainer = document.getElementById('paginationContainer');
+                if (paginationContainer) {
+                    paginationContainer.innerHTML = '';
+                    
+                    // Önceki sayfa butonu
+                    const prevButton = document.createElement('button');
+                    prevButton.classList.add('relative', 'inline-flex', 'items-center', 'px-2', 'py-2', 'rounded-l-md', 'border', 'border-gray-300', 'bg-white', 'text-sm', 'font-medium', 'text-gray-500', 'hover:bg-gray-50');
+                    prevButton.innerHTML = '<span class="sr-only">Previous</span><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
+                    prevButton.disabled = currentPage === 1;
+                    prevButton.addEventListener('click', () => {
+                        if (currentPage > 1) {
+                            goToPage(currentPage - 1);
+                        }
+                    });
+                    paginationContainer.appendChild(prevButton);
+                    
+                    // Sayfa numaraları
+                    for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.classList.add('relative', 'inline-flex', 'items-center', 'px-4', 'py-2', 'border', 'border-gray-300', 'bg-white', 'text-sm', 'font-medium', 'hover:bg-gray-50');
+                        pageButton.textContent = i;
+                        
+                        if (i === currentPage) {
+                            pageButton.classList.add('z-10', 'bg-indigo-50', 'border-indigo-500', 'text-indigo-600');
+                        } else {
+                            pageButton.classList.add('text-gray-500');
+                        }
+                        
+                        pageButton.addEventListener('click', () => goToPage(i));
+                        paginationContainer.appendChild(pageButton);
+                    }
+                    
+                    // Sonraki sayfa butonu
+                    const nextButton = document.createElement('button');
+                    nextButton.classList.add('relative', 'inline-flex', 'items-center', 'px-2', 'py-2', 'rounded-r-md', 'border', 'border-gray-300', 'bg-white', 'text-sm', 'font-medium', 'text-gray-500', 'hover:bg-gray-50');
+                    nextButton.innerHTML = '<span class="sr-only">Next</span><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>';
+                    nextButton.disabled = currentPage === totalPages;
+                    nextButton.addEventListener('click', () => {
+                        if (currentPage < totalPages) {
+                            goToPage(currentPage + 1);
+                        }
+                    });
+                    paginationContainer.appendChild(nextButton);
+                    
+                    // Mobil sayfalama butonlarını güncelle
+                    const mobilePagePrev = document.getElementById('mobilePagePrev');
+                    const mobilePageNext = document.getElementById('mobilePageNext');
+                    
+                    if (mobilePagePrev) {
+                        mobilePagePrev.disabled = currentPage === 1;
+                        mobilePagePrev.addEventListener('click', () => {
+                            if (currentPage > 1) {
+                                goToPage(currentPage - 1);
+                            }
+                        });
+                    }
+                    
+                    if (mobilePageNext) {
+                        mobilePageNext.disabled = currentPage === totalPages;
+                        mobilePageNext.addEventListener('click', () => {
+                            if (currentPage < totalPages) {
+                                goToPage(currentPage + 1);
+                            }
+                        });
+                    }
+                }
+                
+                // Kullanıcıları göster/gizle
+                visibleRows.forEach((row, index) => {
+                    const startIndex = (currentPage - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage - 1;
+                    
+                    if (index >= startIndex && index <= endIndex) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
+            function goToPage(page) {
+                currentPage = page;
+                updatePagination();
+            }
+        });
+    </script>
 </body>
 </html> 

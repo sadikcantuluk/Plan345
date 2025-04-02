@@ -30,6 +30,12 @@ namespace PlanYonetimAraclari.Models
 
         [PersonalData]
         public bool IsEmailVerified { get; set; } = false;
+        
+        [PersonalData]
+        public int MaxProjectsAllowed { get; set; } = 3;
+        
+        [PersonalData]
+        public int MaxMembersPerProject { get; set; } = 10;
 
         public string FullName => $"{FirstName} {LastName}";
     }

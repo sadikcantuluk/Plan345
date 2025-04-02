@@ -108,6 +108,22 @@ namespace PlanYonetimAraclari.Controllers
                 TempData["ErrorMessage"] = "Sadece proje sahibi yeni üye davet edebilir.";
                 return RedirectToAction(nameof(Members), new { projectId });
             }
+            
+            // Projenin mevcut üye ve davet sayısını kontrol et
+            var currentTeamCount = await _context.ProjectTeamMembers
+                .CountAsync(m => m.ProjectId == projectId);
+            
+            var pendingInvitationCount = await _context.ProjectInvitations
+                .CountAsync(i => i.ProjectId == projectId && i.Status == InvitationStatus.Pending);
+            
+            // Toplam üye + bekleyen davet sayısı
+            var totalPotentialMembers = currentTeamCount + pendingInvitationCount + 1; // +1 proje sahibi için
+            
+            if (totalPotentialMembers >= currentUser.MaxMembersPerProject)
+            {
+                TempData["ErrorMessage"] = $"Bu proje için maksimum üye limitine ulaştınız ({currentUser.MaxMembersPerProject}). Yeni üye eklemek için bekleyen davetleri iptal edin veya mevcut üyeleri çıkarın.";
+                return RedirectToAction(nameof(Members), new { projectId });
+            }
 
             var result = await _teamService.InviteUserToProject(projectId, email, currentUser.Id);
             if (result.success)

@@ -73,7 +73,24 @@ namespace PlanYonetimAraclari.Services
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     
                     _logger.LogInformation($"SMTP sunucusuna bağlanılıyor: {_emailSettings.MailServer}:{_emailSettings.MailPort}");
-                    await client.ConnectAsync(_emailSettings.MailServer, _emailSettings.MailPort, SecureSocketOptions.StartTls);
+                    
+                    // Doğru güvenlik seçeneğini belirle
+                    SecureSocketOptions securityOptions;
+                    if (_emailSettings.UseSsl)
+                    {
+                        securityOptions = SecureSocketOptions.SslOnConnect;
+                    }
+                    else if (_emailSettings.UseStartTls)
+                    {
+                        securityOptions = SecureSocketOptions.StartTls;
+                    }
+                    else
+                    {
+                        securityOptions = SecureSocketOptions.Auto;
+                    }
+                    
+                    _logger.LogInformation($"Bağlantı güvenlik seçeneği: {securityOptions}");
+                    await client.ConnectAsync(_emailSettings.MailServer, _emailSettings.MailPort, securityOptions);
                     
                     _logger.LogInformation($"SMTP sunucusuna kimlik doğrulaması yapılıyor: {_emailSettings.UserName}");
                     await client.AuthenticateAsync(_emailSettings.UserName, _emailSettings.Password);
@@ -248,13 +265,14 @@ namespace PlanYonetimAraclari.Services
             
             try
             {
-                // İletişim formunu plan345destek@gmail.com adresine gönder
-                _logger.LogInformation($"İletişim formu e-postası gönderiliyor: {_emailSettings.SenderEmail}");
-                await SendEmailAsync(_emailSettings.SenderEmail, emailSubject, emailBody);
+                // Her iki e-postayı paralel olarak gönder
+                _logger.LogInformation($"İletişim formu e-postaları paralel olarak gönderiliyor: {email}");
                 
-                // Kullanıcıya teşekkür e-postası gönder
-                _logger.LogInformation($"Kullanıcıya teşekkür e-postası gönderiliyor: {email}");
-                await SendEmailAsync(email, userSubject, userMessage);
+                var adminEmailTask = SendEmailAsync(_emailSettings.SenderEmail, emailSubject, emailBody);
+                var userEmailTask = SendEmailAsync(email, userSubject, userMessage);
+                
+                // Her iki görevi paralel olarak bekle
+                await Task.WhenAll(adminEmailTask, userEmailTask);
                 
                 _logger.LogInformation($"İletişim formu e-postaları başarıyla gönderildi: {email}");
             }

@@ -81,12 +81,26 @@ namespace PlanYonetimAraclari.Controllers
                             // Kodu kullanıcının e-posta adresine gönder
                             try
                             {
-                                await _emailService.SendTwoFactorCodeAsync(email, verificationCode);
-                                _logger.LogInformation($"Doğrulama kodu {email} adresine gönderildi");
+                                // E-posta gönderme işlemini arka planda çalıştır
+                                _ = Task.Run(async () => 
+                                {
+                                    try 
+                                    {
+                                        await _emailService.SendTwoFactorCodeAsync(email, verificationCode);
+                                        _logger.LogInformation($"Doğrulama kodu {email} adresine arka planda gönderildi");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError($"Arka planda doğrulama kodu gönderilirken hata: {ex.Message}");
+                                        _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                                    }
+                                });
+                                
+                                _logger.LogInformation($"İki faktörlü doğrulama e-postası işlemi başlatıldı: {email}");
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError($"Doğrulama kodu gönderilirken hata oluştu: {ex.Message}");
+                                _logger.LogError($"Doğrulama kodu işlemi başlatılırken hata oluştu: {ex.Message}");
                                 // Kod gönderiminde hata oluşsa bile kullanıcı akışını bozmuyoruz
                             }
                             
@@ -245,12 +259,26 @@ namespace PlanYonetimAraclari.Controllers
                     // Kodu kullanıcının e-posta adresine gönder
                     try
                     {
-                        await _emailService.SendTwoFactorCodeAsync(model.Email, verificationCode);
-                        _logger.LogInformation($"Doğrulama kodu {model.Email} adresine gönderildi");
+                        // E-posta gönderme işlemini arka planda çalıştır
+                        _ = Task.Run(async () => 
+                        {
+                            try 
+                            {
+                                await _emailService.SendTwoFactorCodeAsync(model.Email, verificationCode);
+                                _logger.LogInformation($"Doğrulama kodu {model.Email} adresine arka planda gönderildi");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"Arka planda doğrulama kodu gönderilirken hata: {ex.Message}");
+                                _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                            }
+                        });
+                        
+                        _logger.LogInformation($"İki faktörlü doğrulama e-postası işlemi başlatıldı: {model.Email}");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"Doğrulama kodu gönderilirken hata oluştu: {ex.Message}");
+                        _logger.LogError($"Doğrulama kodu işlemi başlatılırken hata oluştu: {ex.Message}");
                         // Kod gönderiminde hata oluşsa bile kullanıcı akışını bozmuyoruz
                     }
                     
@@ -385,11 +413,25 @@ namespace PlanYonetimAraclari.Controllers
                     
                     // E-posta doğrulama kodunu gönder
                     try {
-                        await _emailService.SendEmailVerificationCodeAsync(model.Email, verificationCode);
-                        _logger.LogInformation($"E-posta doğrulama kodu gönderildi: {model.Email}");
+                        // E-posta gönderme işlemini arka planda çalıştır
+                        _ = Task.Run(async () => 
+                        {
+                            try 
+                            {
+                                await _emailService.SendEmailVerificationCodeAsync(model.Email, verificationCode);
+                                _logger.LogInformation($"E-posta doğrulama kodu arka planda gönderildi: {model.Email}");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"Arka planda e-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                                _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                            }
+                        });
+                        
+                        _logger.LogInformation($"E-posta doğrulama işlemi başlatıldı: {model.Email}");
                     }
                     catch (Exception ex) {
-                        _logger.LogError($"E-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                        _logger.LogError($"E-posta doğrulama kodu işlemi başlatılırken hata: {ex.Message}");
                         ModelState.AddModelError("", "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
                         return View(model);
                     }
@@ -544,9 +586,31 @@ namespace PlanYonetimAraclari.Controllers
                     // E-posta göndermeyi dene (test amaçlı olarak kullanıcı olsa da olmasa da)
                     _logger.LogInformation($"E-posta gönderimi başlatılıyor: {model.Email}, Callback URL: {callbackUrl}");
                     
-                    // E-posta gönder
-                    await _emailService.SendPasswordResetEmailAsync(model.Email, callbackUrl);
-                    _logger.LogInformation($"Şifre sıfırlama e-postası gönderildi: {model.Email}");
+                    // E-posta gönderme işlemini arka planda çalıştır
+                    _ = Task.Run(async () => 
+                    {
+                        try
+                        {
+                            // E-posta gönder
+                            await _emailService.SendPasswordResetEmailAsync(model.Email, callbackUrl);
+                            _logger.LogInformation($"Şifre sıfırlama e-postası arka planda gönderildi: {model.Email}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Arka planda e-posta gönderilirken hata oluştu: {ex.Message}");
+                            _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                            
+                            if (ex.InnerException != null)
+                            {
+                                _logger.LogError($"Inner Exception: {ex.InnerException.Message}");
+                                _logger.LogError($"Inner Exception Stack Trace: {ex.InnerException.StackTrace}");
+                            }
+                        }
+                    });
+                    
+                    // Kullanıcıyı şifre sıfırlama bağlantısının gönderildiği konusunda bilgilendir
+                    TempData["SuccessMessage"] = "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.";
+                    return RedirectToAction("ForgotPasswordConfirmation");
                 }
                 catch (Exception ex)
                 {
@@ -556,15 +620,13 @@ namespace PlanYonetimAraclari.Controllers
                     if (ex.InnerException != null)
                     {
                         _logger.LogError($"Inner Exception: {ex.InnerException.Message}");
+                        _logger.LogError($"Inner Exception Stack Trace: {ex.InnerException.StackTrace}");
                     }
                     
-                    // Hata mesajını göster
-                    TempData["ErrorMessage"] = "E-posta gönderirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+                    // Hata mesajını göster - kullanıcıya daha detaylı bilgi ver
+                    ModelState.AddModelError(string.Empty, "E-posta gönderirken bir hata oluştu. Lütfen sistem yöneticisiyle iletişime geçin.");
+                    return View(model);
                 }
-                
-                // Kullanıcıyı şifre sıfırlama bağlantısının gönderildiği konusunda bilgilendir
-                TempData["SuccessMessage"] = "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.";
-                return RedirectToAction("ForgotPasswordConfirmation");
             }
             
             // ModelState geçerli değilse, formu tekrar göster
@@ -663,12 +725,24 @@ namespace PlanYonetimAraclari.Controllers
                         </body>
                         </html>";
                         
-                    await _emailService.SendEmailAsync(model.Email, subject, message);
-                    _logger.LogInformation($"Şifre sıfırlama onay e-postası gönderildi: {model.Email}");
+                    // E-posta gönderme işlemini arka planda çalıştır
+                    _ = Task.Run(async () => 
+                    {
+                        try
+                        {
+                            await _emailService.SendEmailAsync(model.Email, subject, message);
+                            _logger.LogInformation($"Şifre sıfırlama onay e-postası arka planda gönderildi: {model.Email}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Arka planda şifre sıfırlama onay e-postası gönderilirken hata oluştu: {ex.Message}");
+                            _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Şifre sıfırlama onay e-postası gönderirken hata oluştu: {ex.Message}");
+                    _logger.LogError($"Şifre sıfırlama onay e-postası hazırlanırken hata oluştu: {ex.Message}");
                     // E-posta gönderilemese bile, kullanıcı akışını bozmuyoruz
                 }
                 
@@ -1016,11 +1090,25 @@ namespace PlanYonetimAraclari.Controllers
             
             // E-posta doğrulama kodunu gönder
             try {
-                await _emailService.SendEmailVerificationCodeAsync(email, verificationCode);
-                _logger.LogInformation($"Yeni e-posta doğrulama kodu gönderildi: {email}");
+                // E-posta gönderme işlemini arka planda çalıştır
+                _ = Task.Run(async () => 
+                {
+                    try 
+                    {
+                        await _emailService.SendEmailVerificationCodeAsync(email, verificationCode);
+                        _logger.LogInformation($"E-posta doğrulama kodu arka planda gönderildi: {email}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Arka planda e-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                        _logger.LogError($"Stack Trace: {ex.StackTrace}");
+                    }
+                });
+                
+                _logger.LogInformation($"E-posta doğrulama işlemi başlatıldı: {email}");
             }
             catch (Exception ex) {
-                _logger.LogError($"E-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                _logger.LogError($"E-posta doğrulama kodu işlemi başlatılırken hata: {ex.Message}");
                 TempData["ErrorMessage"] = "Doğrulama kodu gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
                 return RedirectToAction("Register");
             }

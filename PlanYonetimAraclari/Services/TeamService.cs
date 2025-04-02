@@ -378,6 +378,9 @@ namespace PlanYonetimAraclari.Services
 
                 // Uygulama URL'sini yapılandırmadan alın veya varsayılan olarak localhost'u kullanın
                 var baseUrl = _emailSettings.ApplicationUrl ?? "https://localhost:7091";
+                
+                // Trailing slash'ı kaldır
+                baseUrl = baseUrl.TrimEnd('/');
 
                 // Send invitation email
                 var emailModel = new InvitationEmailModel
@@ -393,7 +396,19 @@ namespace PlanYonetimAraclari.Services
                 var emailSubject = "Plan345 - Proje Daveti";
                 var emailBody = await RenderEmailTemplate("InvitationEmail", emailModel);
 
-                await _emailService.SendEmailAsync(invitedEmail, emailSubject, emailBody);
+                // E-posta gönderme işlemini arka planda çalıştır
+                _ = Task.Run(async () => 
+                {
+                    try 
+                    {
+                        await _emailService.SendEmailAsync(invitedEmail, emailSubject, emailBody);
+                        System.Diagnostics.Debug.WriteLine($"Davet e-postası arka planda gönderildi: {invitedEmail}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Arka planda davet e-postası gönderilirken hata: {ex.Message}");
+                    }
+                });
 
                 return (true, "Davetiye başarıyla gönderildi.");
             }

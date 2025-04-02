@@ -12,8 +12,8 @@ using PlanYonetimAraclari.Data;
 namespace PlanYonetimAraclari.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250402174024_UpdateUserLimitsDefaults")]
-    partial class UpdateUserLimitsDefaults
+    [Migration("20250402184617_First_mig")]
+    partial class First_mig
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

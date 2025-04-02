@@ -80,15 +80,26 @@ public class HomeController : Controller
                     return Redirect("/#contact");
                 }
                 
-                // E-posta gönderme işlemi
-                await _emailService.SendContactEmailAsync(
-                    model.Name,
-                    model.Email,
-                    model.Subject,
-                    model.Message
-                );
+                // E-posta gönderme işlemini arka planda çalıştır
+                _ = Task.Run(async () => 
+                {
+                    try 
+                    {
+                        await _emailService.SendContactEmailAsync(
+                            model.Name,
+                            model.Email,
+                            model.Subject,
+                            model.Message
+                        );
+                        _logger.LogInformation($"İletişim formu e-postaları arka planda gönderildi: {model.Email}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Arka planda e-posta gönderilirken hata oluştu: {ex.Message}");
+                    }
+                });
                 
-                _logger.LogInformation($"İletişim formu başarıyla kaydedildi ve e-posta gönderildi: {model.Email}");
+                _logger.LogInformation($"İletişim formu başarıyla işlendi: {model.Email}");
                 
                 if (isAjaxRequest)
                 {
@@ -103,7 +114,7 @@ public class HomeController : Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError($"İletişim formu gönderilirken hata oluştu: {ex.Message}");
+                _logger.LogError($"İletişim formu işlenirken hata oluştu: {ex.Message}");
                 _logger.LogError($"Hata detayları: {ex.ToString()}");
                 
                 if (ex.InnerException != null)

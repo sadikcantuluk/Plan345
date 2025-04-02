@@ -34,6 +34,9 @@ namespace PlanYonetimAraclari.Migrations
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     ProfileImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsEmailVerified = table.Column<bool>(type: "bit", nullable: false),
+                    MaxProjectsAllowed = table.Column<int>(type: "int", nullable: false),
+                    MaxMembersPerProject = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -52,6 +55,25 @@ namespace PlanYonetimAraclari.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmailVerificationCodes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    Attempts = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailVerificationCodes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -482,6 +504,9 @@ namespace PlanYonetimAraclari.Migrations
 
             migrationBuilder.DropTable(
                 name: "CalendarNotes");
+
+            migrationBuilder.DropTable(
+                name: "EmailVerificationCodes");
 
             migrationBuilder.DropTable(
                 name: "ProjectInvitations");

@@ -15,6 +15,7 @@ namespace PlanYonetimAraclari.Services
         Task SendPasswordResetEmailAsync(string email, string callbackUrl);
         Task SendContactEmailAsync(string name, string email, string subject, string message);
         Task SendTwoFactorCodeAsync(string email, string code);
+        Task SendEmailVerificationCodeAsync(string email, string code);
     }
 
     public class EmailService : IEmailService
@@ -303,6 +304,49 @@ namespace PlanYonetimAraclari.Services
                             <div class='code'>{code}</div>
                             <p>Bu kod 5 dakika içinde geçerliliğini yitirecektir.</p>
                             <p>Eğer giriş denemesinde bulunmadıysanız, lütfen bu e-postayı görmezden gelin ve şifrenizi değiştirmeyi düşünün.</p>
+                        </div>
+                        <div class='footer'>
+                            <p>Bu e-posta Plan345 Proje Yönetim Sistemi tarafından otomatik olarak gönderilmiştir.</p>
+                            <p>&copy; @DateTime.Now.Year Plan345. Tüm hakları saklıdır.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+                
+            await SendEmailAsync(email, subject, message);
+        }
+
+        // Email verification code sending method
+        public async Task SendEmailVerificationCodeAsync(string email, string code)
+        {
+            string subject = $"E-posta Doğrulama Kodu [{code}] - Plan345";
+            
+            string message = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+                        .header {{ text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }}
+                        .logo {{ font-size: 24px; font-weight: bold; color: #333; }}
+                        .logo span {{ color: #4f46e5; }}
+                        .content {{ padding: 20px 0; }}
+                        .code {{ font-size: 32px; font-weight: bold; letter-spacing: 5px; text-align: center; margin: 20px 0; padding: 10px; background-color: #f5f5f5; border-radius: 5px; color: #4f46e5; }}
+                        .footer {{ font-size: 12px; text-align: center; margin-top: 30px; color: #888; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <div class='logo'>Plan<span>345</span></div>
+                        </div>
+                        <div class='content'>
+                            <h2>E-posta Doğrulama Kodu</h2>
+                            <p>Merhaba,</p>
+                            <p>Plan345 hesabınızı tamamlamak için aşağıdaki doğrulama kodunu kullanın:</p>
+                            <div class='code'>{code}</div>
+                            <p>Bu kod 15 dakika içinde geçerliliğini yitirecektir.</p>
+                            <p>Eğer Plan345'e kayıt olmadıysanız, lütfen bu e-postayı görmezden gelin.</p>
                         </div>
                         <div class='footer'>
                             <p>Bu e-posta Plan345 Proje Yönetim Sistemi tarafından otomatik olarak gönderilmiştir.</p>

@@ -47,6 +47,8 @@ namespace PlanYonetimAraclari.Models
         [Required(ErrorMessage = "Kullanım koşullarını kabul etmelisiniz")]
         [Display(Name = "Kullanım Koşullarını kabul ediyorum")]
         public bool AcceptTerms { get; set; }
+        
+        public bool IsEmailVerified { get; set; } = false;
     }
 
     public class ForgotPasswordViewModel
@@ -114,5 +116,19 @@ namespace PlanYonetimAraclari.Models
         [Display(Name = "Şifre Tekrar")]
         [Compare("NewPassword", ErrorMessage = "Şifreler eşleşmiyor")]
         public string ConfirmPassword { get; set; }
+    }
+
+    public class EmailVerificationViewModel
+    {
+        [Required(ErrorMessage = "E-posta alanı zorunludur")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        [Display(Name = "E-posta")]
+        public string Email { get; set; }
+        
+        [Required(ErrorMessage = "Doğrulama kodu zorunludur")]
+        [Display(Name = "Doğrulama Kodu")]
+        public string Code { get; set; }
+        
+        public string Token { get; set; }
     }
 } 

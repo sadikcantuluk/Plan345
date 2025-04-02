@@ -28,6 +28,9 @@ namespace PlanYonetimAraclari.Models
         [PersonalData]
         public string ProfileImageUrl { get; set; } = "/images/profiles/default.png";
 
+        [PersonalData]
+        public bool IsEmailVerified { get; set; } = false;
+
         public string FullName => $"{FirstName} {LastName}";
     }
 } 

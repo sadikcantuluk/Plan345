@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -341,64 +343,65 @@ namespace PlanYonetimAraclari.Controllers
             
             if (ModelState.IsValid)
             {
-                _logger.LogInformation("ModelState geçerli, kullanıcı oluşturuluyor...");
+                _logger.LogInformation("ModelState geçerli, kullanıcı kaydı için kontrol yapılıyor...");
                 
-                var user = new ApplicationUser
+                // E-posta adresi daha önce kayıtlı mı kontrol et
+                var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    CreatedDate = DateTime.Now,
-                    ProfileImageUrl = "/images/profiles/default.jpg"
-                };
+                    _logger.LogWarning($"E-posta adresi zaten kayıtlı: {model.Email}");
+                    ModelState.AddModelError("Email", "Bu e-posta adresi zaten kullanılıyor.");
+                    return View(model);
+                }
                 
                 try
                 {
-                    _logger.LogInformation($"Yeni kullanıcı oluşturuluyor: {model.Email}");
-                    var result = await _userManager.CreateAsync(user, model.Password);
+                    // Kayıt bilgilerini geçici olarak sakla
+                    var registrationData = new Dictionary<string, string>
+                    {
+                        { "Email", model.Email },
+                        { "FirstName", model.FirstName },
+                        { "LastName", model.LastName },
+                        { "Password", model.Password }
+                    };
+                    TempData["PendingRegistration"] = JsonConvert.SerializeObject(registrationData);
                     
-                    if (result.Succeeded)
+                    // Doğrulama kodu oluştur
+                    string verificationCode = GenerateRandomCode();
+                    
+                    // E-posta doğrulama kodunu TempData'da sakla
+                    var pendingVerification = new EmailVerificationCode
                     {
-                        _logger.LogInformation($"Kullanıcı başarıyla oluşturuldu: {model.Email}, şimdi rol atanıyor");
-                        
-                        // Yeni kullanıcıya "User" rolünü ata
-                        var roleResult = await _userManager.AddToRoleAsync(user, "User");
-                        
-                        if (roleResult.Succeeded)
-                        {
-                            _logger.LogInformation($"Yeni kullanıcı başarıyla kaydedildi ve User rolü atandı: {model.Email}");
-                            
-                            // Session'a bilgileri kaydet
-                            HttpContext.Session.SetString("IsAuthenticated", "true");
-                            HttpContext.Session.SetString("UserEmail", user.Email);
-                            HttpContext.Session.SetString("UserName", $"{user.FirstName} {user.LastName}");
-                            HttpContext.Session.SetString("UserRole", "User");
-                            
-                            // TempData da sakla
-                            TempData["RegisterSuccess"] = "Hesabınız başarıyla oluşturuldu. Lütfen giriş yapın.";
-                            
-                            _logger.LogInformation($"Kullanıcı başarıyla oluşturuldu, giriş sayfasına yönlendiriliyor: {user.Email}");
-                            return RedirectToAction("Login", "Account");
-                        }
-                        else
-                        {
-                            // Rol atama başarısız olduysa hataları logla
-                            foreach (var error in roleResult.Errors)
-                            {
-                                ModelState.AddModelError("", error.Description);
-                                _logger.LogError($"Rol atama hatası: {error.Description}");
-                            }
-                        }
+                        Email = model.Email,
+                        Code = verificationCode,
+                        CreatedAt = DateTime.Now,
+                        ExpiresAt = DateTime.Now.AddMinutes(15),
+                        IsUsed = false,
+                        Attempts = 0
+                    };
+                    
+                    _dbContext.EmailVerificationCodes.Add(pendingVerification);
+                    await _dbContext.SaveChangesAsync();
+                    
+                    // E-posta doğrulama kodunu gönder
+                    try {
+                        await _emailService.SendEmailVerificationCodeAsync(model.Email, verificationCode);
+                        _logger.LogInformation($"E-posta doğrulama kodu gönderildi: {model.Email}");
                     }
-                    else
-                    {
-                        foreach (var error in result.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                            _logger.LogError($"Kullanıcı oluşturma hatası: {error.Description}");
-                        }
+                    catch (Exception ex) {
+                        _logger.LogError($"E-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                        ModelState.AddModelError("", "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+                        return View(model);
                     }
+                    
+                    // E-posta doğrulama token'ı oluştur ve geçici olarak TempData'da sakla
+                    TempData["VerificationToken"] = Guid.NewGuid().ToString();
+                    
+                    // E-posta doğrulama sayfasına yönlendir
+                    return RedirectToAction("VerifyEmail", new { 
+                        email = model.Email, 
+                        token = TempData["VerificationToken"].ToString() 
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -835,6 +838,207 @@ namespace PlanYonetimAraclari.Controllers
             
             _logger.LogWarning($"Kullanıcı {userId} için geçersiz veya süresi dolmuş doğrulama kodu");
             return false;
+        }
+
+        // E-posta doğrulama sayfası - GET
+        [HttpGet]
+        public IActionResult VerifyEmail(string email, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("VerifyEmail - Email veya token boş gönderildi");
+                return RedirectToAction("Login");
+            }
+
+            var model = new EmailVerificationViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        // E-posta doğrulama - POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyEmail(EmailVerificationViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Kayıt bilgilerini TempData'dan al
+                if (TempData["PendingRegistration"] == null || TempData["VerificationToken"] == null)
+                {
+                    _logger.LogWarning($"VerifyEmail - Geçici kayıt bilgileri bulunamadı: {model.Email}");
+                    TempData["ErrorMessage"] = "Oturum zaman aşımına uğradı. Lütfen tekrar kayıt olun.";
+                    return RedirectToAction("Register");
+                }
+                
+                // Token kontrol et
+                if (model.Token != TempData["VerificationToken"].ToString())
+                {
+                    _logger.LogWarning($"VerifyEmail - Geçersiz token: {model.Email}");
+                    TempData["ErrorMessage"] = "Geçersiz doğrulama bağlantısı. Lütfen tekrar kayıt olun.";
+                    return RedirectToAction("Register");
+                }
+
+                // Doğrulama kodunu kontrol et
+                var verificationCode = await _dbContext.EmailVerificationCodes
+                    .Where(c => c.Email == model.Email && c.Code == model.Code && !c.IsUsed && c.ExpiresAt > DateTime.Now)
+                    .OrderByDescending(c => c.ExpiresAt)
+                    .FirstOrDefaultAsync();
+
+                if (verificationCode != null)
+                {
+                    _logger.LogInformation($"E-posta doğrulama kodu geçerli: {model.Email}");
+
+                    // Kodu kullanıldı olarak işaretle
+                    verificationCode.IsUsed = true;
+                    await _dbContext.SaveChangesAsync();
+                    
+                    // Geçici kayıt bilgilerini al ve deserialize et
+                    var pendingRegistrationJson = TempData["PendingRegistration"].ToString();
+                    var pendingRegistration = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(pendingRegistrationJson);
+                    
+                    // Kullanıcıyı oluştur
+                    var user = new ApplicationUser
+                    {
+                        UserName = pendingRegistration["Email"],
+                        Email = pendingRegistration["Email"],
+                        FirstName = pendingRegistration["FirstName"],
+                        LastName = pendingRegistration["LastName"],
+                        CreatedDate = DateTime.Now,
+                        ProfileImageUrl = "/images/profiles/default.jpg",
+                        IsEmailVerified = true // E-posta doğrulanmış olarak kaydet
+                    };
+                    
+                    // Kullanıcıyı veritabanına kaydet
+                    _logger.LogInformation($"Yeni kullanıcı oluşturuluyor: {model.Email}");
+                    var result = await _userManager.CreateAsync(user, pendingRegistration["Password"]);
+                    
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation($"Kullanıcı başarıyla oluşturuldu: {model.Email}, şimdi rol atanıyor");
+                        
+                        // Yeni kullanıcıya "User" rolünü ata
+                        var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                        
+                        if (roleResult.Succeeded)
+                        {
+                            _logger.LogInformation($"Yeni kullanıcı başarıyla kaydedildi ve User rolü atandı: {model.Email}");
+                            
+                            // Kullanıcıyı otomatik olarak giriş yaptır
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            
+                            // Kullanıcı oturum bilgilerini ayarla
+                            HttpContext.Session.SetString("IsAuthenticated", "true");
+                            HttpContext.Session.SetString("UserEmail", user.Email);
+                            HttpContext.Session.SetString("UserName", $"{user.FirstName} {user.LastName}");
+                            HttpContext.Session.SetString("UserRole", "User");
+                            HttpContext.Session.SetString("UserProfileImage", user.ProfileImageUrl ?? "/images/profiles/default.png");
+                            HttpContext.Session.SetString("CurrentUserId", user.Id);
+                            
+                            // Başarı mesajı
+                            TempData["SuccessMessage"] = "Hesabınız başarıyla oluşturuldu ve e-posta adresiniz doğrulandı.";
+                            
+                            // Dashboard'a yönlendir
+                            return RedirectToAction("Index", "Dashboard");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Rol atama hatası: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+                            ModelState.AddModelError("", "Hesap oluşturuldu ancak rol atanırken bir hata oluştu.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Kullanıcı oluşturma hatası: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        ModelState.AddModelError("", "Hesap oluşturulurken bir hata oluştu.");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Geçersiz e-posta doğrulama kodu: {model.Email}");
+                    ModelState.AddModelError("", "Geçersiz doğrulama kodu veya oturum zaman aşımına uğradı.");
+                }
+            }
+
+            // TempData'yı korumak için
+            TempData.Keep("PendingRegistration");
+            TempData.Keep("VerificationToken");
+            
+            return View(model);
+        }
+
+        // Yeniden doğrulama kodu gönderme - GET
+        [HttpGet]
+        public async Task<IActionResult> ResendVerification(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                _logger.LogWarning("ResendVerification - Email boş gönderildi");
+                return RedirectToAction("Login");
+            }
+
+            // Geçici kayıt bilgilerini kontrol et
+            if (TempData["PendingRegistration"] == null)
+            {
+                _logger.LogWarning($"ResendVerification - Geçici kayıt bilgileri bulunamadı: {email}");
+                TempData["ErrorMessage"] = "Oturum zaman aşımına uğradı. Lütfen tekrar kayıt olun.";
+                return RedirectToAction("Register");
+            }
+
+            // Daha önce oluşturduğumuz bu mail adresiyle ilgili kaydı bulalım
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser != null && existingUser.IsEmailVerified)
+            {
+                _logger.LogInformation($"ResendVerification - Kullanıcı e-postası zaten doğrulanmış: {email}");
+                TempData["SuccessMessage"] = "E-posta adresiniz zaten doğrulanmış. Lütfen giriş yapın.";
+                return RedirectToAction("Login");
+            }
+
+            // Yeni doğrulama kodu oluştur
+            string verificationCode = GenerateRandomCode();
+            
+            // Veritabanına yeni bir doğrulama kodu ekle
+            var verificationCodeEntity = new EmailVerificationCode
+            {
+                Email = email,
+                Code = verificationCode,
+                CreatedAt = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddMinutes(15),
+                IsUsed = false,
+                Attempts = 0
+            };
+            
+            _dbContext.EmailVerificationCodes.Add(verificationCodeEntity);
+            await _dbContext.SaveChangesAsync();
+            
+            // E-posta doğrulama kodunu gönder
+            try {
+                await _emailService.SendEmailVerificationCodeAsync(email, verificationCode);
+                _logger.LogInformation($"Yeni e-posta doğrulama kodu gönderildi: {email}");
+            }
+            catch (Exception ex) {
+                _logger.LogError($"E-posta doğrulama kodu gönderilirken hata: {ex.Message}");
+                TempData["ErrorMessage"] = "Doğrulama kodu gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+                return RedirectToAction("Register");
+            }
+
+            // E-posta doğrulama token'ı oluştur veya mevcut olanı koru
+            if (TempData["VerificationToken"] == null)
+            {
+                TempData["VerificationToken"] = Guid.NewGuid().ToString();
+            }
+            
+            // TempData'yı korumak için
+            TempData.Keep("PendingRegistration");
+            
+            // Doğrulama sayfasına yönlendir
+            return RedirectToAction("VerifyEmail", new { 
+                email = email, 
+                token = TempData["VerificationToken"].ToString() 
+            });
         }
     }
 } 

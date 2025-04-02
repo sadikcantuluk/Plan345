@@ -14,6 +14,7 @@ namespace PlanYonetimAraclari.Data
         public DbSet<ProjectModel> Projects { get; set; }
         public DbSet<TaskModel> Tasks { get; set; }
         public DbSet<TwoFactorCode> TwoFactorCodes { get; set; }
+        public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
         public DbSet<ProjectTeamMember> ProjectTeamMembers { get; set; }
         public DbSet<ProjectInvitation> ProjectInvitations { get; set; }
         public DbSet<CalendarNote> CalendarNotes { get; set; }

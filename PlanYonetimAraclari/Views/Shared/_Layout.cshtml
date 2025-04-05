@@ -120,6 +120,7 @@
         window.currentUserId = '@currentUserId';
         window.isAuthenticated = '@(currentUserId != null)' === 'True';
     </script>
+    @RenderSection("Styles", required: false)
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -135,7 +136,7 @@
             <!-- Orta: Logo -->
             <div class="absolute left-1/2 transform -translate-x-1/2">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-tasks text-blue-500 text-2xl"></i>
+                    <i class="fas fa-clipboard-check text-blue-500 text-2xl"></i>
                     <a href="/Dashboard" class="text-2xl font-bold tracking-tight text-gray-900">
                         Plan<span class="text-blue-500">345</span>
                     </a>
@@ -231,10 +232,16 @@
                     </a>
                 </li>
                 <li>
+                    <a href="/TaskPlanner" class="flex items-center space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/TaskPlanner") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
+                        <i class="fas fa-project-diagram text-lg"></i>
+                        <span>Proje Planlayıcı</span>
+                    </a>
+                </li>
+                <li>
                     <div class="project-dropdown">
                         <button id="projects-dropdown-btn" class="w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg @(Context.Request.Path.Value.Contains("/Project/") ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-gray-50")">
                             <div class="flex items-center">
-                                <i class="fas fa-tasks text-lg mr-3"></i>
+                                <i class="fas fa-folder-open text-lg mr-3"></i>
                                 <span>Projeler</span>
                             </div>
                             <i class="fas fa-chevron-down text-sm transition-transform duration-200 @(Context.Request.Path.Value.Contains("/Project/") ? "transform rotate-180" : "")"></i>
@@ -298,7 +305,7 @@
     <footer class="bg-white border-t border-gray-200 shadow-sm lg:ml-64 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center mb-4 sm:mb-0">
-                <i class="fas fa-tasks text-primary-500 text-lg mr-2"></i>
+                <i class="fas fa-clipboard-check text-primary-500 text-lg mr-2"></i>
                 <span class="text-sm font-semibold text-gray-800">Plan<span class="text-primary-500">345</span> &copy; @DateTime.Now.Year</span>
             </div>
             

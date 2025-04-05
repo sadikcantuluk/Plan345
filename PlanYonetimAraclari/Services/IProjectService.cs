@@ -12,6 +12,7 @@ namespace PlanYonetimAraclari.Services
         Task<ProjectModel> GetProjectByIdAsync(int projectId);
         Task<ProjectModel> CreateProjectAsync(ProjectModel project);
         Task<ProjectModel> UpdateProjectAsync(ProjectModel project);
+        Task<bool> DeleteProjectAsync(int projectId, bool forceDelete = false);
         Task<int> GetUserProjectsCountAsync(string userId);
         Task<int> GetUserActiveProjectsCountAsync(string userId);
         Task<int> GetUserCompletedProjectsCountAsync(string userId);
@@ -25,7 +26,7 @@ namespace PlanYonetimAraclari.Services
         Task<TaskModel> CreateTaskAsync(TaskModel task);
         Task<TaskModel> UpdateTaskAsync(TaskModel task);
         Task<bool> DeleteTaskAsync(int taskId);
-        Task<bool> DeleteProjectAsync(int projectId, bool forceDelete = false);
         Task<int> GetUserOwnedProjectsCountAsync(string userId);
+        Task<bool> IsUserProjectMemberAsync(string userId, int projectId);
     }
 } 

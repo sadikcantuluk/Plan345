@@ -20,6 +20,7 @@ namespace PlanYonetimAraclari.Data
         public DbSet<CalendarNote> CalendarNotes { get; set; }
         public DbSet<QuickNote> QuickNotes { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<PlannerTask> PlannerTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -52,6 +53,13 @@ namespace PlanYonetimAraclari.Data
                 .HasOne(pi => pi.InvitedByUser)
                 .WithMany()
                 .HasForeignKey(pi => pi.InvitedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure PlannerTask entity
+            builder.Entity<PlannerTask>()
+                .HasOne(pt => pt.Project)
+                .WithMany()
+                .HasForeignKey(pt => pt.ProjectId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

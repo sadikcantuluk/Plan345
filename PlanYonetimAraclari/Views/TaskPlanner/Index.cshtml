@@ -1,0 +1,704 @@
+@{
+    ViewData["Title"] = "Proje Planlayıcı - Plan345";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    // Kullanıcı bilgilerini atarken uyarı göstermemek için varsayılan değerler
+    if (ViewData["UserFullName"] == null) ViewData["UserFullName"] = "";
+    if (ViewData["UserEmail"] == null) ViewData["UserEmail"] = "";  
+    if (ViewData["UserProfileImage"] == null) ViewData["UserProfileImage"] = "/images/profiles/default.png";
+}
+
+@section Styles {
+    <style>
+        .project-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .project-card .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .project-card .card-content {
+            flex-grow: 1;
+        }
+        
+        .project-card .card-footer {
+            margin-top: auto;
+            padding: 0.75rem 1rem;
+            background-color: #f9fafb;
+            border-top: 1px solid #f1f1f1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .project-card .btn {
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.15s ease;
+        }
+        
+        .project-card .btn-edit {
+            color: #4b5563;
+            background-color: #e5e7eb;
+        }
+        
+        .project-card .btn-edit:hover {
+            background-color: #d1d5db;
+        }
+        
+        .project-card .btn-primary {
+            color: white;
+            background-color: #3b82f6;
+        }
+        
+        .project-card .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .project-card .card-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: #1f2937;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .project-card .card-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        
+        .project-card .card-meta {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .project-card .status-badge {
+            font-weight: 500;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.025em;
+            white-space: nowrap;
+        }
+        
+        .project-row:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Form input improvements */
+        .form-input-wrapper {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        #project-modal input[type="text"],
+        #project-modal input[type="date"],
+        #project-modal textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease;
+        }
+        
+        #project-modal input[type="text"]:focus,
+        #project-modal input[type="date"]:focus,
+        #project-modal textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+        
+        #project-modal textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        #project-modal .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #project-modal .btn-submit {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+        
+        #project-modal .btn-submit:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px -1px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+}
+
+<div class="container mx-auto p-6">
+    <!-- Anti-forgery token -->
+    @{
+        var currentUserId = ViewData["CurrentUserId"]?.ToString();
+    }
+    <input type="hidden" name="__UserIdField" id="userIdField" value="@currentUserId" />
+    @Html.AntiForgeryToken()
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-project-diagram mr-2"></i> Proje Planlayıcı
+            </h1>
+            <p class="text-gray-600 mt-1">Projelerinizi bağımsız olarak oluşturun ve görevlerinizi hiyerarşik şekilde yönetin.</p>
+        </div>
+        
+        <div class="flex space-x-2">
+            <button id="add-project-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md flex items-center font-medium transition duration-150 ease-in-out">
+                <i class="fas fa-plus mr-2"></i> Yeni Proje
+            </button>
+        </div>
+    </div>
+
+    <!-- Bildirim Mesajları -->
+    <div id="success-message" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm hidden">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="ml-3">
+                <p id="success-text" class="text-sm"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-message" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-sm hidden">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="ml-3">
+                <p id="error-text" class="text-sm"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proje Listesi -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="project-list">
+        <!-- Yükleme göstergesi -->
+        <div id="loader" class="col-span-full text-center p-4" style="display: none;">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p class="mt-2 text-gray-600">Projeler yükleniyor...</p>
+        </div>
+        
+        <!-- Projeler burada listelenecek -->
+        </div>
+        
+    <!-- Proje bulunamadı mesajı -->
+    <div id="no-projects-message" class="p-8 text-center text-gray-500 bg-white rounded-lg shadow-sm mt-6" style="display: none;">
+        <i class="fas fa-project-diagram fa-3x mb-4 text-gray-400"></i>
+        <h3 class="text-xl font-medium mb-3">Henüz hiç proje eklenmemiş</h3>
+        <p class="mb-5 text-gray-600">Görevlerinizi düzenlemek için yeni bir proje oluşturun.</p>
+        <button id="create-first-project" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-md flex items-center font-medium mx-auto transition duration-150 ease-in-out">
+            <i class="fas fa-plus mr-2"></i> İlk Projeni Oluştur
+            </button>
+    </div>
+</div>
+
+<!-- Proje Ekle Modal -->
+<div id="project-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl">
+        <div class="flex justify-between items-center border-b border-gray-200 px-6 py-4">
+            <h3 id="modal-title" class="text-xl font-medium text-gray-800">Yeni Proje</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="project-form">
+            <div class="px-8 py-6">
+                <input type="hidden" id="project-id">
+                @Html.AntiForgeryToken()
+
+                <div class="space-y-5">
+                    <div class="form-input-wrapper">
+                        <label for="project-name" class="form-label">Proje Adı *</label>
+                        <div class="relative">
+                            <input type="text" id="project-name" required class="w-full" 
+                                   placeholder="Proje adını giriniz" maxlength="80">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-xs text-gray-500" id="name-char-count">0/80</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            En fazla 80 karakter girilebilir
+                        </div>
+                    </div>
+
+                    <div class="form-input-wrapper">
+                        <label for="project-description" class="form-label">Açıklama</label>
+                        <div class="relative">
+                            <textarea id="project-description" class="w-full" 
+                                     rows="4" placeholder="Proje açıklaması (opsiyonel)" maxlength="500"></textarea>
+                            <div class="absolute bottom-2 right-2 pointer-events-none">
+                                <span class="text-xs bg-white px-1 rounded text-gray-500" id="desc-char-count">0/500</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            En fazla 500 karakter girilebilir
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="form-input-wrapper">
+                            <label for="project-start-date" class="form-label">Başlangıç Tarihi *</label>
+                            <input type="date" id="project-start-date" required class="w-full">
+                        </div>
+
+                        <div class="form-input-wrapper">
+                            <label for="project-end-date" class="form-label">Bitiş Tarihi *</label>
+                            <input type="date" id="project-end-date" required class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button type="button" id="cancel-btn" class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-5 py-2 rounded-md mr-3">
+                    İptal
+                </button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md btn-submit">
+                    Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // DOM elementleri
+            const projectListEl = document.getElementById('project-list');
+            const addProjectBtn = document.getElementById('add-project-btn');
+            const createFirstProjectBtn = document.getElementById('create-first-project');
+            const projectModal = document.getElementById('project-modal');
+            const closeModal = document.getElementById('close-modal');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const projectForm = document.getElementById('project-form');
+            const projectIdField = document.getElementById('project-id');
+            const projectNameField = document.getElementById('project-name');
+            const projectDescField = document.getElementById('project-description');
+            const startDateField = document.getElementById('project-start-date');
+            const endDateField = document.getElementById('project-end-date');
+            const modalTitle = document.getElementById('modal-title');
+            const loader = document.getElementById('loader');
+            const noProjectsMessage = document.getElementById('no-projects-message');
+            const nameCharCount = document.getElementById('name-char-count');
+            const descCharCount = document.getElementById('desc-char-count');
+            
+            // Anti-forgery token
+            const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            
+            // Karakter sayım fonksiyonları
+            function updateCharCount(input, display, maxLength) {
+                const count = input.value.length;
+                display.textContent = `${count}/${maxLength}`;
+                
+                // Karakter sınırına yaklaştıkça uyarı rengi
+                if (count > maxLength * 0.9) {
+                    display.classList.add('text-orange-500');
+                    if (count >= maxLength) {
+                        display.classList.remove('text-orange-500');
+                        display.classList.add('text-red-500');
+                    }
+                } else {
+                    display.classList.remove('text-orange-500', 'text-red-500');
+                }
+            }
+            
+            // Karakter sayımı için event listener'lar
+            projectNameField.addEventListener('input', () => updateCharCount(projectNameField, nameCharCount, 80));
+            projectDescField.addEventListener('input', () => updateCharCount(projectDescField, descCharCount, 500));
+            
+            // Sayfa yüklendiğinde karakter sayısını güncelle
+            updateCharCount(projectNameField, nameCharCount, 80);
+            updateCharCount(projectDescField, descCharCount, 500);
+            
+            // Modal açma eventleri
+            addProjectBtn.addEventListener('click', () => openProjectModal());
+            createFirstProjectBtn?.addEventListener('click', () => openProjectModal());
+            closeModal.addEventListener('click', closeProjectModal);
+            cancelBtn.addEventListener('click', closeProjectModal);
+            
+            // Form submit event listener'ı ekle
+            projectForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Formun normal davranışını engelle
+                const projectId = projectIdField.value;
+                saveProject(projectId);
+            });
+            
+            // Proje ekleme ve düzenleme işlemleri
+            async function openProjectModal(projectId = null) {
+                // Form temizle
+                projectForm.reset();
+                projectIdField.value = projectId || '';
+                
+                // Başlık güncelle
+                modalTitle.textContent = projectId ? 'Projeyi Düzenle' : 'Yeni Proje';
+                
+                // Varsayılan değerler
+                const today = new Date().toISOString().split('T')[0];
+                startDateField.value = today;
+                
+                const nextMonth = new Date();
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                endDateField.value = nextMonth.toISOString().split('T')[0];
+                
+                // Karakter sayaçlarını sıfırla
+                nameCharCount.textContent = '0';
+                descCharCount.textContent = '0';
+                
+                // Eğer düzenleme ise verileri yükle
+                if (projectId) {
+                    // Proje verilerini yükle
+                    await fetchProjectData(projectId);
+                }
+                
+                // Göster
+                projectModal.classList.remove('hidden');
+            }
+            
+            async function fetchProjectData(projectId) {
+                try {
+                    showLoading();
+                    
+                    const response = await fetch(`/TaskPlanner/GetTask/${projectId}`);
+                    if (!response.ok) {
+                        throw new Error('Proje bilgileri alınamadı');
+                    }
+                    
+                    const project = await response.json();
+                    
+                    // Form alanlarını doldur
+                    projectNameField.value = project.name;
+                    projectDescField.value = project.description || '';
+                    startDateField.value = new Date(project.startDate).toISOString().split('T')[0];
+                    endDateField.value = new Date(project.endDate).toISOString().split('T')[0];
+                    
+                    // Karakter sayaçlarını güncelle
+                    nameCharCount.textContent = project.name.length;
+                    descCharCount.textContent = (project.description || '').length;
+                    
+                } catch (error) {
+                    console.error('Proje bilgileri alınamadı:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+            
+            // Proje ekleme ve silme işlemleri
+            async function saveProject(projectId) {
+                try {
+                    showLoading();
+                    
+                    const name = projectNameField.value.trim();
+                    const description = projectDescField.value.trim();
+                    const startDate = startDateField.value;
+                    const endDate = endDateField.value;
+                    
+                    if (!name || !startDate || !endDate) {
+                        showMessage("Lütfen tüm gerekli alanları doldurun", "error");
+                        return;
+                    }
+                    
+                    // Tarihleri doğru formatta ayarla
+                    const startDateObj = new Date(startDate);
+                    const endDateObj = new Date(endDate);
+                    startDateObj.setHours(0, 0, 0, 0);
+                    endDateObj.setHours(23, 59, 59, 999);
+                    
+                    // Süreyi hesapla (gün olarak)
+                    const durationDays = Math.ceil((endDateObj - startDateObj) / (1000 * 60 * 60 * 24));
+                    
+                    // PlannerTask modeline uygun payload yapısı (Ana görev olarak proje oluşturuyoruz)
+                    const payload = {
+                        name: name,
+                        description: description,
+                        startDate: startDateObj.toISOString(),
+                        endDate: endDateObj.toISOString(),
+                        parentTaskId: null, // Ana görev
+                        projectId: null, // Proje ID null çünkü bu bir ana görev
+                        taskState: 0, // Bekliyor
+                        orderIndex: 0, // Backend'de hesaplanacak
+                        duration: durationDays,
+                        createdAt: new Date().toISOString(),
+                        userId: currentUserId
+                    };
+                    
+                    // Düzenleme işleminde id ekle
+                    if (projectId && projectId !== '') {
+                        payload.id = parseInt(projectId);
+                    }
+                    
+                    console.log('Gönderilen payload:', payload);
+                    
+                    const response = await fetch('/TaskPlanner/SaveTask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': antiForgeryToken
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const responseText = await response.text();
+                    console.log('Server yanıtı:', responseText);
+                    
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (parseError) {
+                        console.error('JSON parse hatası:', parseError);
+                        throw new Error('Sunucu yanıtı işlenemedi: ' + responseText);
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error('Proje kaydedilirken bir hata oluştu: ' + (result.error || responseText));
+                    }
+                    
+                    if (result.success) {
+                        showMessage('Proje başarıyla kaydedildi', 'success');
+                        closeProjectModal();
+                        
+                        // Projeleri yeniden yükle
+                        loadProjects();
+                    } else {
+                        throw new Error(result.error || 'Bir hata oluştu');
+                    }
+                } catch (error) {
+                    console.error('Proje kaydedilemedi:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+            
+            async function deleteProject(projectId, projectName) {
+                // Onay kutusu göster
+                if (!confirm(`"${projectName}" projesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm alt görevleri de silecektir.`)) {
+                    return;
+                }
+                
+                try {
+                    showLoading();
+                    
+                    const response = await fetch(`/TaskPlanner/DeleteTask?id=${projectId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': antiForgeryToken
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMessage(`"${projectName}" projesi başarıyla silindi.`, 'success');
+                        // Projeleri yeniden yükle
+                        loadProjects();
+                    } else {
+                        throw new Error(result.error || 'Proje silinirken bir hata oluştu.');
+                    }
+                } catch (error) {
+                    console.error('Proje silinemedi:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+            
+            // Projeleri yükle
+            async function loadProjects() {
+                try {
+                    showLoading();
+                    projectListEl.innerHTML = '';
+                    
+                    const response = await fetch('/TaskPlanner/GetRootTasks');
+                    if (!response.ok) {
+                        throw new Error('Projeler alınamadı');
+                    }
+                    
+                    const projects = await response.json();
+                    
+                    if (projects.length === 0) {
+                        noProjectsMessage.style.display = 'block';
+                    } else {
+                        noProjectsMessage.style.display = 'none';
+                        
+                        // Projeleri listele
+                        projects.forEach(project => {
+                            const card = createProjectCard(project);
+                            projectListEl.appendChild(card);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Projeler yüklenemedi:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+            
+            // Proje kartı oluştur
+            function createProjectCard(project) {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                
+                // Durum rengini belirle
+                let statusClass = 'bg-gray-400'; // Bekliyor
+                let statusText = 'Bekliyor';
+                
+                switch(project.taskState) {
+                                case 0:
+                        statusClass = 'bg-gray-400'; 
+                                    statusText = 'Bekliyor';
+                                    break;
+                                case 1:
+                        statusClass = 'bg-blue-500'; 
+                                    statusText = 'Devam Ediyor';
+                                    break;
+                                case 2:
+                        statusClass = 'bg-green-500'; 
+                                    statusText = 'Tamamlandı';
+                                    break;
+                                case 3:
+                        statusClass = 'bg-red-500'; 
+                                    statusText = 'İptal Edildi';
+                                    break;
+                }
+                
+                // Tarihleri formatlama
+                const startDate = new Date(project.startDate).toLocaleDateString('tr-TR');
+                const endDate = new Date(project.endDate).toLocaleDateString('tr-TR');
+                
+                // Açıklama kontrolü
+                const description = project.description ? project.description : 'Açıklama bulunmuyor';
+                
+                card.innerHTML = `
+                    <div class="card-body p-5">
+                        <div class="card-content">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="card-title">${project.name}</h3>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <p class="card-description">${description}</p>
+                            <div class="card-meta">
+                                <i class="far fa-calendar mr-1"></i> ${startDate} - ${endDate}
+                                        </div>
+                                    </div>
+                                    </div>
+                    <div class="card-footer">
+                        <button class="delete-project-btn btn text-white bg-red-500 hover:bg-red-600" data-id="${project.id}" title="Projeyi Sil">
+                            <i class="fas fa-trash-alt mr-1"></i> Sil
+                        </button>
+                        <button class="edit-project-btn btn btn-edit" data-id="${project.id}">
+                            <i class="fas fa-edit mr-1"></i> Düzenle
+                        </button>
+                        <a href="/TaskPlanner/ProjectDetail/${project.id}" class="btn btn-primary">
+                            <i class="fas fa-tasks mr-1"></i> Görevler
+                                        </a>
+                                    </div>
+                `;
+                
+                // Düzenleme butonuna event listener ekle
+                card.querySelector('.edit-project-btn').addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-id');
+                    openProjectModal(projectId);
+                });
+                
+                // Silme butonuna event listener ekle
+                card.querySelector('.delete-project-btn').addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-id');
+                    const projectName = project.name;
+                    deleteProject(projectId, projectName);
+                });
+                
+                return card;
+            }
+            
+            // Proje silme fonksiyonu
+            function closeProjectModal() {
+                projectModal.classList.add('hidden');
+            }
+            
+            // Mesaj gösterme
+            function showMessage(message, type) {
+                const box = document.getElementById(type === 'success' ? 'success-message' : 'error-message');
+                const text = document.getElementById(type === 'success' ? 'success-text' : 'error-text');
+                
+                if (box && text) {
+                    text.textContent = message;
+                    box.classList.remove('hidden');
+                    
+                        setTimeout(() => {
+                        box.classList.add('hidden');
+                    }, 3000);
+                }
+            }
+            
+            // Yükleniyor göstergesi
+            function showLoading() {
+                loader.style.display = 'block';
+            }
+            
+            function hideLoading() {
+                loader.style.display = 'none';
+            }
+            
+            // Sayfa yüklendiğinde projeleri yükle
+            loadProjects();
+        });
+    </script>
+} 

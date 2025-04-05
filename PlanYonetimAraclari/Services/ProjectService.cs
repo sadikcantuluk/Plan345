@@ -627,5 +627,35 @@ namespace PlanYonetimAraclari.Services
                 throw;
             }
         }
+        
+        public async Task<bool> IsUserProjectMemberAsync(string userId, int projectId)
+        {
+            try
+            {
+                _logger.LogInformation($"Kullanıcının proje üyesi olup olmadığı kontrol ediliyor: UserId={userId}, ProjectId={projectId}");
+                
+                // Proje sahibi mi kontrol et
+                var isOwner = await _context.Projects
+                    .AnyAsync(p => p.Id == projectId && p.UserId == userId);
+                
+                if (isOwner)
+                {
+                    _logger.LogInformation($"Kullanıcı projenin sahibi: UserId={userId}, ProjectId={projectId}");
+                    return true;
+                }
+                
+                // Ekip üyesi mi kontrol et
+                var isMember = await _context.ProjectTeamMembers
+                    .AnyAsync(m => m.ProjectId == projectId && m.UserId == userId && m.Status == "Accepted");
+                
+                _logger.LogInformation($"Kullanıcının proje üyeliği: UserId={userId}, ProjectId={projectId}, IsMember={isMember}");
+                return isMember;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Kullanıcının proje üyeliği kontrol edilirken hata oluştu: {ex.Message}");
+                throw;
+            }
+        }
     }
 } 

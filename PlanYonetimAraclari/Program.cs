@@ -21,6 +21,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<ActivityService>();
+builder.Services.AddScoped<IPlannerService, PlannerService>();
 
 // Görev ve takvim servisleri ekle
 builder.Services.AddScoped<ITaskService, TaskService>();

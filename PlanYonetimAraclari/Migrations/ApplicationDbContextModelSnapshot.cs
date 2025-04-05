@@ -375,6 +375,66 @@ namespace PlanYonetimAraclari.Migrations
                     b.ToTable("EmailVerificationCodes");
                 });
 
+            modelBuilder.Entity("PlanYonetimAraclari.Models.PlannerTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ParentTaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TaskState")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentTaskId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PlannerTasks");
+                });
+
             modelBuilder.Entity("PlanYonetimAraclari.Models.ProjectInvitation", b =>
                 {
                     b.Property<int>("Id")
@@ -684,6 +744,30 @@ namespace PlanYonetimAraclari.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PlanYonetimAraclari.Models.PlannerTask", b =>
+                {
+                    b.HasOne("PlanYonetimAraclari.Models.PlannerTask", "ParentTask")
+                        .WithMany("SubTasks")
+                        .HasForeignKey("ParentTaskId");
+
+                    b.HasOne("PlanYonetimAraclari.Models.ProjectModel", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PlanYonetimAraclari.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParentTask");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PlanYonetimAraclari.Models.ProjectInvitation", b =>
                 {
                     b.HasOne("PlanYonetimAraclari.Models.ApplicationUser", "InvitedByUser")
@@ -759,6 +843,11 @@ namespace PlanYonetimAraclari.Migrations
                     b.Navigation("AssignedMember");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("PlanYonetimAraclari.Models.PlannerTask", b =>
+                {
+                    b.Navigation("SubTasks");
                 });
 
             modelBuilder.Entity("PlanYonetimAraclari.Models.ProjectModel", b =>

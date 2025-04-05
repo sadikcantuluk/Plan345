@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PlanYonetimAraclari.Migrations
 {
-    public partial class First_mig : Migration
+    public partial class FirstMig : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -300,6 +300,46 @@ namespace PlanYonetimAraclari.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlannerTasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: true),
+                    ParentTaskId = table.Column<int>(type: "int", nullable: true),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TaskState = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlannerTasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlannerTasks_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlannerTasks_PlannerTasks_ParentTaskId",
+                        column: x => x.ParentTaskId,
+                        principalTable: "PlannerTasks",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PlannerTasks_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProjectInvitations",
                 columns: table => new
                 {
@@ -442,6 +482,21 @@ namespace PlanYonetimAraclari.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlannerTasks_ParentTaskId",
+                table: "PlannerTasks",
+                column: "ParentTaskId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlannerTasks_ProjectId",
+                table: "PlannerTasks",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlannerTasks_UserId",
+                table: "PlannerTasks",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectInvitations_InvitedByUserId",
                 table: "ProjectInvitations",
                 column: "InvitedByUserId");
@@ -507,6 +562,9 @@ namespace PlanYonetimAraclari.Migrations
 
             migrationBuilder.DropTable(
                 name: "EmailVerificationCodes");
+
+            migrationBuilder.DropTable(
+                name: "PlannerTasks");
 
             migrationBuilder.DropTable(
                 name: "ProjectInvitations");

@@ -1,0 +1,2519 @@
+@using System.Web;
+@using Microsoft.AspNetCore.Html;
+
+ @{
+    ViewData["Title"] = "Proje Detayı - Plan345";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    // Kullanıcı bilgilerini atarken uyarı göstermemek için varsayılan değerler
+    if (ViewData["UserFullName"] == null) ViewData["UserFullName"] = "";
+    if (ViewData["UserEmail"] == null) ViewData["UserEmail"] = "";  
+    if (ViewData["UserProfileImage"] == null) ViewData["UserProfileImage"] = "/images/profiles/default.png";
+    
+    var task = ViewData["Task"] as PlanYonetimAraclari.Models.PlannerTask;
+    var childTasks = ViewData["ChildTasks"] as List<PlanYonetimAraclari.Models.PlannerTask>;
+}
+
+@section Styles {
+    <style>
+        /* Temel Stiller */
+        .task-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-bottom: 20px;
+        }
+        
+        /* Görev Satırı Stili */
+        .task-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .task-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Checkbox stilleri */
+        .task-checkbox {
+            margin-right: 8px;
+        }
+        
+        /* Görev Adı Stili */
+        .task-name {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        .task-name span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+            display: inline-block;
+        }
+        
+        /* Genişletme/Daraltma İkonları */
+        .task-toggle {
+            display: inline-flex;
+            width: 16px;
+            height: 16px;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: #3b82f6;
+            font-size: 10px;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        /* Alt görevleri gizlemek için stil */
+        .hidden-task {
+            display: none !important;
+        }
+        
+        /* Hiyerarşi Seviyeleri için Padding */
+        .level-0 { padding-left: 10px; }
+        .level-1 { padding-left: 35px; }
+        .level-2 { padding-left: 60px; }
+        .level-3 { padding-left: 85px; }
+        .level-4 { padding-left: 110px; }
+        .level-5 { padding-left: 135px; }
+        .level-6 { padding-left: 160px; }
+        .level-7 { padding-left: 185px; }
+        .level-8 { padding-left: 210px; }
+        .level-9 { padding-left: 235px; }
+        .level-10 { padding-left: 260px; }
+        
+        /* Dikey Bağlantı Çizgileri */
+        .level-1, .level-2, .level-3, .level-4,
+        .level-5, .level-6, .level-7, .level-8, 
+        .level-9, .level-10 {
+            position: relative;
+        }
+        
+        .level-1::before, .level-2::before, .level-3::before, .level-4::before,
+        .level-5::before, .level-6::before, .level-7::before, .level-8::before, 
+        .level-9::before, .level-10::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background-color: #e5e7eb;
+        }
+        
+        .level-1::after, .level-2::after, .level-3::after, .level-4::after,
+        .level-5::after, .level-6::after, .level-7::after, .level-8::after, 
+        .level-9::after, .level-10::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            width: 10px;
+            height: 1px;
+            background-color: #e5e7eb;
+        }
+        
+        /* Task Düğmeleri */
+        .task-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+        .add-subtask-btn {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .add-subtask-btn:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .add-subtask-btn i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        /* Durum Göstergeleri */
+        .task-status {
+            margin-right: 16px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .status-completed {
+            background-color: #d1fae5;
+            color: #047857;
+        }
+        
+        .status-cancelled {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        /* Tarih Aralıkları */
+        .task-dates {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-right: 16px;
+        }
+        
+        /* Animasyonlar */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Gantt Chart */
+        .gantt-container {
+            overflow: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .gantt-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .gantt-header-cell {
+            padding: 8px 4px;
+            border-right: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            font-size: 12px;
+        }
+        
+        .gantt-row {
+            border-bottom: 1px solid #e5e7eb;
+            position: relative;
+            min-height: 40px;
+            display: flex;
+        }
+        
+        .gantt-task-cell {
+            padding: 6px 12px;
+            border-right: 1px solid #e5e7eb;
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            min-width: 320px;
+            max-width: 320px;
+        }
+        
+        .gantt-task-cell .task-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 240px;
+            display: inline-block;
+        }
+        
+        .gantt-date-cell {
+            font-size: 12px;
+            text-align: center;
+            padding: 6px 0;
+            border-right: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        
+        .gantt-cell {
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+        }
+        
+        .gantt-bar {
+            position: absolute;
+            top: 8px;
+            height: 24px;
+            background-color: #4ade80;
+            border-radius: 4px;
+            z-index: 4;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .gantt-bar span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        .state-pending {
+            background-color: #9ca3af;
+        }
+        
+        .state-in-progress {
+            background-color: #3b82f6;
+        }
+        
+        .state-completed {
+            background-color: #4ade80;
+        }
+        
+        .state-cancelled {
+            background-color: #ef4444;
+        }
+        
+        .gantt-weekend {
+            background-color: #f9fafb;
+        }
+        
+        .gantt-today {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Gantt Chart Styles - Existing CSS */
+
+        /* ... existing style rules ... */
+
+        /* Task Form Input Improvements */
+        .task-form-input-wrapper {
+            margin-bottom: 1.25rem;
+        }
+        
+        .task-form-label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        #task-modal input[type="text"],
+        #task-modal input[type="date"],
+        #task-modal textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease;
+        }
+        
+        #task-modal input[type="text"]:focus,
+        #task-modal input[type="date"]:focus,
+        #task-modal textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+        
+        #task-modal textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        #task-modal .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #task-modal .btn-submit {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+        
+        #task-modal .btn-submit:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px -1px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+}
+
+<div class="container mx-auto p-4">
+    @if (task != null)
+    {
+        <div class="flex justify-between items-center mb-4">
+                <div>
+                <h1 class="text-2xl font-bold">@task.Name</h1>
+                <p class="text-gray-600">Proje Zaman Çizelgesi (@task.StartDate.ToString("dd.MM.yyyy") - @task.EndDate.ToString("dd.MM.yyyy"))</p>
+                </div>
+            <div class="flex gap-2">
+                <button id="add-task-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md">
+                    <i class="fas fa-plus mr-1"></i> Yeni Görev
+                    </button>
+            </div>
+        </div>
+
+        <!-- Bildirim Mesajları -->
+        <div id="success-message" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded shadow-sm hidden">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p id="success-text" class="text-sm"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-message" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded shadow-sm hidden">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p id="error-text" class="text-sm"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ana Görev -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-4 border-b bg-gray-50">
+                <div class="flex items-center">
+                    <input type="checkbox" class="task-checkbox" data-id="@task.Id" @(task.TaskState == 2 ? "checked" : "")>
+                    <span class="ml-2 font-semibold">@task.Name</span>
+                    <span class="ml-auto text-sm text-gray-500">@task.StartDate.ToString("dd.MM.yyyy") - @task.EndDate.ToString("dd.MM.yyyy")</span>
+                    <button class="add-subtask-btn ml-4" data-parent-id="@task.Id">
+                        <i class="fas fa-plus"></i> Alt Görev
+                    </button>
+                </div>
+            </div>
+            </div>
+            
+        <!-- Hiyerarşik Görev Listesi -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-3 bg-gray-50 border-b flex items-center font-medium">
+                <div class="w-6/12 pl-10">Ad</div>
+                <div class="w-2/12 text-center">Başlat</div>
+                <div class="w-2/12 text-center">Bitirme</div>
+                <div class="w-1/12 text-center">Durum</div>
+                <div class="w-1/12 text-right pr-4">İşlem</div>
+            </div>
+            
+            <div id="tasks-container">
+                @if (childTasks != null && childTasks.Any())
+                {
+                    @await RenderTaskList(childTasks, task.Id, 0)
+                }
+            </div>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-3 bg-gray-50 border-b flex justify-between items-center">
+                <h3 class="font-medium">Gantt Şema</h3>
+                
+                <!-- Gantt Görünüm Kontrolleri -->
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <select id="gantt-view-mode" class="py-1 px-2 rounded border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="day">Gün</option>
+                            <option value="week">Hafta</option>
+                            <option value="month">Ay</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex border rounded overflow-hidden">
+                        <button id="gantt-prev" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 border-r">
+                            <i class="fas fa-chevron-left text-xs"></i>
+                        </button>
+                        <button id="gantt-today" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600">
+                            Bugün
+                        </button>
+                        <button id="gantt-next" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 border-l">
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <span id="gantt-date-range" class="text-sm text-gray-600 py-1 px-2">
+                            @task.StartDate.ToString("MMM yyyy") - @task.EndDate.ToString("MMM yyyy")
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gantt-container" id="gantt-container">
+                <!-- Gantt içeriği JavaScript ile oluşturulacak -->
+                <div id="gantt-content" class="relative">
+                    <div class="gantt-header" id="gantt-header">
+                        <!-- Header JavaScript ile oluşturulacak -->
+                    </div>
+                    <div id="gantt-body">
+                        <!-- Body JavaScript ile oluşturulacak -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center p-6">
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl mb-4"></i>
+            <h2 class="text-xl font-bold mb-2">Proje Bulunamadı</h2>
+            <p class="text-gray-600 mb-4">Görüntülemek istediğiniz proje bulunamadı veya erişim izniniz yok.</p>
+            <a href="/TaskPlanner" class="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md">
+                <i class="fas fa-arrow-left mr-1"></i> Projelere Dön
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Görev Ekle Modal -->
+<div id="task-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl">
+        <div class="flex justify-between items-center border-b border-gray-200 px-6 py-4">
+            <h3 id="modal-title" class="text-xl font-medium text-gray-800">Yeni Görev Ekle</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="task-form">
+            <div class="px-8 py-6">
+                <input type="hidden" id="task-id">
+                <input type="hidden" id="parent-task-id">
+                @Html.AntiForgeryToken()
+
+                <div class="space-y-5">
+                    <!-- Görev Adı -->
+                    <div class="task-form-input-wrapper">
+                        <label for="task-name" class="task-form-label">Görev Adı *</label>
+                        <div class="relative">
+                            <input type="text" id="task-name" required class="w-full" 
+                                   placeholder="Görev adını giriniz" maxlength="80">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-xs text-gray-500" id="task-name-char-count">0/80</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            En fazla 80 karakter girilebilir
+                        </div>
+                    </div>
+
+                    <!-- Açıklama -->
+                    <div class="task-form-input-wrapper">
+                        <label for="task-description" class="task-form-label">Açıklama</label>
+                        <div class="relative">
+                            <textarea id="task-description" class="w-full" 
+                                      rows="3" placeholder="Görev açıklaması (opsiyonel)" maxlength="250"></textarea>
+                            <div class="absolute bottom-2 right-2 pointer-events-none">
+                                <span class="text-xs bg-white px-1 rounded text-gray-500" id="task-desc-char-count">0/250</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            En fazla 250 karakter girilebilir
+                        </div>
+                    </div>
+
+                    <!-- Tarihler -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="task-form-input-wrapper">
+                            <label for="task-start-date" class="task-form-label">Başlangıç *</label>
+                            <input type="date" id="task-start-date" required class="w-full">
+                        </div>
+
+                        <div class="task-form-input-wrapper">
+                            <label for="task-end-date" class="task-form-label">Bitiş *</label>
+                            <input type="date" id="task-end-date" required class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button type="button" id="cancel-btn" class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-5 py-2 rounded-md mr-3">
+                    İptal
+                </button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md btn-submit">
+                    Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@functions {
+    // Hiyerarşik görev listesini render et
+    async Task<IHtmlContent> RenderTaskList(List<PlanYonetimAraclari.Models.PlannerTask> tasks, int parentId, int level)
+    {
+        var output = new HtmlContentBuilder();
+        
+        // Ana görevi hariç tut ve alt görevleri filtrele
+        var childTasks = tasks
+            .Where(t => t.ParentTaskId == parentId && t.Id != parentId)
+            .OrderBy(t => t.OrderIndex)
+            .ThenBy(t => t.EndDate);
+            
+        foreach (var childTask in childTasks)
+        {
+            // Alt görev satırı - hiyerarşik seviyesine göre sınıf ekle
+            string rowClass = $"task-item level-{level} task-row";
+            
+            // Tüm seviyeleri açık halde göster
+            // if (level > 0) {
+            //     rowClass += " hidden-task";
+            // }
+            
+            output.AppendHtml($"<div class=\"{rowClass}\" data-id=\"{childTask.Id}\" data-parent-id=\"{parentId}\" data-level=\"{level}\">");
+            
+            // Alt görevleri var mı kontrol et
+            bool hasChildren = tasks.Any(t => t.ParentTaskId == childTask.Id);
+            string toggleIcon = hasChildren ? "<span class='task-toggle expand-icon'>►</span>" : "<span class='task-toggle'></span>";
+            
+            // Görev adı ve bilgileri
+            output.AppendHtml("<div class=\"w-6/12 task-name\">");
+            output.AppendHtml(toggleIcon);
+            output.AppendHtml($"<input type=\"checkbox\" class=\"task-checkbox\" data-id=\"{childTask.Id}\" {(childTask.TaskState == 2 ? "checked" : "")}>");
+            output.AppendHtml($"<span class=\"ml-2\">{childTask.Name}</span>");
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("<div class=\"w-2/12 text-center task-dates\">");
+            output.AppendHtml(childTask.StartDate.ToString("dd.MM.yyyy"));
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("<div class=\"w-2/12 text-center task-dates\">");
+            output.AppendHtml(childTask.EndDate.ToString("dd.MM.yyyy"));
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("<div class=\"w-1/12 text-center\">");
+            output.AppendHtml($"<span class=\"task-status {GetStatusClass(childTask.TaskState)}\">");
+            output.AppendHtml(GetStatusText(childTask.TaskState));
+            output.AppendHtml("</span>");
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("<div class=\"w-1/12 text-right pr-4 flex space-x-1 justify-end\">");
+            // Düzenle butonu
+            output.AppendHtml($"<button class=\"edit-task-btn p-1 text-blue-500 hover:text-blue-700\" data-id=\"{childTask.Id}\" title=\"Düzenle\">");
+            output.AppendHtml("<i class=\"fas fa-edit\"></i>");
+            output.AppendHtml("</button>");
+            // Sil butonu
+            output.AppendHtml($"<button class=\"delete-task-btn p-1 text-red-500 hover:text-red-700\" data-id=\"{childTask.Id}\" title=\"Sil\">");
+            output.AppendHtml("<i class=\"fas fa-trash\"></i>");
+            output.AppendHtml("</button>");
+            // Alt görev ekle butonu
+            output.AppendHtml($"<button class=\"add-subtask-btn\" data-parent-id=\"{childTask.Id}\" title=\"Alt Görev Ekle\">");
+            output.AppendHtml("<i class=\"fas fa-plus\"></i>");
+            output.AppendHtml("</button>");
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("</div>");
+            
+            // Alt görevleri recursive olarak render et
+            var subTasks = tasks.Where(t => t.ParentTaskId == childTask.Id).ToList();
+            if (subTasks.Any())
+            {
+                output.AppendHtml(await RenderTaskList(tasks, childTask.Id, level + 1));
+            }
+        }
+        
+        return output;
+    }
+    
+    // Gantt Chart görev hiyerarşisini render et
+    async Task<IHtmlContent> RenderGanttChart(List<PlanYonetimAraclari.Models.PlannerTask> tasks, int parentId, int level, DateTime startDate, int dayCount)
+    {
+        var output = new HtmlContentBuilder();
+        
+        // Ana görevi hariç tut ve alt görevleri filtrele
+        var childTasks = tasks
+            .Where(t => t.ParentTaskId == parentId && t.Id != parentId)
+            .OrderBy(t => t.OrderIndex)
+            .ThenBy(t => t.EndDate);
+            
+        foreach (var childTask in childTasks)
+        {
+            // Gantt satırının sınıfını ayarla - hidden-task sınıfını level 1 için ekleme
+            string rowClass = $"gantt-row";
+            
+            // Alt görevleri de açık göster, hiçbir seviyeyi gizleme
+            // if (level > 1) {
+            //     rowClass += " hidden-task";
+            // }
+            
+            // Data özniteliklerini ekle - ID, parent-id, level
+            output.AppendHtml($"<div class=\"{rowClass}\" data-id=\"{childTask.Id}\" data-parent-id=\"{parentId}\" data-level=\"{level}\">");
+            
+            // Task hücresi - doğru level sınıfı ile
+            output.AppendHtml($"<div class=\"gantt-task-cell level-{level}\">");
+            
+            // Alt görevleri var mı kontrol et
+            bool hasChildren = tasks.Any(t => t.ParentTaskId == childTask.Id);
+            string toggleIcon = hasChildren ? "<span class='task-toggle expand-icon'>►</span>" : "<span class='task-toggle'></span>";
+            
+            output.AppendHtml("<div class=\"flex items-center\">");
+            output.AppendHtml(toggleIcon);
+            output.AppendHtml($"<input type=\"checkbox\" class=\"task-checkbox\" data-id=\"{childTask.Id}\" {(childTask.TaskState == 2 ? "checked" : "")}>");
+            output.AppendHtml($"<span class=\"ml-2\">{childTask.Name}</span>");
+            output.AppendHtml("</div>");
+            
+            output.AppendHtml("</div>");
+            
+            // Günler
+            for (int i = 0; i < dayCount; i++)
+            {
+                DateTime currentDate = startDate.AddDays(i);
+                string cellClass = "gantt-cell";
+                
+                if (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    cellClass += " gantt-weekend";
+                }
+                
+                if (currentDate.Date == DateTime.Now.Date)
+                {
+                    cellClass += " gantt-today";
+                }
+                
+                output.AppendHtml($"<div class=\"{cellClass}\">");
+                
+                // İlk hücrede görev çubuğunu göster
+                if (i == 0) {
+                    // Gantt bar için genişlik ve konum hesaplamaları
+                    // Günlük görünümde her bir gün 36px genişliğinde
+                    
+                    // Görünür alanın başlangıç tarihinden görevin başlangıç tarihine kadar olan gün sayısı
+                    double startDiffDays = Math.Max(0, (childTask.StartDate - startDate).TotalDays);
+                    // Görevin başlangıç ve bitiş tarihleri arasındaki gün sayısı
+                    double taskDurationDays = Math.Max(1, Math.Ceiling((childTask.EndDate - childTask.StartDate).TotalDays) + 1);
+                    
+                    // Piksel olarak sol konumu ve genişliği hesapla
+                    int leftOffset = (int)Math.Round(startDiffDays * 36);
+                    int width = (int)Math.Round(taskDurationDays * 36);
+                    
+                    // Genişlik ve konum için minimum değerler
+                    leftOffset = Math.Max(0, leftOffset);
+                    width = Math.Max(36, width); // En az bir günlük genişlik
+                    
+                    // Görünüm alanı dışındaysa kırp
+                    int totalWidth = dayCount * 36;
+                    if (leftOffset > totalWidth) {
+                        // Görünüm dışında, gösterme
+                        continue;
+                    }
+                    
+                    // Bar genişliği görünümü aşıyorsa kırp
+                    if (leftOffset + width > totalWidth) {
+                        width = totalWidth - leftOffset;
+                    }
+                    
+                    string barClass = "gantt-bar ";
+                    switch(childTask.TaskState) {
+                        case 0: barClass += "state-pending"; break;
+                        case 1: barClass += "state-in-progress"; break;
+                        case 2: barClass += "state-completed"; break;
+                        case 3: barClass += "state-cancelled"; break;
+                    }
+                    
+                    output.AppendHtml($"<div class=\"{barClass}\" style=\"width: {width}px; left: {leftOffset}px;\" title=\"{childTask.StartDate.ToString("dd.MM.yyyy")} - {childTask.EndDate.ToString("dd.MM.yyyy")}\">");
+                    output.AppendHtml(childTask.Name);
+                    output.AppendHtml("</div>");
+                }
+                
+                output.AppendHtml("</div>");
+            }
+            
+            output.AppendHtml("</div>");
+            
+            // Alt görevleri recursive olarak render et
+            var subTasks = tasks.Where(t => t.ParentTaskId == childTask.Id).ToList();
+            if (subTasks.Any())
+            {
+                output.AppendHtml(await RenderGanttChart(tasks, childTask.Id, level + 1, startDate, dayCount));
+            }
+        }
+        
+        return output;
+    }
+    
+    // Durum sınıfını getir
+    string GetStatusClass(int taskState)
+    {
+        return taskState switch
+        {
+            0 => "status-pending",
+            1 => "status-in-progress",
+            2 => "status-completed",
+            3 => "status-cancelled",
+            _ => "status-pending"
+        };
+    }
+    
+    // Durum metni
+    string GetStatusText(int taskState)
+    {
+        return taskState switch
+        {
+            0 => "Bekliyor",
+            1 => "Devam Ediyor",
+            2 => "Tamamlandı",
+            3 => "İptal Edildi",
+            _ => "Bekliyor"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // DOM elementleri
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const taskModal = document.getElementById('task-modal');
+            const closeModal = document.getElementById('close-modal');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const taskForm = document.getElementById('task-form');
+            const modalTitle = document.getElementById('modal-title');
+            const parentTaskIdField = document.getElementById('parent-task-id');
+            const taskIdField = document.getElementById('task-id');
+            const taskNameField = document.getElementById('task-name');
+            const taskDescriptionField = document.getElementById('task-description');
+            const startDateField = document.getElementById('task-start-date');
+            const endDateField = document.getElementById('task-end-date');
+            const taskNameCharCount = document.getElementById('task-name-char-count');
+            const taskDescCharCount = document.getElementById('task-desc-char-count');
+            
+            // Karakter sayım fonksiyonları
+            function updateCharCount(input, display, maxLength) {
+                const count = input.value.length;
+                display.textContent = `${count}/${maxLength}`;
+                
+                // Karakter sınırına yaklaştıkça uyarı rengi
+                if (count > maxLength * 0.9) {
+                    display.classList.add('text-orange-500');
+                    if (count >= maxLength) {
+                        display.classList.remove('text-orange-500');
+                        display.classList.add('text-red-500');
+                    }
+                } else {
+                    display.classList.remove('text-orange-500', 'text-red-500');
+                }
+            }
+            
+            // Karakter sayımı için event listener'lar
+            taskNameField.addEventListener('input', () => updateCharCount(taskNameField, taskNameCharCount, 80));
+            if (taskDescriptionField) {
+                taskDescriptionField.addEventListener('input', () => updateCharCount(taskDescriptionField, taskDescCharCount, 250));
+                // Sayfa yüklendiğinde karakter sayısını güncelle
+                updateCharCount(taskDescriptionField, taskDescCharCount, 250);
+            }
+            
+            // Sayfa yüklendiğinde karakter sayısını güncelle
+            updateCharCount(taskNameField, taskNameCharCount, 80);
+            
+            // Ana görev ID
+            const mainTaskId = "@task.Id";
+            
+            // Kullanıcı kimliği
+            const currentUserId = "@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value";
+            
+            // Anti-forgery token
+            const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            
+            // DEBUG
+            console.log("Sayfa yüklendi, task-toggle elementleri bulunuyor");
+            $('.task-toggle').each(function(index) {
+                console.log(index, ":", this, $(this).hasClass('expand-icon'));
+            });
+            
+            console.log("Expand-icon olanlar:");
+            $('.task-toggle.expand-icon').each(function(index) {
+                console.log(index, ":", this);
+            });
+            
+            // Task-toggle için event listener (ek olarak)
+            $('.task-toggle').on('click', function(e) {
+                console.log("Task toggle tıklandı (direkt):", this);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const taskItem = $(this).closest('[data-id]');
+                const taskId = taskItem.data('id');
+                
+                // Bu bir expand-icon mu?
+                if ($(this).hasClass('expand-icon')) {
+                    console.log("Expand icon tıklandı, toggleSubtasks çağrılıyor");
+                    toggleSubtasks(taskId);
+                }
+            });
+            
+            // ===== GANTT ŞEMA FONKSİYONLARI =====
+            
+            // Gantt şema konfigürasyonu
+            const ganttConfig = {
+                viewMode: 'day', // day, week, month - Default olarak gün formatında gelsin
+                cellWidth: {
+                    day: 36, // Günlük görünüm hücre genişliği (px)
+                    week: 140, // Haftalık görünüm hücre genişliği (px)
+                    month: 120 // Aylık görünüm hücre genişliği (px)
+                },
+                startDate: new Date('@task.StartDate.ToString("yyyy-MM-dd")'),
+                endDate: new Date('@task.EndDate.ToString("yyyy-MM-dd")'),
+                headerHeight: 60,
+                rowHeight: 40,
+                today: new Date()
+            };
+            
+            // Tüm görevleri topla - ana ve alt görevler
+            const tasks = [];
+            
+            // Ana görevi ekle
+            tasks.push({
+                id: parseInt('@task.Id'),
+                name: '@task.Name',
+                startDate: new Date('@task.StartDate.ToString("yyyy-MM-dd")'),
+                endDate: new Date('@task.EndDate.ToString("yyyy-MM-dd")'),
+                state: parseInt('@task.TaskState'),
+                parentId: null,
+                level: 0
+            });
+            
+            // Alt görevleri ekle
+            @if (childTasks != null && childTasks.Any())
+            {
+                foreach (var childTask in childTasks)
+                {
+                    <text>
+                    tasks.push({
+                        id: @childTask.Id,
+                        name: '@Html.Raw(HttpUtility.JavaScriptStringEncode(childTask.Name))',
+                        startDate: new Date('@childTask.StartDate.ToString("yyyy-MM-dd")'),
+                        endDate: new Date('@childTask.EndDate.ToString("yyyy-MM-dd")'),
+                        state: @childTask.TaskState,
+                        parentId: @(childTask.ParentTaskId.HasValue ? childTask.ParentTaskId.Value.ToString() : "null"),
+                        level: '@childTask.ParentTaskId' == '@task.Id' ? 1 : 2
+                    });
+                    </text>
+                }
+            }
+            
+            // Tarih aralığını hesapla
+            function calculateDateRange() {
+                // Minimum ve maksimum proje tarihlerini bul
+                let minDate = ganttConfig.startDate;
+                let maxDate = ganttConfig.endDate;
+                
+                // Görevlerin tarihlerini kontrol et ve gerekirse genişlet
+                tasks.forEach(task => {
+                    if (task.startDate < minDate) minDate = task.startDate;
+                    if (task.endDate > maxDate) maxDate = task.endDate;
+                });
+                
+                // En az 1 ay gösterme garantisi
+                const monthDiff = (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+                if (monthDiff < 1) {
+                    maxDate = new Date(minDate);
+                    maxDate.setMonth(maxDate.getMonth() + 1);
+                }
+                
+                // Eğer bitiş tarihi projenin gerçekten bittiği tarihe kadar gösterilmiyorsa
+                if (maxDate < ganttConfig.endDate) {
+                    maxDate = new Date(ganttConfig.endDate);
+                }
+                
+                console.log("Tarih aralığı hesaplandı:", {
+                    minDate: minDate.toDateString(),
+                    maxDate: maxDate.toDateString(),
+                    ganttStartDate: ganttConfig.startDate.toDateString(),
+                    ganttEndDate: ganttConfig.endDate.toDateString()
+                });
+                
+                return { minDate, maxDate };
+            }
+            
+            // Proje uzunluğuna göre en iyi görünüm modunu belirle
+            function determineBestViewMode() {
+                const { minDate, maxDate } = calculateDateRange();
+                const projectDurationDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+                
+                console.log("Proje süresi (gün):", projectDurationDays);
+                
+                // Her zaman gün görünümü kullan
+                return 'day';
+                
+                // Otomatik belirleme - kullanılmıyor artık
+                /*
+                if (projectDurationDays <= 60) {
+                    // 2 ay veya daha kısa projeler için günlük görünüm
+                    return 'day';
+                } else if (projectDurationDays <= 180) {
+                    // 6 ay veya daha kısa projeler için haftalık görünüm
+                    return 'week';
+                } else {
+                    // 6 aydan uzun projeler için aylık görünüm
+                    return 'month';
+                }
+                */
+            }
+            
+            // DOM elementlerini al
+            const ganttViewMode = document.getElementById('gantt-view-mode');
+            const ganttPrev = document.getElementById('gantt-prev');
+            const ganttNext = document.getElementById('gantt-next');
+            const ganttToday = document.getElementById('gantt-today');
+            const ganttDateRange = document.getElementById('gantt-date-range');
+            const ganttHeader = document.getElementById('gantt-header');
+            const ganttBody = document.getElementById('gantt-body');
+            
+            // Tarih aralığı
+            let dateRange = calculateDateRange();
+            let currentStartDate = new Date(dateRange.minDate);
+            let currentEndDate = new Date(dateRange.maxDate);
+            
+            // Ay isimleri
+            const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", 
+                              "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+                              
+            // Kısa ay isimleri
+            const shortMonthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", 
+                                  "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+            
+            // Gün isimleri
+            const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+            
+            // Gantt şemayı oluştur
+            function renderGantt() {
+                // Görünüm moduna göre tarihleri hesapla
+                const { dates, headerDates } = getHeaderDates();
+                
+                // Başlıkları oluştur
+                renderGanttHeader(dates, headerDates);
+                
+                // Görev satırlarını oluştur
+                renderGanttRows(dates);
+                
+                // Bugün çizgisini ekle
+                renderTodayLine(dates);
+                
+                // Tarih aralığını güncelle
+                updateDateRangeText();
+            }
+            
+            // Bugün çizgisini ekle
+            function renderTodayLine(dates) {
+                // Önce varsa eski bugün çizgisini kaldır
+                $('.gantt-today-line').remove();
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Bugün görünümde mi?
+                let todayIndex = -1;
+                
+                if (ganttConfig.viewMode === 'day') {
+                    // Günlük görünümde bugünün indeksini bul
+                    todayIndex = dates.findIndex(date => 
+                        date.getFullYear() === today.getFullYear() && 
+                        date.getMonth() === today.getMonth() && 
+                        date.getDate() === today.getDate()
+                    );
+                } else if (ganttConfig.viewMode === 'week') {
+                    // Haftalık görünümde bugünün olduğu haftanın indeksini bul
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay());
+                    
+                    todayIndex = dates.findIndex(date => {
+                        const dateStartOfWeek = new Date(date);
+                        dateStartOfWeek.setDate(date.getDate() - date.getDay());
+                        
+                        return dateStartOfWeek.getFullYear() === startOfWeek.getFullYear() && 
+                               dateStartOfWeek.getMonth() === startOfWeek.getMonth() && 
+                               dateStartOfWeek.getDate() === startOfWeek.getDate();
+                    });
+                } else if (ganttConfig.viewMode === 'month') {
+                    // Aylık görünümde bugünün olduğu ayın indeksini bul
+                    todayIndex = dates.findIndex(date => 
+                        date.getFullYear() === today.getFullYear() && 
+                        date.getMonth() === today.getMonth()
+                    );
+                }
+                
+                if (todayIndex !== -1) {
+                    // Bugün görünümde, çizgiyi ekle
+                    const cellWidth = ganttConfig.cellWidth[ganttConfig.viewMode];
+                    let leftOffset;
+                    
+                    if (ganttConfig.viewMode === 'day') {
+                        leftOffset = todayIndex * cellWidth + (cellWidth / 2); // Günün ortasına yerleştir
+                    } else if (ganttConfig.viewMode === 'week') {
+                        // Haftanın hangi gününde olduğumuza göre hesapla
+                        const dayOfWeek = today.getDay(); // 0=Pazar, 1=Pazartesi, ...
+                        const dayOffset = dayOfWeek * (cellWidth / 7);
+                        leftOffset = todayIndex * cellWidth + dayOffset;
+                    } else if (ganttConfig.viewMode === 'month') {
+                        // Ayın hangi gününde olduğumuza göre hesapla
+                        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                        const dayOfMonth = today.getDate();
+                        const dayOffset = (dayOfMonth / daysInMonth) * cellWidth;
+                        leftOffset = todayIndex * cellWidth + dayOffset;
+                    }
+                    
+                    // Çizginin pozisyonunu task-cell genişliğine göre ayarla
+                    const taskCellWidth = $('.gantt-task-cell').first().outerWidth();
+                    leftOffset += taskCellWidth;
+                    
+                    // Çizgiyi ekle
+                    const todayLine = $('<div class="gantt-today-line"></div>');
+                    todayLine.css('left', leftOffset + 'px');
+                    
+                    // Çizgiyi gantt gövdesine ekle
+                    $('#gantt-body').append(todayLine);
+                    
+                    // Çizgiyi gantt başlığına da ekle
+                    const headerTodayLine = $('<div class="gantt-today-line"></div>');
+                    headerTodayLine.css('left', leftOffset + 'px');
+                    headerTodayLine.css('height', ganttConfig.headerHeight + 'px');
+                    $('#gantt-header').append(headerTodayLine);
+                }
+            }
+            
+            // Tarih aralığı metnini güncelle
+            function updateDateRangeText() {
+                let rangeText = '';
+                
+                if (ganttConfig.viewMode === 'day') {
+                    rangeText = `${currentStartDate.getDate()} ${shortMonthNames[currentStartDate.getMonth()]} ${currentStartDate.getFullYear()} - ${currentEndDate.getDate()} ${shortMonthNames[currentEndDate.getMonth()]} ${currentEndDate.getFullYear()}`;
+                } else if (ganttConfig.viewMode === 'week') {
+                    rangeText = `${shortMonthNames[currentStartDate.getMonth()]} ${currentStartDate.getFullYear()} - ${shortMonthNames[currentEndDate.getMonth()]} ${currentEndDate.getFullYear()}`;
+                } else {
+                    rangeText = `${shortMonthNames[currentStartDate.getMonth()]} ${currentStartDate.getFullYear()} - ${shortMonthNames[currentEndDate.getMonth()]} ${currentEndDate.getFullYear()}`;
+                }
+                
+                $('#gantt-date-range').text(rangeText);
+            }
+            
+            // Görünüm moduna göre başlık tarihlerini hesapla
+            function getHeaderDates() {
+                const dates = [];
+                const headerDates = [];
+                
+                // İlgili fonksiyonu çağır
+                switch (ganttConfig.viewMode) {
+                    case 'day':
+                        return getDailyDates();
+                    case 'week':
+                        return getWeeklyDates();
+                    case 'month':
+                        return getMonthlyDates();
+                    default:
+                        return getDailyDates();
+                }
+            }
+            
+            // Günlük tarihler
+            function getDailyDates() {
+                const dates = [];
+                const headerDates = [];
+                
+                // Ay başlıkları için
+                let currentMonth = new Date(currentStartDate);
+                currentMonth.setDate(1); // Ayın ilk günü
+                
+                // Son tarih
+                const endDate = new Date(currentEndDate);
+                
+                // Her gün için
+                let currentDate = new Date(currentStartDate);
+                while (currentDate <= endDate) {
+                    // Gün ekle
+                    dates.push(new Date(currentDate));
+                    
+                    // Yeni ay başladıysa ay başlığı ekle
+                    if (currentDate.getDate() === 1 || currentDate.getTime() === currentStartDate.getTime()) {
+                        headerDates.push({
+                            date: new Date(currentDate),
+                            type: 'month',
+                            span: 0 // Daha sonra hesaplanacak
+                        });
+                    }
+                    
+                    // Sonraki güne geç
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                // Ay başlıklarının uzunluğunu hesapla
+                for (let i = 0; i < headerDates.length; i++) {
+                    const current = headerDates[i];
+                    if (i === headerDates.length - 1) {
+                        // Son başlık
+                        current.span = dates.length - dates.findIndex(d => 
+                            d.getMonth() === current.date.getMonth() && 
+                            d.getFullYear() === current.date.getFullYear()
+                        );
+                    } else {
+                        // Aradaki başlıklar
+                        const nextStart = dates.findIndex(d => 
+                            d.getMonth() === headerDates[i + 1].date.getMonth() && 
+                            d.getFullYear() === headerDates[i + 1].date.getFullYear()
+                        );
+                        const currentStart = dates.findIndex(d => 
+                            d.getMonth() === current.date.getMonth() && 
+                            d.getFullYear() === current.date.getFullYear()
+                        );
+                        current.span = nextStart - currentStart;
+                    }
+                }
+                
+                return { dates, headerDates };
+            }
+            
+            // Haftalık tarihler
+            function getWeeklyDates() {
+                const dates = [];
+                const headerDates = [];
+                
+                // İlk haftanın başlangıcı (pazartesi)
+                let currentDate = new Date(currentStartDate);
+                currentDate.setDate(currentDate.getDate() - currentDate.getDay() + (currentDate.getDay() === 0 ? -6 : 1));
+                
+                // Ay başlıkları için
+                let currentMonth = new Date(currentDate);
+                currentMonth.setDate(1); // Ayın ilk günü
+                
+                // Son tarih
+                const endDate = new Date(currentEndDate);
+                
+                // Her hafta için
+                while (currentDate <= endDate) {
+                    // Haftanın başlangıcı
+                    dates.push(new Date(currentDate));
+                    
+                    // Yeni ay başladıysa ay başlığı ekle
+                    if (currentDate.getDate() <= 7 || dates.length === 1) {
+                        headerDates.push({
+                            date: new Date(currentDate),
+                            type: 'month',
+                            span: 0 // Daha sonra hesaplanacak
+                        });
+                    }
+                    
+                    // Sonraki haftaya geç
+                    currentDate.setDate(currentDate.getDate() + 7);
+                }
+                
+                // Ay başlıklarının uzunluğunu hesapla
+                for (let i = 0; i < headerDates.length; i++) {
+                    const current = headerDates[i];
+                    const monthStart = new Date(current.date.getFullYear(), current.date.getMonth(), 1);
+                    const monthEnd = new Date(current.date.getFullYear(), current.date.getMonth() + 1, 0);
+                    
+                    // Bu ayın kaç hafta sürdüğünü hesapla
+                    let weekCount = 0;
+                    for (const date of dates) {
+                        if (date >= monthStart && date <= monthEnd) {
+                            weekCount++;
+                        }
+                    }
+                    
+                    current.span = weekCount;
+                }
+                
+                return { dates, headerDates };
+            }
+            
+            // Aylık tarihler
+            function getMonthlyDates() {
+                const dates = [];
+                const headerDates = [];
+                
+                // İlk ay
+                let currentDate = new Date(currentStartDate);
+                currentDate.setDate(1); // Ayın ilk günü
+                
+                // Son tarih
+                const endDate = new Date(currentEndDate);
+                endDate.setDate(1); // Ayın ilk günü
+                
+                // Her ay için
+                while (currentDate <= endDate) {
+                    // Ay ekle
+                    dates.push(new Date(currentDate));
+                    
+                    // Yeni yıl başladıysa yıl başlığı ekle
+                    if (currentDate.getMonth() === 0 || dates.length === 1) {
+                        headerDates.push({
+                            date: new Date(currentDate),
+                            type: 'year',
+                            span: 0 // Daha sonra hesaplanacak
+                        });
+                    }
+                    
+                    // Sonraki aya geç
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                }
+                
+                // Yıl başlıklarının uzunluğunu hesapla
+                for (let i = 0; i < headerDates.length; i++) {
+                    const current = headerDates[i];
+                    if (i === headerDates.length - 1) {
+                        // Son başlık
+                        current.span = dates.length - dates.findIndex(d => 
+                            d.getFullYear() === current.date.getFullYear()
+                        );
+                    } else {
+                        // Aradaki başlıklar
+                        const nextStart = dates.findIndex(d => 
+                            d.getFullYear() === headerDates[i + 1].date.getFullYear()
+                        );
+                        const currentStart = dates.findIndex(d => 
+                            d.getFullYear() === current.date.getFullYear()
+                        );
+                        current.span = nextStart - currentStart;
+                    }
+                }
+                
+                return { dates, headerDates };
+            }
+            
+            // Gantt başlık satırını oluştur
+            function renderGanttHeader(dates, headerDates) {
+                // Başlık HTML'ini hazırla
+                let headerHtml = `
+                    <div class="gantt-task-cell font-semibold sticky left-0 z-10 bg-white shadow-sm">
+                        Görev / Aşama
+                    </div>`;
+                
+                // Görünüm moduna göre
+                if (ganttConfig.viewMode === 'day') {
+                    // Üst satır - Ay başlıkları
+                    let monthHeaderHtml = '';
+                    headerDates.forEach(header => {
+                        const monthName = `${monthNames[header.date.getMonth()]} ${header.date.getFullYear()}`;
+                        const width = header.span * ganttConfig.cellWidth.day;
+                        monthHeaderHtml += `<div class="gantt-header-cell text-center font-medium border-r" style="width: ${width}px;">${monthName}</div>`;
+                    });
+                    
+                    // Alt satır - Gün başlıkları
+                    let dayHeaderHtml = '';
+                    dates.forEach(date => {
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                        const isToday = date.toDateString() === new Date().toDateString();
+                        const cellClass = `gantt-date-cell${isWeekend ? ' gantt-weekend' : ''}${isToday ? ' gantt-today' : ''}`;
+                        dayHeaderHtml += `<div class="${cellClass}" style="width: ${ganttConfig.cellWidth.day}px;">${date.getDate()}</div>`;
+                    });
+                    
+                    headerHtml = `
+                        <div class="grid gantt-header sticky top-0 z-10 bg-white">
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm"></div>
+                                ${monthHeaderHtml}
+                            </div>
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm">Görev / Aşama</div>
+                                ${dayHeaderHtml}
+                            </div>
+                        </div>`;
+                    
+                } else if (ganttConfig.viewMode === 'week') {
+                    // Üst satır - Ay başlıkları
+                    let monthHeaderHtml = '';
+                    headerDates.forEach(header => {
+                        const monthName = `${monthNames[header.date.getMonth()]} ${header.date.getFullYear()}`;
+                        const width = header.span * ganttConfig.cellWidth.week;
+                        monthHeaderHtml += `<div class="gantt-header-cell text-center font-medium border-r" style="width: ${width}px;">${monthName}</div>`;
+                    });
+                    
+                    // Alt satır - Hafta başlıkları
+                    let weekHeaderHtml = '';
+                    dates.forEach(date => {
+                        const weekStart = new Date(date);
+                        const weekEnd = new Date(date);
+                        weekEnd.setDate(weekEnd.getDate() + 6);
+                        
+                        const weekLabel = `${weekStart.getDate()}-${weekEnd.getDate()} ${shortMonthNames[weekEnd.getMonth()]}`;
+                        weekHeaderHtml += `<div class="gantt-date-cell" style="width: ${ganttConfig.cellWidth.week}px;">${weekLabel}</div>`;
+                    });
+                    
+                    headerHtml = `
+                        <div class="grid gantt-header sticky top-0 z-10 bg-white">
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm"></div>
+                                ${monthHeaderHtml}
+                            </div>
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm">Görev / Aşama</div>
+                                ${weekHeaderHtml}
+                            </div>
+                        </div>`;
+                    
+                } else if (ganttConfig.viewMode === 'month') {
+                    // Üst satır - Yıl başlıkları
+                    let yearHeaderHtml = '';
+                    headerDates.forEach(header => {
+                        const yearName = header.date.getFullYear();
+                        const width = header.span * ganttConfig.cellWidth.month;
+                        yearHeaderHtml += `<div class="gantt-header-cell text-center font-medium border-r" style="width: ${width}px;">${yearName}</div>`;
+                    });
+                    
+                    // Alt satır - Ay başlıkları
+                    let monthHeaderHtml = '';
+                    dates.forEach(date => {
+                        const monthName = monthNames[date.getMonth()];
+                        monthHeaderHtml += `<div class="gantt-date-cell" style="width: ${ganttConfig.cellWidth.month}px;">${monthName}</div>`;
+                    });
+                    
+                    headerHtml = `
+                        <div class="grid gantt-header sticky top-0 z-10 bg-white">
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm"></div>
+                                ${yearHeaderHtml}
+                            </div>
+                            <div class="flex">
+                                <div class="gantt-task-cell font-semibold sticky left-0 z-20 bg-white shadow-sm">Görev / Aşama</div>
+                                ${monthHeaderHtml}
+                            </div>
+                        </div>`;
+                }
+                
+                // HTML'i DOM'a uygula
+                ganttHeader.innerHTML = headerHtml;
+            }
+            
+            // Gantt görev satırlarını oluştur
+            function renderGanttRows(dates) {
+                // Önce HTML'i hazırla
+                let rowsHtml = '';
+                
+                // Ana görevi ekle
+                const mainTask = tasks.find(t => t.parentId === null);
+                if (mainTask) {
+                    rowsHtml += createGanttRow(mainTask, dates);
+                    
+                    // Hiyerarşik olarak alt görevleri ekle
+                    rowsHtml += renderGanttRowsRecursive(mainTask.id, dates, 1);
+                }
+                
+                // HTML'i DOM'a uygula
+                ganttBody.innerHTML = rowsHtml;
+                
+                // Görev satırlarına event listener'ları ekle
+                setupTaskToggleListeners();
+            }
+            
+            // Hiyerarşik olarak alt görevleri recursive oluştur
+            function renderGanttRowsRecursive(parentId, dates, level) {
+                let html = '';
+                
+                // Bu parent'a bağlı alt görevleri al ve sırala
+                const childTasks = tasks
+                    .filter(task => task.parentId === parentId)
+                    .sort((a, b) => {
+                        // Önce OrderIndex'e göre sırala
+                        if (a.orderIndex !== b.orderIndex) {
+                            return a.orderIndex - b.orderIndex;
+                        }
+                        // OrderIndex eşitse EndDate'e göre sırala
+                        return new Date(a.endDate) - new Date(b.endDate);
+                    });
+                
+                // Her alt görev için
+                childTasks.forEach(task => {
+                    // Görev satırını oluştur
+                    html += createGanttRow(task, dates);
+                    
+                    // Recursive olarak alt görevlerini oluştur
+                    html += renderGanttRowsRecursive(task.id, dates, level + 1);
+                });
+                
+                return html;
+            }
+            
+            // Görev satırı HTML oluştur
+            function createGanttRow(task, dates) {
+                // Görev CSS sınıfını belirle
+                let stateClass = '';
+                switch (task.state) {
+                    case 0: // Planlanan
+                        stateClass = 'state-pending';
+                        break;
+                    case 1: // Devam eden
+                        stateClass = 'state-in-progress';
+                        break;
+                    case 2: // Tamamlandı
+                        stateClass = 'state-completed';
+                        break;
+                    case 3: // İptal edildi
+                        stateClass = 'state-cancelled';
+                        break;
+                }
+                
+                // Görev hücresini oluştur
+                let levelIndent = task.level * 20;
+                let taskRowHtml = `
+                    <div class="gantt-row" data-id="${task.id}" data-parent-id="${task.parentId || 0}" data-level="${task.level}">
+                        <div class="gantt-task-cell" style="padding-left: ${levelIndent + 12}px;">
+                            <div class="flex items-center w-full">
+                                ${task.level > 0 ? `<span class="task-toggle ${hasChildTasks(task.id) ? 'expand-icon' : ''}">${hasChildTasks(task.id) ? '►' : ''}</span>` : ''}
+                                <span class="ml-1 task-name">${task.name}</span>
+                            </div>
+                        </div>`;
+                
+                // Görünüm moduna göre hücreleri oluştur
+                for (let i = 0; i < dates.length; i++) {
+                    const date = dates[i];
+                    
+                    // Hücre CSS sınıfı
+                    let cellClass = 'gantt-cell';
+                    
+                    // Hafta sonu mu?
+                    if (ganttConfig.viewMode === 'day') {
+                        const day = date.getDay();
+                        if (day === 0 || day === 6) {
+                            cellClass += ' gantt-weekend';
+                        }
+                    }
+                    
+                    // Bugün mü?
+                    if (ganttConfig.viewMode === 'day' && date.toDateString() === new Date().toDateString()) {
+                        cellClass += ' gantt-today';
+                    }
+                    
+                    // Hücre genişliği
+                    let cellWidth = ganttConfig.cellWidth[ganttConfig.viewMode];
+                    
+                    taskRowHtml += `<div class="${cellClass}" style="width: ${cellWidth}px;">`;
+                    
+                    // Gantt bar'ı sadece ilk hücrede göster (görünüm moduna göre)
+                    if (i == 0) {
+                        // Görev süresi (pixel olarak)
+                        let barWidth, barLeft;
+                        
+                        // Görünüm moduna göre
+                        if (ganttConfig.viewMode === 'day') {
+                            // Günler arası - daha hassas hesaplama
+                            const startDate = new Date(task.startDate);
+                            const endDate = new Date(task.endDate);
+                            startDate.setHours(0,0,0,0);
+                            endDate.setHours(23,59,59,999);
+                            
+                            const firstDate = new Date(dates[0]);
+                            firstDate.setHours(0,0,0,0);
+                            
+                            // Milisaniye cinsinden farkı al ve gün sayısına çevir
+                            const startDiffMs = startDate.getTime() - firstDate.getTime();
+                            const startDiff = Math.max(0, startDiffMs / (1000 * 60 * 60 * 24));
+                            
+                            // Başlangıç ve bitiş tarihleri arasındaki gün sayısını hesapla
+                            const durationMs = endDate.getTime() - startDate.getTime();
+                            const dayCount = Math.max(1, Math.ceil(durationMs / (1000 * 60 * 60 * 24)) + 1);
+                            
+                            barLeft = Math.round(startDiff * cellWidth);
+                            barWidth = Math.round(dayCount * cellWidth);
+                        } else if (ganttConfig.viewMode === 'week') {
+                            // Haftalar arası - daha hassas hesaplama
+                            const startDate = new Date(task.startDate);
+                            const endDate = new Date(task.endDate);
+                            startDate.setHours(0,0,0,0);
+                            endDate.setHours(23,59,59,999);
+                            
+                            const firstDate = new Date(dates[0]);
+                            firstDate.setHours(0,0,0,0);
+                            
+                            // Hafta başlangıcına ayarlama (Pazartesi = 0)
+                            const firstDateDay = firstDate.getDay();
+                            const firstDateOffset = firstDateDay === 0 ? 6 : firstDateDay - 1; // Pazar günü için özel durum
+                            
+                            // Milisaniye cinsinden farkı al
+                            const startDiffMs = startDate.getTime() - firstDate.getTime();
+                            // Hafta sayısına çevir (ilk haftanın kalan günlerini hesaba katarak)
+                            const startDiff = startDiffMs / (1000 * 60 * 60 * 24 * 7);
+                            
+                            // Başlangıç ve bitiş tarihleri arasındaki hafta sayısını hesapla
+                            const durationMs = endDate.getTime() - startDate.getTime();
+                            const weekCount = Math.ceil(durationMs / (1000 * 60 * 60 * 24 * 7)) + 1;
+                            
+                            barLeft = Math.round(startDiff * cellWidth);
+                            barWidth = Math.round(weekCount * cellWidth);
+                        } else if (ganttConfig.viewMode === 'month') {
+                            // Aylar arası - daha hassas hesaplama
+                            const startDate = new Date(task.startDate);
+                            const endDate = new Date(task.endDate);
+                            
+                            const firstDate = new Date(dates[0]);
+                            
+                            // Yıl ve ay farkını hesapla
+                            const yearDiff = startDate.getFullYear() - firstDate.getFullYear();
+                            const monthDiff = startDate.getMonth() - firstDate.getMonth();
+                            const startDiff = yearDiff * 12 + monthDiff;
+                            
+                            // Ay farkını ve görevin süresini hesapla (ay olarak)
+                            const taskYearDiff = endDate.getFullYear() - startDate.getFullYear();
+                            const taskMonthDiff = endDate.getMonth() - startDate.getMonth();
+                            
+                            // Gün bazında düzeltmeler için
+                            const startDay = startDate.getDate();
+                            const endDay = endDate.getDate();
+                            const daysInEndMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0).getDate();
+                            
+                            // Tam ay sayısı + gün bazında kısmi ay
+                            const monthCount = taskYearDiff * 12 + taskMonthDiff + 1;
+                            
+                            barLeft = Math.round(startDiff * cellWidth);
+                            barWidth = Math.round(monthCount * cellWidth);
+                        }
+                        
+                        // Eksi değerlere karşı kontrol
+                        barLeft = Math.max(0, barLeft);
+                        barWidth = Math.max(cellWidth, barWidth); // Minimum bir hücre genişliği
+                        
+                        // Görünüm sınırlarını aşmadığından emin ol
+                        const totalWidth = cellWidth * dates.length;
+                        if (barLeft >= totalWidth) {
+                            // Görünüm dışı - gösterme
+                            taskRowHtml += '</div>';
+                            continue;
+                        }
+                        
+                        // Bar genişliği görünümü aşıyorsa kırp
+                        if (barLeft + barWidth > totalWidth) {
+                            barWidth = totalWidth - barLeft;
+                        }
+                        
+                        // Gantt bar'ı ekle
+                        taskRowHtml += `
+                            <div class="gantt-bar ${stateClass}" style="left: ${barLeft}px; width: ${barWidth}px;" 
+                                 title="${task.name} (${new Date(task.startDate).toLocaleDateString('tr-TR')} - ${new Date(task.endDate).toLocaleDateString('tr-TR')})">
+                                <span>${task.name}</span>
+                            </div>`;
+                    }
+                    
+                    taskRowHtml += `</div>`;
+                }
+                
+                taskRowHtml += `</div>`;
+                return taskRowHtml;
+            }
+            
+            // Görevin alt görevleri var mı kontrol et
+            function hasChildTasks(taskId) {
+                return tasks.some(task => task.parentId === taskId);
+            }
+            
+            // Görevin tamamlanma yüzdesini hesapla
+            function calculateTaskCompletionPercentage(taskId) {
+                // Fonksiyon artık kullanılmadığından boş olarak bırakıldı
+                return 0;
+            }
+            
+            // Olay dinleyicileri ekle
+            function setupTaskToggleListeners() {
+                // Genişletme/daraltma ikonları
+                document.querySelectorAll('.gantt-row .task-toggle.expand-icon').forEach(toggle => {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const taskItem = this.closest('[data-id]');
+                        const taskId = taskItem.dataset.id;
+                        
+                        toggleSubtasks(taskId);
+                    });
+                });
+            }
+            
+            // Alt görevleri göster/gizle
+            function toggleSubtasks(taskId) {
+                console.log("toggleSubtasks çağrıldı", taskId);
+                
+                // Hem görev listesinde hem gantt chartta aynı task ID'li satırları bul
+                const taskItems = $(`.task-item[data-id="${taskId}"], .gantt-row[data-id="${taskId}"]`);
+                console.log("Bulunan taskItems:", taskItems.length, taskItems);
+                
+                // Alt görevleri var mı kontrol et
+                const childrenItems = $(`.task-item[data-parent-id="${taskId}"], .gantt-row[data-parent-id="${taskId}"]`);
+                const hasChildren = childrenItems.length > 0;
+                
+                console.log("Alt görevler:", childrenItems.length, childrenItems);
+                console.log("Alt görev var mı:", hasChildren);
+                
+                // Alt görevleri yoksa işlem yapma
+                if (!hasChildren) {
+                    return;
+                }
+                
+                // Genişletilmiş durumu kontrol et
+                const isExpanded = taskItems.first().hasClass('expanded');
+                console.log("İşlem öncesi genişletilmiş mi:", isExpanded);
+                
+                if (isExpanded) {
+                    // Daralt
+                    taskItems.removeClass('expanded');
+                    
+                    // Tıklanan görevin içindeki tüm expand ikonlarını ► yap
+                    taskItems.find('.task-toggle.expand-icon').text('►');
+                    
+                    // Alt görevleri gizle - recursive
+                    hideChildren(taskId);
+                    console.log("Görev daraltıldı:", taskId);
+                } else {
+                    // Genişlet
+                    taskItems.addClass('expanded');
+                    
+                    // Tıklanan görevin içindeki tüm expand ikonlarını ▼ yap
+                    taskItems.find('.task-toggle.expand-icon').text('▼');
+                    
+                    // Sadece doğrudan alt görevleri göster
+                    showDirectChildren(taskId);
+                    console.log("Görev genişletildi:", taskId);
+                }
+            }
+            
+            // Alt görevleri göster
+            function showSubtasks(parentId) {
+                // Doğrudan alt görevleri bul
+                const childRows = document.querySelectorAll(`.gantt-row[data-parent-id="${parentId}"]`);
+                
+                childRows.forEach(childRow => {
+                    // Gizli sınıfını kaldır
+                    childRow.classList.remove('hidden-task');
+                    
+                    // Eğer bu görev önceden genişletilmişse, onun alt görevlerini de göster
+                    if (childRow.classList.contains('expanded')) {
+                        showSubtasks(childRow.dataset.id);
+                    }
+                });
+            }
+            
+            // Alt görevleri gizle
+            function hideSubtasks(parentId) {
+                // Doğrudan alt görevleri bul
+                const childRows = document.querySelectorAll(`.gantt-row[data-parent-id="${parentId}"]`);
+                
+                childRows.forEach(childRow => {
+                    // Gizli sınıfını ekle
+                    childRow.classList.add('hidden-task');
+                    
+                    // Recursive olarak alt görevlerini de gizle
+                    hideSubtasks(childRow.dataset.id);
+                });
+            }
+            
+            // Alt görevleri olan görev mi?
+            function hasChildren(taskId) {
+                return tasks.some(task => task.parentId === taskId);
+            }
+            
+            // İleri geri navigasyon
+            function navigatePrev() {
+                // Görünüm moduna göre geriye git
+                if (ganttConfig.viewMode === 'day') {
+                    // Günlük görünüm için bir ay geriye git
+                    const visibleDays = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24));
+                    currentStartDate.setDate(currentStartDate.getDate() - visibleDays);
+                    currentEndDate.setDate(currentEndDate.getDate() - visibleDays);
+                } else if (ganttConfig.viewMode === 'week') {
+                    // Haftalık görünüm için üç ay geriye git 
+                    const visibleWeeks = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24 * 7));
+                    currentStartDate.setDate(currentStartDate.getDate() - visibleWeeks * 7);
+                    currentEndDate.setDate(currentEndDate.getDate() - visibleWeeks * 7);
+                } else if (ganttConfig.viewMode === 'month') {
+                    // Aylık görünüm için bir yıl geriye git
+                    const visibleMonths = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24 * 30));
+                    currentStartDate.setMonth(currentStartDate.getMonth() - visibleMonths);
+                    currentEndDate.setMonth(currentEndDate.getMonth() - visibleMonths);
+                }
+                
+                renderGantt();
+            }
+            
+            function navigateNext() {
+                // Görünüm moduna göre ileriye git
+                if (ganttConfig.viewMode === 'day') {
+                    // Günlük görünüm için bir ay ileriye git
+                    const visibleDays = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24));
+                    currentStartDate.setDate(currentStartDate.getDate() + visibleDays);
+                    currentEndDate.setDate(currentEndDate.getDate() + visibleDays);
+                } else if (ganttConfig.viewMode === 'week') {
+                    // Haftalık görünüm için üç ay ileriye git
+                    const visibleWeeks = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24 * 7));
+                    currentStartDate.setDate(currentStartDate.getDate() + visibleWeeks * 7);
+                    currentEndDate.setDate(currentEndDate.getDate() + visibleWeeks * 7);
+                } else if (ganttConfig.viewMode === 'month') {
+                    // Aylık görünüm için bir yıl ileriye git
+                    const visibleMonths = Math.round((currentEndDate - currentStartDate) / (1000 * 60 * 60 * 24 * 30));
+                    currentStartDate.setMonth(currentStartDate.getMonth() + visibleMonths);
+                    currentEndDate.setMonth(currentEndDate.getMonth() + visibleMonths);
+                }
+                
+                renderGantt();
+            }
+            
+            function navigateToday() {
+                // Bugünü içerecek şekilde tarih aralığını ayarla
+                const today = new Date();
+                const { minDate, maxDate } = calculateDateRange();
+                const projectDuration = maxDate - minDate;
+                
+                if (ganttConfig.viewMode === 'day') {
+                    // Günlük görünüm için bugünü merkez alarak bir ay göster
+                    currentStartDate = new Date(today);
+                    currentStartDate.setDate(today.getDate() - 15);
+                    currentEndDate = new Date(today);
+                    currentEndDate.setDate(today.getDate() + 15);
+                    
+                    // Projenin başlangıç ve bitiş tarihlerini dahil et
+                    if (minDate < currentStartDate && minDate > new Date(today.getTime() - projectDuration)) {
+                        currentStartDate = new Date(minDate);
+                    }
+                    if (maxDate > currentEndDate && maxDate < new Date(today.getTime() + projectDuration)) {
+                        currentEndDate = new Date(maxDate);
+                    }
+                } else if (ganttConfig.viewMode === 'week') {
+                    // Haftalık görünüm - 12 hafta göster, bugün ortada olacak şekilde
+                    currentStartDate = new Date(today);
+                    currentStartDate.setDate(today.getDate() - 42); // 6 hafta geriye
+                    currentEndDate = new Date(today);
+                    currentEndDate.setDate(today.getDate() + 42); // 6 hafta ileriye
+                    
+                    // Projenin başlangıç ve bitiş tarihlerini dahil et
+                    if (minDate < currentStartDate && minDate > new Date(today.getTime() - projectDuration)) {
+                        currentStartDate = new Date(minDate);
+                    }
+                    if (maxDate > currentEndDate && maxDate < new Date(today.getTime() + projectDuration)) {
+                        currentEndDate = new Date(maxDate);
+                    }
+                } else if (ganttConfig.viewMode === 'month') {
+                    // Aylık görünüm - 12 ay göster, bugün ortada olacak şekilde
+                    currentStartDate = new Date(today);
+                    currentStartDate.setMonth(today.getMonth() - 6);
+                    currentEndDate = new Date(today);
+                    currentEndDate.setMonth(today.getMonth() + 6);
+                    
+                    // Projenin başlangıç ve bitiş tarihlerini dahil et
+                    if (minDate < currentStartDate && minDate > new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())) {
+                        currentStartDate = new Date(minDate);
+                    }
+                    if (maxDate > currentEndDate && maxDate < new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())) {
+                        currentEndDate = new Date(maxDate);
+                    }
+                }
+                
+                renderGantt();
+            }
+            
+            // Görünüm modu değiştiğinde
+            ganttViewMode.addEventListener('change', function() {
+                ganttConfig.viewMode = this.value;
+                renderGantt();
+            });
+            
+            // İleri geri düğmeleri
+            ganttPrev.addEventListener('click', navigatePrev);
+            ganttNext.addEventListener('click', navigateNext);
+            ganttToday.addEventListener('click', navigateToday);
+            
+            // Sayfa yüklendiğinde Gantt şemasını oluştur
+            renderGantt();
+            
+            // HİYERARŞİK GÖREV FONKSİYONLARI
+            
+            // ===== HİYERARŞİK GÖREV FONKSİYONLARI =====
+            
+            // Alt görev ekleme butonlarını dinle (hem görev listesi hem gantt chart için)
+            $(document).on('click', '.add-subtask-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const parentId = $(this).data('parent-id');
+                openTaskModal(parentId);
+            });
+            
+            // Toggle ikonları tıklandığında alt görevleri göster/gizle - Hem Görev Listesi hem Gantt için
+            $(document).on('click', '.task-toggle', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const taskItem = $(this).closest('[data-id]');
+                const taskId = taskItem.data('id');
+                
+                console.log("Toggle butonu tıklandı:", this, "task ID:", taskId);
+                
+                // Alt görevleri olan görevlere tıklandığında
+                toggleSubtasks(taskId);
+            });
+            
+            // Görev adına tıklandığında toggle işlemi - Hem Görev Listesi hem Gantt için
+            $(document).on('click', '.task-name, .gantt-task-cell', function(e) {
+                if ($(e.target).is('input') || $(e.target).is('button') || $(e.target).is('i')) {
+                    return; // Checkbox, buton ya da ikonlara tıklandığında durdur
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const taskItem = $(this).closest('[data-id]');
+                const taskId = taskItem.data('id');
+                
+                // Görev adına tıklanınca aynı işlemi yap
+                toggleSubtasks(taskId);
+            });
+            
+            // Belirli bir görevin doğrudan alt görevlerini göster
+            function showDirectChildren(parentId) {
+                console.log("showDirectChildren çağrıldı", parentId);
+                
+                // Hem görev listesinde hem gantt chartta aynı parent ID'li satırları bul
+                const taskItems = $(`.task-item[data-parent-id="${parentId}"]`);
+                const ganttItems = $(`.gantt-row[data-parent-id="${parentId}"]`);
+                
+                console.log("Görev listesinde bulunan alt görevler:", taskItems.length, taskItems);
+                console.log("Gantt'ta bulunan alt görevler:", ganttItems.length, ganttItems);
+                
+                // Sadece doğrudan alt görevleri göster - önce görev tablosundakiler
+                taskItems.each(function() {
+                    $(this).removeClass('hidden-task');
+                    console.log("Gösterilen alt görev:", this);
+                });
+                
+                // Sonra Gantt chart'takiler
+                ganttItems.each(function() {
+                    $(this).removeClass('hidden-task');
+                });
+            }
+            
+            // Belirli bir görevin tüm alt görevlerini gizle (recursive)
+            function hideChildren(parentId) {
+                console.log("hideChildren çağrıldı", parentId);
+                
+                // Önce görev tablosundaki alt görevleri bul
+                const taskItems = $(`.task-item[data-parent-id="${parentId}"]`);
+                console.log("Gizlenecek görev tablosundaki alt görevler:", taskItems.length, taskItems);
+                
+                // Alt görevleri gizle
+                taskItems.each(function() {
+                    $(this).addClass('hidden-task');
+                    $(this).removeClass('expanded');
+                    
+                    // Alt görevlerin içindeki tüm expand ikonlarını ► yap
+                    $(this).find('.task-toggle.expand-icon').text('►');
+                    
+                    const childId = $(this).data('id');
+                    // Her bir alt görevin kendi alt görevlerini recursive olarak gizle
+                    hideChildren(childId);
+                });
+                
+                // Sonra Gantt chart'taki alt görevleri bul ve gizle
+                const ganttItems = $(`.gantt-row[data-parent-id="${parentId}"]`);
+                ganttItems.each(function() {
+                    $(this).addClass('hidden-task');
+                    $(this).removeClass('expanded');
+                    $(this).find('.task-toggle.expand-icon').text('►');
+                });
+            }
+            
+            // Tüm görevleri genişlet
+            function expandAllTasks() {
+                // Tüm görevleri genişlet
+                $('.task-item, .gantt-row').removeClass('hidden-task').addClass('expanded');
+                $('.task-toggle.expand-icon').text('▼');
+            }
+            
+            function collapseAllTasks() {
+                // Ana görevi daralt - Level 0
+                $('.task-item:not([data-level="0"]), .gantt-row:not([data-level="0"])').addClass('hidden-task');
+                $('.task-item, .gantt-row').removeClass('expanded');
+                $('.task-toggle.expand-icon').text('►');
+            }
+            
+            // Görevde alt görev olup olmadığını kontrol et ve genişletme ikonu ekle
+            function checkAndAddExpandIcon(taskItem) {
+                const taskId = taskItem.data('id');
+                
+                // Alt görevleri var mı kontrol et
+                const hasChildren = $(`.task-item[data-parent-id="${taskId}"]`).length > 0;
+                
+                if (hasChildren) {
+                    // Alt görevleri olan görevlerin toggle ikonuna expand-icon sınıfı ekle
+                    taskItem.find('.task-toggle').addClass('expand-icon').text('►');
+                }
+            }
+            
+            // Sayfa ilk yüklendiğinde görevleri hazırla
+            function initializeTaskView() {
+                // Hiyerarşi seviyesi ayarlanıyor
+                setTimeout(function() {
+                    console.log("Hiyerarşi seviyesi düzenleniyor");
+                    
+                    // İç içe geçmiş yapı için DOM manipülasyonu
+                    $('.task-item').each(function() {
+                        const level = $(this).data('level') || 0;
+                        
+                        // Seviye sınıfı ekle
+                        $(this).addClass(`level-${level}`);
+                        
+                        // Eğer alt görevleri varsa genişlet/daralt ikonu ekle
+                        checkAndAddExpandIcon($(this));
+                        
+                        // Tüm genişletilebilir görevleri başlangıçta genişletilmiş olarak işaretle
+                        if ($(this).find('.task-toggle.expand-icon').length > 0) {
+                            $(this).addClass('expanded');
+                            $(this).find('.task-toggle.expand-icon').text('▼');
+                        }
+                    });
+                    
+                    // Alt görevleri varsayılan olarak göster (hidden-task sınıfını kaldır)
+                    $('.task-item').removeClass('hidden-task');
+                    $('.gantt-row').removeClass('hidden-task');
+                    
+                    console.log("Hiyerarşi event listener'ları ekleniyor");
+                    
+                    // Tüm task-toggle.expand-icon elementlerini kontrol et
+                    console.log("Tablo toggle butonları:", $('.task-item .task-toggle.expand-icon').length);
+                    
+                    // Görev toggle (genişlet/daralt) olayları
+                    $(document).off('click', '.task-item .task-toggle.expand-icon').on('click', '.task-item .task-toggle.expand-icon', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const taskItem = $(this).closest('.task-item');
+                        const taskId = taskItem.data('id');
+                        
+                        toggleSubtasks(taskId);
+                    });
+                    
+                    console.log("Gantt chart seviye düzenleniyor");
+                    
+                    // Gantt görünümünde tüm görevleri genişlet
+                    setTimeout(() => {
+                        // Tüm görevleri genişlet
+                        expandAllTasks();
+                    }, 100);
+                }, 100);
+            }
+            
+            // ===== MODAL VE FORM İŞLEMLERİ =====
+            
+            // Ana görev için Görev Ekle butonunu dinle
+            addTaskBtn.addEventListener('click', function() {
+                openTaskModal(mainTaskId);
+            });
+            
+            // Modal'ı aç
+            function openTaskModal(parentId = null, taskId = null) {
+                taskForm.reset();
+                taskIdField.value = taskId || '';
+                parentTaskIdField.value = parentId || '';
+                modalTitle.textContent = taskId ? 'Görevi Düzenle' : 'Yeni Görev Ekle';
+                
+                // Varsayılan tarihler - ana görevin başlangıç ve bitiş tarihleri
+                if (!taskId) {
+                    const today = new Date().toISOString().split('T')[0];
+                    startDateField.value = today;
+                    endDateField.value = today;
+                    
+                    // Üst görev varsa, onun tarihleri arasında olmalı
+                    if (parentId) {
+                        const parentTask = tasks.find(t => t.id === parseInt(parentId));
+                        if (parentTask) {
+                            const parentStartDate = new Date(parentTask.startDate).toISOString().split('T')[0];
+                            const parentEndDate = new Date(parentTask.endDate).toISOString().split('T')[0];
+                            startDateField.value = parentStartDate;
+                            endDateField.value = parentEndDate;
+                        }
+                    }
+                } else {
+                    // Mevcut görevi düzenleme
+                    fetchTaskData(taskId);
+                }
+                
+                // Karakter sayaçlarını sıfırla
+                if (taskNameCharCount) taskNameCharCount.textContent = '0/80';
+                if (taskDescCharCount) taskDescCharCount.textContent = '0/250';
+                
+                taskModal.classList.remove('hidden');
+            }
+            
+            // Modal'ı kapat
+            function closeTaskModal() {
+                taskModal.classList.add('hidden');
+            }
+            
+            // Kapatma butonları
+            closeModal.addEventListener('click', closeTaskModal);
+            cancelBtn.addEventListener('click', closeTaskModal);
+            
+            // Form gönderimi
+            taskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveTask();
+            });
+            
+            // Görev verilerini getir
+            async function fetchTaskData(taskId) {
+                try {
+                    const response = await fetch(`/TaskPlanner/GetTask/${taskId}`);
+                    const task = await response.json();
+                    
+                    // Form alanlarını doldur
+                    taskNameField.value = task.name;
+                    if (taskDescriptionField && task.description) {
+                        taskDescriptionField.value = task.description;
+                    }
+                    startDateField.value = new Date(task.startDate).toISOString().split('T')[0];
+                    endDateField.value = new Date(task.endDate).toISOString().split('T')[0];
+                    
+                    // Karakter sayaçlarını güncelle
+                    if (taskNameCharCount) updateCharCount(taskNameField, taskNameCharCount, 80);
+                    if (taskDescriptionField && taskDescCharCount) {
+                        updateCharCount(taskDescriptionField, taskDescCharCount, 250);
+                    }
+                    
+                } catch (error) {
+                    console.error('Görev bilgileri alınamadı:', error);
+                    showMessage('Görev bilgileri alınamadı.', 'error');
+                }
+            }
+            
+            // Görevi kaydet
+            async function saveTask() {
+                try {
+                    // Form verilerini al
+                    const taskId = taskIdField.value;
+                    const parentId = parentTaskIdField.value || mainTaskId;
+                    const name = taskNameField.value.trim();
+                    const description = taskDescriptionField ? taskDescriptionField.value.trim() : '';
+                    const startDate = startDateField.value;
+                    const endDate = endDateField.value;
+                    
+                    console.log('Görev kaydetme başlatıldı:', { 
+                        taskId, 
+                        parentId, 
+                        name, 
+                        description: description ? `${description.substr(0, 20)}...` : '',
+                        startDate,
+                        endDate,
+                        currentUserId
+                    });
+                    
+                    // Validasyon kontrolleri
+                    if (!name) {
+                        showMessage('Görev adı zorunludur.', 'error');
+                        return;
+                    }
+                    
+                    // Karakter uzunluğu kontrolleri
+                    if (name.length > 80) {
+                        showMessage('Görev adı en fazla 80 karakter olabilir.', 'error');
+                        return;
+                    }
+                    
+                    if (description && description.length > 250) {
+                        showMessage('Açıklama en fazla 250 karakter olabilir.', 'error');
+                        return;
+                    }
+                    
+                    if (!startDate || !endDate) {
+                        showMessage('Başlangıç ve bitiş tarihleri zorunludur.', 'error');
+                        return;
+                    }
+                    
+                    // Tarihleri doğru formatta ayarla
+                    const startDateObj = new Date(startDate);
+                    const endDateObj = new Date(endDate);
+                    
+                    // Tarih kontrolü
+                    if (startDateObj > endDateObj) {
+                        showMessage('Başlangıç tarihi, bitiş tarihinden sonra olamaz.', 'error');
+                        return;
+                    }
+                    
+                    // Süreyi hesapla (gün olarak)
+                    const durationDays = Math.ceil((endDateObj - startDateObj) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // Payload
+                    const payload = {
+                        id: taskId ? parseInt(taskId) : 0,
+                        name: name,
+                        description: description,
+                        startDate: startDateObj.toISOString(),
+                        endDate: endDateObj.toISOString(),
+                        parentTaskId: parseInt(parentId),
+                        userId: currentUserId,
+                        duration: durationDays,
+                        taskState: 0 // Bekliyor durumu
+                    };
+                    
+                    const response = await fetch('/TaskPlanner/SaveTask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': antiForgeryToken
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    // Log the raw response for debugging
+                    const responseText = await response.text();
+                    console.log('Server yanıtı:', responseText);
+                    
+                    // Try to parse the response as JSON
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (parseError) {
+                        console.error('JSON parse hatası:', parseError);
+                        showMessage('Sunucu yanıtı işlenemedi. Detaylar için konsolu kontrol edin.', 'error');
+                        return;
+                    }
+                    
+                    if (result.success) {
+                        showMessage(taskId ? 'Görev güncellendi.' : 'Görev eklendi.', 'success');
+                        closeTaskModal();
+                        
+                        // Sayfayı yenile
+                        location.reload();
+                    } else {
+                        // Detaylı hata mesajını göster
+                        const errorMessage = result.error || 'Görev kaydedilirken bir hata oluştu.';
+                        showMessage(errorMessage, 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Görev kaydedilemedi:', error);
+                    showMessage(error.message || 'Beklenmeyen bir hata oluştu, lütfen daha sonra tekrar deneyin.', 'error');
+                }
+            }
+            
+            // ===== DÜZENLEME VE SİLME FONKSİYONLARI =====
+            
+            // Düzenleme butonunu dinle
+            $(document).on('click', '.edit-task-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const taskId = $(this).data('id');
+                const parentTaskId = $(this).closest('[data-parent-id]').data('parent-id');
+                
+                openTaskModal(parentTaskId, taskId);
+            });
+            
+            // Silme butonunu dinle
+            $(document).on('click', '.delete-task-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const taskId = $(this).data('id');
+                const taskName = $(this).closest('.task-item').find('.task-name span').text().trim();
+                
+                // Silme işlemi onayı
+                if (confirm(`"${taskName}" görevini ve tüm alt görevlerini silmek istediğinize emin misiniz?`)) {
+                    deleteTask(taskId);
+                }
+            });
+            
+            // Görevi ve alt görevlerini sil
+            function deleteTask(taskId) {
+                showLoading();
+                
+                fetch(`/TaskPlanner/DeleteTask?id=${taskId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiForgeryToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Görev silinemedi');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showMessage('Görev ve alt görevleri başarıyla silindi', 'success');
+                        
+                        // Sayfayı yenile
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.error || 'Silme işlemi başarısız oldu');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showMessage(error.message, 'error');
+                });
+            }
+            
+            // ===== GÖREV DURUM GÜNCELLEMESİ =====
+            
+            // Görev checkbox'ları tıklama (hem görev listesi hem gantt chart için)
+            $(document).on('change', '.task-checkbox', function() {
+                const taskId = $(this).data('id');
+                const isCompleted = this.checked;
+                const state = isCompleted ? 2 : 0; // 2 = Tamamlandı, 0 = Bekliyor
+                
+                // İlgili tüm checkbox'ları güncelle (hem görev listesi hem gantt chart için)
+                $(`.task-checkbox[data-id="${taskId}"]`).prop('checked', isCompleted);
+                
+                // Eğer görev tamamlandı olarak işaretlendiyse, alt görevleri de otomatik olarak işaretle
+                if (isCompleted) {
+                    updateChildTasksState(taskId, state);
+                }
+                
+                // Durumu sunucuya güncelle
+                updateTaskState(taskId, state);
+            });
+            
+            // Alt görevlerin durumunu güncelleme
+            function updateChildTasksState(parentId, state) {
+                // Alt görevleri bul
+                const childTasks = $(`.task-item[data-parent-id="${parentId}"], .gantt-row[data-parent-id="${parentId}"]`);
+                
+                if (childTasks.length > 0) {
+                    console.log(`${childTasks.length} alt görev bulundu ve durumları güncelleniyor...`);
+                    
+                    // Her bir alt görev için
+                    childTasks.each(function() {
+                        const childTaskId = $(this).data('id');
+                        
+                        // Checkbox'ları güncelle
+                        $(`.task-checkbox[data-id="${childTaskId}"]`).prop('checked', state === 2);
+                        
+                        // Durumu sunucuya güncelle
+                        updateTaskState(childTaskId, state);
+                        
+                        // Recursive olarak alt görevleri de güncelle
+                        updateChildTasksState(childTaskId, state);
+                    });
+                }
+            }
+            
+            // Görev durumu güncelleme
+            function updateTaskState(taskId, state) {
+                showLoading();
+                
+                fetch('/TaskPlanner/UpdateTaskState', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: JSON.stringify({ 
+                        taskId: taskId, 
+                        state: state
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Durum güncellenemedi');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showMessage('Görev durumu güncellendi', 'success');
+                        
+                        // Gantt çubuğunun rengini güncelle
+                        updateTaskBarColor(taskId, state);
+                        
+                        // Durum metnini ve sınıfını güncelle
+                        updateTaskStatusDisplay(taskId, state);
+                    } else {
+                        throw new Error(data.error || 'Durum güncellenirken bir hata oluştu');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showMessage(error.message, 'error');
+                });
+            }
+            
+            // Gantt çubuğu rengini güncelle
+            function updateTaskBarColor(taskId, state) {
+                const ganttBar = $(`.gantt-row[data-id="${taskId}"] .gantt-bar`);
+                
+                // Tüm durum sınıflarını kaldır
+                ganttBar.removeClass('state-pending state-in-progress state-completed state-cancelled');
+                
+                // Yeni durum sınıfını ekle
+                switch(state) {
+                    case 0:
+                        ganttBar.addClass('state-pending');
+                        break;
+                    case 1:
+                        ganttBar.addClass('state-in-progress');
+                        break;
+                    case 2:
+                        ganttBar.addClass('state-completed');
+                        break;
+                    case 3:
+                        ganttBar.addClass('state-cancelled');
+                        break;
+                }
+            }
+            
+            // Durum metnini ve sınıfını güncelle
+            function updateTaskStatusDisplay(taskId, state) {
+                // Task listesindeki durum span'ını bul
+                const statusSpan = $(`.task-item[data-id="${taskId}"] .task-status`);
+                
+                if (statusSpan.length > 0) {
+                    // Tüm durum sınıflarını kaldır
+                    statusSpan.removeClass('status-pending status-in-progress status-completed status-cancelled');
+                    
+                    // Durum metnini ve sınıfını güncelle
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    switch(state) {
+                        case 0:
+                            statusClass = 'status-pending';
+                            statusText = 'Bekliyor';
+                            break;
+                        case 1:
+                            statusClass = 'status-in-progress';
+                            statusText = 'Devam Ediyor';
+                            break;
+                        case 2:
+                            statusClass = 'status-completed';
+                            statusText = 'Tamamlandı';
+                            break;
+                        case 3:
+                            statusClass = 'status-cancelled';
+                            statusText = 'İptal Edildi';
+                            break;
+                    }
+                    
+                    statusSpan.addClass(statusClass);
+                    statusSpan.text(statusText);
+                }
+            }
+            
+            // ===== YARDIMCI FONKSİYONLAR =====
+            
+            // Mesaj gösterme
+            function showMessage(message, type) {
+                const box = document.getElementById(type === 'success' ? 'success-message' : 'error-message');
+                const text = document.getElementById(type === 'success' ? 'success-text' : 'error-text');
+                
+                if (box && text) {
+                    text.textContent = message;
+                    box.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        box.classList.add('hidden');
+                    }, 3000);
+                }
+            }
+            
+            // Yükleniyor göstergesi
+            function showLoading() {
+                const loader = document.createElement('div');
+                loader.id = 'loader';
+                loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                loader.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                        <p>Yükleniyor...</p>
+                    </div>
+                `;
+                document.body.appendChild(loader);
+            }
+            
+            function hideLoading() {
+                const loader = document.getElementById('loader');
+                if (loader) loader.remove();
+            }
+            
+            // Sayfa yüklendiğinde başlangıç işlemlerini yap
+            initializeTaskView();
+            
+            // Gantt şemasını başlat
+            renderGantt();
+            
+            // Gantt şeması ilk render
+            $(document).ready(function() {
+                // Proje uzunluğuna göre en iyi görünüm modunu belirle
+                ganttConfig.viewMode = determineBestViewMode();
+                
+                // Görünüm modu seçicisini güncelle
+                document.getElementById('gantt-view-mode').value = ganttConfig.viewMode;
+                
+                // Gantt şemasını render et
+                renderGantt();
+                
+                // Tarih aralığı bilgisini güncelle
+                updateDateRangeText();
+            });
+            
+            // Görünüm modu değişikliğini izle
+            $('#gantt-view-mode').on('change', function() {
+                ganttConfig.viewMode = this.value;
+                renderGantt();
+                updateDateRangeText();
+            });
+            
+            // İleri geri navigasyon butonları
+            $('#gantt-prev').on('click', function() {
+                navigatePrev();
+                updateDateRangeText();
+            });
+            
+            $('#gantt-next').on('click', function() {
+                navigateNext();
+                updateDateRangeText();
+            });
+            
+            $('#gantt-today').on('click', function() {
+                navigateToday();
+                updateDateRangeText();
+            });
+            
+            // Hiyerarşik görev yapısını ve görüntüleme seçeneklerini başlat
+            initializeTaskView();
+        });
+    </script>
+}

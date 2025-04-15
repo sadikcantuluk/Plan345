@@ -88,7 +88,7 @@
                     <div class="mb-4">
                         <label for="Password" class="block text-sm font-medium text-gray-700">Şifre</label>
                         <div class="mt-1 relative">
-                            <input type="password" id="Password" name="Password" 
+                            <input type="password" id="Password" name="Password" value="@Model?.Password"
                                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="••••••••" required>
                             <button type="button" onclick="togglePassword('Password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -101,7 +101,7 @@
                     <div class="mb-4">
                         <label for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Şifre Tekrarı</label>
                         <div class="mt-1 relative">
-                            <input type="password" id="ConfirmPassword" name="ConfirmPassword" 
+                            <input type="password" id="ConfirmPassword" name="ConfirmPassword" value="@Model?.ConfirmPassword"
                                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="••••••••" required>
                             <button type="button" onclick="togglePassword('ConfirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -202,18 +202,73 @@
         // Form değerlerini saklamak için değişkenler
         let savedFormValues = {};
 
+        // Şifre gereksinimlerini kontrol eden fonksiyon
+        function validatePassword() {
+            const password = document.getElementById("Password").value;
+            const errorMessageDiv = document.getElementById("error-message");
+            const errorTextElement = document.getElementById("error-text");
+            
+            // Şifre gereksinimlerini kontrol et
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasNonAlphaNumeric = /[^A-Za-z0-9]/.test(password);
+            const isLongEnough = password.length >= 8;
+            
+            // Hata mesajlarını oluştur
+            let errorMessages = [];
+            
+            if (!hasUpperCase) {
+                errorMessages.push("Şifre en az bir büyük harf içermelidir");
+            }
+            
+            if (!hasLowerCase) {
+                errorMessages.push("Şifre en az bir küçük harf içermelidir");
+            }
+            
+            if (!hasNumbers) {
+                errorMessages.push("Şifre en az bir rakam içermelidir");
+            }
+            
+            if (!hasNonAlphaNumeric) {
+                errorMessages.push("Şifre en az bir özel karakter içermelidir");
+            }
+            
+            if (!isLongEnough) {
+                errorMessages.push("Şifre en az 8 karakter uzunluğunda olmalıdır");
+            }
+            
+            // Hata varsa göster
+            if (errorMessages.length > 0) {
+                errorTextElement.innerHTML = errorMessages.join("<br>");
+                errorMessageDiv.classList.remove("hidden");
+                return false;
+            } else {
+                errorMessageDiv.classList.add("hidden");
+                return true;
+            }
+        }
+
+        // Form gönderimini kontrol et
+        document.getElementById("register-form").addEventListener("submit", function(event) {
+            // Şifre gereksinimlerini kontrol et
+            if (!validatePassword()) {
+                event.preventDefault(); // Form gönderimini engelle
+            }
+        });
+
         function togglePassword(id) {
             const input = document.getElementById(id);
-            const icon = input.nextElementSibling.querySelector('i');
+            const icon = input.nextElementSibling.querySelector("i");
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
             } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
             }
         }
 
@@ -222,28 +277,28 @@
             
             // Modal açılmadan önce form değerlerini kaydet
             savedFormValues = {
-                firstName: document.getElementById('FirstName').value,
-                lastName: document.getElementById('LastName').value,
-                email: document.getElementById('Email').value,
-                password: document.getElementById('Password').value,
-                confirmPassword: document.getElementById('ConfirmPassword').value,
-                acceptTerms: document.getElementById('AcceptTerms').checked
+                firstName: document.getElementById("FirstName").value,
+                lastName: document.getElementById("LastName").value,
+                email: document.getElementById("Email").value,
+                password: document.getElementById("Password").value,
+                confirmPassword: document.getElementById("ConfirmPassword").value,
+                acceptTerms: document.getElementById("AcceptTerms").checked
             };
             
-            document.getElementById('termsModal').classList.remove('hidden');
+            document.getElementById("termsModal").classList.remove("hidden");
         }
 
         function closeTerms(event) {
             event.preventDefault(); // Form gönderimini engelle
-            document.getElementById('termsModal').classList.add('hidden');
+            document.getElementById("termsModal").classList.add("hidden");
             
             // Modal kapandıktan sonra form değerlerini geri yükle
-            document.getElementById('FirstName').value = savedFormValues.firstName || '';
-            document.getElementById('LastName').value = savedFormValues.lastName || '';
-            document.getElementById('Email').value = savedFormValues.email || '';
-            document.getElementById('Password').value = savedFormValues.password || '';
-            document.getElementById('ConfirmPassword').value = savedFormValues.confirmPassword || '';
-            document.getElementById('AcceptTerms').checked = savedFormValues.acceptTerms || false;
+            document.getElementById("FirstName").value = savedFormValues.firstName || "";
+            document.getElementById("LastName").value = savedFormValues.lastName || "";
+            document.getElementById("Email").value = savedFormValues.email || "";
+            document.getElementById("Password").value = savedFormValues.password || "";
+            document.getElementById("ConfirmPassword").value = savedFormValues.confirmPassword || "";
+            document.getElementById("AcceptTerms").checked = savedFormValues.acceptTerms || false;
             
             return false; // Link tıklamasını engelle
         }

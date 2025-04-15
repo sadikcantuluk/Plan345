@@ -373,12 +373,43 @@ namespace PlanYonetimAraclari.Controllers
             {
                 _logger.LogInformation("ModelState geçerli, kullanıcı kaydı için kontrol yapılıyor...");
                 
+                // Şifreler eşleşiyor mu kontrol et - ModelState.IsValid içinde olsa da açıkça göstermek için
+                if (model.Password != model.ConfirmPassword)
+                {
+                    _logger.LogWarning($"Şifreler eşleşmiyor: {model.Email}");
+                    ModelState.AddModelError("ConfirmPassword", "Şifreler eşleşmiyor");
+                    return View(model);
+                }
+                
                 // E-posta adresi daha önce kayıtlı mı kontrol et
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
                     _logger.LogWarning($"E-posta adresi zaten kayıtlı: {model.Email}");
                     ModelState.AddModelError("Email", "Bu e-posta adresi zaten kullanılıyor.");
+                    return View(model);
+                }
+                
+                // Şifre gereksinimlerini manuel olarak kontrol et
+                bool hasUpperCase = model.Password.Any(char.IsUpper);
+                bool hasLowerCase = model.Password.Any(char.IsLower);
+                bool hasDigit = model.Password.Any(char.IsDigit);
+                bool hasNonAlphanumeric = model.Password.Any(c => !char.IsLetterOrDigit(c));
+                bool isLongEnough = model.Password.Length >= 8;
+                
+                // Şifre politikası kontrolü
+                if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasNonAlphanumeric || !isLongEnough)
+                {
+                    _logger.LogWarning($"Şifre politika gereksinimleri karşılanmadı: {model.Email}");
+                    
+                    string errorMessage = "Şifreniz aşağıdaki gereksinimleri karşılamalıdır:";
+                    if (!hasUpperCase) errorMessage += "<br>- En az bir büyük harf içermelidir";
+                    if (!hasLowerCase) errorMessage += "<br>- En az bir küçük harf içermelidir";
+                    if (!hasDigit) errorMessage += "<br>- En az bir rakam içermelidir";
+                    if (!hasNonAlphanumeric) errorMessage += "<br>- En az bir özel karakter içermelidir (!, @, #, vb.)";
+                    if (!isLongEnough) errorMessage += "<br>- En az 8 karakter uzunluğunda olmalıdır";
+                    
+                    ModelState.AddModelError("Password", errorMessage);
                     return View(model);
                 }
                 
@@ -552,38 +583,28 @@ namespace PlanYonetimAraclari.Controllers
                 // Kullanıcıyı e-posta adresine göre bul
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 
-                string token = "";
-                string callbackUrl = "";
-                
                 if (user == null)
                 {
                     _logger.LogWarning($"Şifre sıfırlama talebi - Kullanıcı bulunamadı: {model.Email}");
                     
-                    // DEV ORTAMI İÇİN: Test amaçlı olarak, kullanıcı olmasa da e-posta göndermeyi deneyelim
-                    // Ancak bu durumda bile ResetPassword sayfasına yönlendirmeliyiz, Login'e değil
-                    token = "TEST-TOKEN-123456789";
-                    callbackUrl = Url.Action(
-                        "ResetPassword", 
-                        "Account",
-                        new { code = token },
-                        protocol: HttpContext.Request.Scheme);
+                    // Kullanıcı bulunamadı, hatayı kullanıcıya göster
+                    ModelState.AddModelError("Email", "Bu e-posta adresi sistemde kayıtlı değil.");
+                    return View(model);
                 }
-                else
-                {
-                    // Şifre sıfırlama token'ı oluştur
-                    token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    
-                    // Şifre sıfırlama bağlantısı oluştur
-                    callbackUrl = Url.Action(
-                        "ResetPassword", 
-                        "Account",
-                        new { userId = user.Id, code = token },
-                        protocol: HttpContext.Request.Scheme);
-                }
+                
+                // Şifre sıfırlama token'ı oluştur
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                
+                // Şifre sıfırlama bağlantısı oluştur
+                var callbackUrl = Url.Action(
+                    "ResetPassword", 
+                    "Account",
+                    new { userId = user.Id, code = token, email = model.Email },
+                    protocol: HttpContext.Request.Scheme);
                 
                 try
                 {
-                    // E-posta göndermeyi dene (test amaçlı olarak kullanıcı olsa da olmasa da)
+                    // E-posta göndermeyi dene (sadece kullanıcı varsa)
                     _logger.LogInformation($"E-posta gönderimi başlatılıyor: {model.Email}, Callback URL: {callbackUrl}");
                     
                     // E-posta gönderme işlemini arka planda çalıştır
@@ -641,7 +662,7 @@ namespace PlanYonetimAraclari.Controllers
         }
 
         [HttpGet]
-        public IActionResult ResetPassword(string? code = null)
+        public IActionResult ResetPassword(string? code = null, string? email = null)
         {
             if (code == null)
             {
@@ -651,7 +672,8 @@ namespace PlanYonetimAraclari.Controllers
             
             var model = new ResetPasswordViewModel 
             { 
-                Code = code 
+                Code = code,
+                Email = email
             };
             
             return View(model);
@@ -675,8 +697,39 @@ namespace PlanYonetimAraclari.Controllers
             {
                 _logger.LogWarning($"Şifre sıfırlama - Kullanıcı bulunamadı: {model.Email}");
                 
-                // Kullanıcıyı bilgilendirmek yerine, işlem başarılıymış gibi davran (güvenlik için)
-                return RedirectToAction("ResetPasswordConfirmation");
+                ModelState.AddModelError("Email", "Bu e-posta adresi sistemde kayıtlı değil.");
+                return View(model);
+            }
+            
+            // Şifreler eşleşiyor mu kontrol et - ModelState.IsValid içinde olsa da açıkça göstermek için
+            if (model.Password != model.ConfirmPassword)
+            {
+                _logger.LogWarning($"Şifreler eşleşmiyor: {model.Email}");
+                ModelState.AddModelError("ConfirmPassword", "Şifreler eşleşmiyor");
+                return View(model);
+            }
+            
+            // Şifre gereksinimlerini manuel olarak kontrol et
+            bool hasUpperCase = model.Password.Any(char.IsUpper);
+            bool hasLowerCase = model.Password.Any(char.IsLower);
+            bool hasDigit = model.Password.Any(char.IsDigit);
+            bool hasNonAlphanumeric = model.Password.Any(c => !char.IsLetterOrDigit(c));
+            bool isLongEnough = model.Password.Length >= 8;
+            
+            // Şifre politikası kontrolü
+            if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasNonAlphanumeric || !isLongEnough)
+            {
+                _logger.LogWarning($"Şifre politika gereksinimleri karşılanmadı: {model.Email}");
+                
+                string errorMessage = "Şifreniz aşağıdaki gereksinimleri karşılamalıdır:";
+                if (!hasUpperCase) errorMessage += "<br>- En az bir büyük harf içermelidir";
+                if (!hasLowerCase) errorMessage += "<br>- En az bir küçük harf içermelidir";
+                if (!hasDigit) errorMessage += "<br>- En az bir rakam içermelidir";
+                if (!hasNonAlphanumeric) errorMessage += "<br>- En az bir özel karakter içermelidir (!, @, #, vb.)";
+                if (!isLongEnough) errorMessage += "<br>- En az 8 karakter uzunluğunda olmalıdır";
+                
+                ModelState.AddModelError("Password", errorMessage);
+                return View(model);
             }
             
             // Şifreyi sıfırla

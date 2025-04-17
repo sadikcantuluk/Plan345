@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PlanYonetimAraclari")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8fa46b78ae6976ad116add9753d72e06ed037afe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42b9a309d36ccb035a8229f7126b221521391457")]
 [assembly: System.Reflection.AssemblyProductAttribute("PlanYonetimAraclari")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PlanYonetimAraclari")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

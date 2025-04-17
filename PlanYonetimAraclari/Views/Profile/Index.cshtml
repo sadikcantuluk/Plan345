@@ -105,7 +105,7 @@
                                     <div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
                                         @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
                                         {
-                                            <img id="profileImagePreview" src="@Model.ProfileImageUrl" alt="Profil Resmi" class="w-full h-full object-cover" onerror="this.src='/images/profiles/default.png'; this.onerror=null; console.log('Profil resmi yüklenirken hata oluştu, varsayılan resim kullanılıyor.');">
+                                            <img id="profileImagePreview" src="@Model.ProfileImageUrl" alt="Profil Resmi" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/images/profiles/default.png';">
                                         }
                                         else
                                         {

@@ -132,6 +132,30 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-42FwWEkApifb9xf2aN7yp8wMkAiOcNwZFekIhchzi7w="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"851"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u002242FwWEkApifb9xf2aN7yp8wMkAiOcNwZFekIhchzi7w=\u0022"},{"Name":"Last-Modified","Value":"Fri, 21 Mar 2025 12:47:32 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/03b44b6e-950f-4b63-8b07-5103a9782779_sadık.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\03b44b6e-950f-4b63-8b07-5103a9782779_sadık.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"6089"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00220VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 16 Apr 2025 15:17:32 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/03b44b6e-950f-4b63-8b07-5103a9782779_sadık.vk403x59ti.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\03b44b6e-950f-4b63-8b07-5103a9782779_sadık.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"vk403x59ti"},{"Name":"integrity","Value":"sha256-0VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk="},{"Name":"label","Value":"_content/PlanYonetimAraclari/images/profiles/03b44b6e-950f-4b63-8b07-5103a9782779_sad\u0131k.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"6089"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00220VFzMIgVdIv77yNn6NtGCJicmTLWvr25qyrVfJaSJzk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 16 Apr 2025 15:17:32 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-BD8nqEgV\u002BJmGmBiFrj4093qmuDGAMY82HyFjjB4xomk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"196357"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022BD8nqEgV\u002BJmGmBiFrj4093qmuDGAMY82HyFjjB4xomk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 16 Apr 2025 15:42:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.wn2yz39k71.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"wn2yz39k71"},{"Name":"integrity","Value":"sha256-BD8nqEgV\u002BJmGmBiFrj4093qmuDGAMY82HyFjjB4xomk="},{"Name":"label","Value":"_content/PlanYonetimAraclari/images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"196357"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022BD8nqEgV\u002BJmGmBiFrj4093qmuDGAMY82HyFjjB4xomk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 16 Apr 2025 15:42:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/PlanYonetimAraclari/images/profiles/default.hd4ajhcj91.jpg">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\default.jpg'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

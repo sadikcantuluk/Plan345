@@ -1844,7 +1844,26 @@
             // Görünüm modu değiştiğinde
             ganttViewMode.addEventListener('change', function() {
                 ganttConfig.viewMode = this.value;
+                
+                // Tüm görevlerin durumlarını tazelemek için referans görevleri al
+                const completedTasks = [];
+                $('.task-checkbox:checked').each(function() {
+                    completedTasks.push($(this).data('id'));
+                });
+                
+                // Gantt şemasını yeniden oluştur
                 renderGantt();
+                
+                // Tamamlanmış görevlerin durumunu yenile
+                completedTasks.forEach(taskId => {
+                    // Gantt çubuğunu güncelle
+                    updateTaskBarColor(taskId, 2); // 2 = Tamamlandı
+                    
+                    // Checkbox'ları tekrar işaretle
+                    $(`.task-checkbox[data-id="${taskId}"]`).prop('checked', true);
+                });
+                
+                updateDateRangeText();
             });
             
             // İleri geri düğmeleri
@@ -2489,26 +2508,58 @@
                 updateDateRangeText();
             });
             
-            // Görünüm modu değişikliğini izle
-            $('#gantt-view-mode').on('change', function() {
-                ganttConfig.viewMode = this.value;
-                renderGantt();
-                updateDateRangeText();
-            });
-            
             // İleri geri navigasyon butonları
             $('#gantt-prev').on('click', function() {
+                // Tamamlanmış görevleri kaydet
+                const completedTasks = [];
+                $('.task-checkbox:checked').each(function() {
+                    completedTasks.push($(this).data('id'));
+                });
+                
                 navigatePrev();
+                
+                // Tamamlanmış görevlerin durumunu yenile
+                completedTasks.forEach(taskId => {
+                    updateTaskBarColor(taskId, 2);
+                    $(`.task-checkbox[data-id="${taskId}"]`).prop('checked', true);
+                });
+                
                 updateDateRangeText();
             });
             
             $('#gantt-next').on('click', function() {
+                // Tamamlanmış görevleri kaydet
+                const completedTasks = [];
+                $('.task-checkbox:checked').each(function() {
+                    completedTasks.push($(this).data('id'));
+                });
+                
                 navigateNext();
+                
+                // Tamamlanmış görevlerin durumunu yenile
+                completedTasks.forEach(taskId => {
+                    updateTaskBarColor(taskId, 2);
+                    $(`.task-checkbox[data-id="${taskId}"]`).prop('checked', true);
+                });
+                
                 updateDateRangeText();
             });
             
             $('#gantt-today').on('click', function() {
+                // Tamamlanmış görevleri kaydet
+                const completedTasks = [];
+                $('.task-checkbox:checked').each(function() {
+                    completedTasks.push($(this).data('id'));
+                });
+                
                 navigateToday();
+                
+                // Tamamlanmış görevlerin durumunu yenile
+                completedTasks.forEach(taskId => {
+                    updateTaskBarColor(taskId, 2);
+                    $(`.task-checkbox[data-id="${taskId}"]`).prop('checked', true);
+                });
+                
                 updateDateRangeText();
             });
             

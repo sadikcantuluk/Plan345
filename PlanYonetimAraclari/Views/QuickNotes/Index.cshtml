@@ -153,6 +153,16 @@
                 editModal.classList.add('hidden');
             });
             
+            // Düzenleme butonları için event listener (olay delegasyonu ile)
+            document.addEventListener('click', function(e) {
+                if (e.target && (e.target.classList.contains('edit-note-btn') || e.target.closest('.edit-note-btn'))) {
+                    const button = e.target.classList.contains('edit-note-btn') ? e.target : e.target.closest('.edit-note-btn');
+                    const id = button.dataset.id;
+                    const content = decodeURIComponent(button.dataset.content);
+                    editNote(id, content);
+                }
+            });
+            
             // Functions
             async function loadNotes() {
                 try {
@@ -201,7 +211,7 @@
                                 <p class="text-xs text-gray-500">${formatDate(note.createdAt)}</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="editNote(${note.id}, '${note.content.replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-primary-500 transition-colors">
+                                <button data-id="${note.id}" data-content="${encodeURIComponent(note.content)}" class="edit-note-btn text-gray-400 hover:text-primary-500 transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button onclick="deleteNote(${note.id})" class="text-gray-400 hover:text-red-500 transition-colors">

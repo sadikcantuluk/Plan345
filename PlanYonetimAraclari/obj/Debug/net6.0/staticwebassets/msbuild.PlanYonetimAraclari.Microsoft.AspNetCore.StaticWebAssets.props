@@ -216,30 +216,48 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\03b44b6e-950f-4b63-8b07-5103a9782779_sadık.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg'))">
       <SourceType>Package</SourceType>
       <SourceId>PlanYonetimAraclari</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/PlanYonetimAraclari</BasePath>
-      <RelativePath>images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg</RelativePath>
+      <RelativePath>images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>All</AssetMode>
       <AssetRole>Primary</AssetRole>
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>wn2yz39k71</Fingerprint>
-      <Integrity>BD8nqEgV+JmGmBiFrj4093qmuDGAMY82HyFjjB4xomk=</Integrity>
+      <Fingerprint>oousmnc7su</Fingerprint>
+      <Integrity>qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\default.jpg'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png'))">
       <SourceType>Package</SourceType>
       <SourceId>PlanYonetimAraclari</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/PlanYonetimAraclari</BasePath>
-      <RelativePath>images/profiles/default.jpg</RelativePath>
+      <RelativePath>images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>j15mlyudpd</Fingerprint>
+      <Integrity>+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\default.png'))">
+      <SourceType>Package</SourceType>
+      <SourceId>PlanYonetimAraclari</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/PlanYonetimAraclari</BasePath>
+      <RelativePath>images/profiles/default.png</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>All</AssetMode>
       <AssetRole>Primary</AssetRole>
@@ -250,7 +268,7 @@
       <Integrity>W3QcQhUnIU3U8YUSRIKM9D2F4+QV0d+ut4yPBUzrNEU=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\default.jpg'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\profiles\default.png'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))">
       <SourceType>Package</SourceType>

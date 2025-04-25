@@ -2381,8 +2381,8 @@
       ]
     },
     {
-      "Route": "images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg",
-      "AssetFile": "images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg",
+      "Route": "images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg",
+      "AssetFile": "images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2395,7 +2395,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "196357"
+          "Value": "49570"
         },
         {
           "Name": "Content-Type",
@@ -2403,23 +2403,23 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"BD8nqEgV+JmGmBiFrj4093qmuDGAMY82HyFjjB4xomk=\""
+          "Value": "\"qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 16 Apr 2025 15:42:58 GMT"
+          "Value": "Fri, 25 Apr 2025 14:48:44 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-BD8nqEgV+JmGmBiFrj4093qmuDGAMY82HyFjjB4xomk="
+          "Value": "sha256-qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI="
         }
       ]
     },
     {
-      "Route": "images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.wn2yz39k71.jpg",
-      "AssetFile": "images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg",
+      "Route": "images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.oousmnc7su.jpg",
+      "AssetFile": "images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2432,7 +2432,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "196357"
+          "Value": "49570"
         },
         {
           "Name": "Content-Type",
@@ -2440,31 +2440,113 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"BD8nqEgV+JmGmBiFrj4093qmuDGAMY82HyFjjB4xomk=\""
+          "Value": "\"qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 16 Apr 2025 15:42:58 GMT"
+          "Value": "Fri, 25 Apr 2025 14:48:44 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "wn2yz39k71"
+          "Value": "oousmnc7su"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-BD8nqEgV+JmGmBiFrj4093qmuDGAMY82HyFjjB4xomk="
+          "Value": "sha256-qGN2aVOJJkqRTNQBB9TJ2nBFNHi4HbKDlCdu9bp7RCI="
         },
         {
           "Name": "label",
-          "Value": "images/profiles/2fb5f309-a51a-453b-bb2b-ec1e7e01514c_pernoselman.jpg"
+          "Value": "images/profiles/53dab8fc-fe3f-465d-94e1-d1dfb2197958_foto.jpg"
         }
       ]
     },
     {
-      "Route": "images/profiles/default.hd4ajhcj91.jpg",
-      "AssetFile": "images/profiles/default.jpg",
+      "Route": "images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.j15mlyudpd.png",
+      "AssetFile": "images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "776003"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 25 Apr 2025 13:45:25 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "j15mlyudpd"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="
+        },
+        {
+          "Name": "label",
+          "Value": "images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png"
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png",
+      "AssetFile": "images/profiles/7991b9db-181e-453c-a67c-f7b57b0b791d_sezar.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "776003"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 25 Apr 2025 13:45:25 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-+R9ypG3PjLKtQchQ3j3CpcnJDBtYXQogyL8qh7SM8mU="
+        }
+      ]
+    },
+    {
+      "Route": "images/profiles/default.hd4ajhcj91.png",
+      "AssetFile": "images/profiles/default.png",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2481,7 +2563,7 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "image/jpeg"
+          "Value": "image/png"
         },
         {
           "Name": "ETag",
@@ -2503,13 +2585,13 @@
         },
         {
           "Name": "label",
-          "Value": "images/profiles/default.jpg"
+          "Value": "images/profiles/default.png"
         }
       ]
     },
     {
-      "Route": "images/profiles/default.jpg",
-      "AssetFile": "images/profiles/default.jpg",
+      "Route": "images/profiles/default.png",
+      "AssetFile": "images/profiles/default.png",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2526,7 +2608,7 @@
         },
         {
           "Name": "Content-Type",
-          "Value": "image/jpeg"
+          "Value": "image/png"
         },
         {
           "Name": "ETag",

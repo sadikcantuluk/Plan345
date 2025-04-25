@@ -21,6 +21,7 @@ namespace PlanYonetimAraclari.Controllers
         private readonly ActivityService _activityService;
         private readonly ITaskService _taskService;
         private readonly ICalendarService _calendarService;
+        private readonly ProfileImageHelper _profileImageHelper;
 
         public DashboardController(
             ILogger<DashboardController> logger,
@@ -28,7 +29,8 @@ namespace PlanYonetimAraclari.Controllers
             IProjectService projectService,
             ActivityService activityService,
             ITaskService taskService,
-            ICalendarService calendarService)
+            ICalendarService calendarService,
+            ProfileImageHelper profileImageHelper)
         {
             _logger = logger;
             _userManager = userManager;
@@ -36,6 +38,7 @@ namespace PlanYonetimAraclari.Controllers
             _activityService = activityService;
             _taskService = taskService;
             _calendarService = calendarService;
+            _profileImageHelper = profileImageHelper;
         }
 
         public async Task<IActionResult> Index()
@@ -68,6 +71,9 @@ namespace PlanYonetimAraclari.Controllers
                     TempData["ErrorMessage"] = "Oturum bilgilerinizde bir hata oluştu. Lütfen tekrar giriş yapın.";
                     return RedirectToAction("Login", "Account");
                 }
+
+                // Profil resmi kontrolü
+                string profileImageUrl = await _profileImageHelper.CheckAndUpdateProfileImage(user, HttpContext);
 
                 // Kullanıcının projelerini getir
                 var projects = await _projectService.GetUserProjectsAsync(user.Id);
@@ -150,7 +156,7 @@ namespace PlanYonetimAraclari.Controllers
                         FirstName = user.FirstName,
                         LastName = user.LastName,
                         Email = user.Email,
-                        ProfileImageUrl = user.ProfileImageUrl
+                        ProfileImageUrl = profileImageUrl
                     },
                     Projects = projects ?? new List<ProjectModel>(),
                     TotalProjectsCount = totalProjectsCount,
@@ -162,15 +168,6 @@ namespace PlanYonetimAraclari.Controllers
                     AssignedTasks = assignedTasks ?? new List<TaskModel>(),
                     UpcomingCalendarNotes = upcomingNotes ?? new List<CalendarNote>()
                 };
-                
-                // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
-                string profileImageUrl = user.ProfileImageUrl;
-                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
-                if (!string.IsNullOrEmpty(sessionProfileImage))
-                {
-                    profileImageUrl = sessionProfileImage;
-                    _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
-                }
                 
                 // Layout için gereken bilgileri ViewData'da sakla (ProfileController ile tutarlı)
                 ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";

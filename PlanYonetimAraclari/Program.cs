@@ -27,6 +27,9 @@ builder.Services.AddScoped<IPlannerService, PlannerService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 
+// Profil resmi kontrol servisi ekle
+builder.Services.AddScoped<ProfileImageHelper>();
+
 // Arka plan servisleri
 builder.Services.AddHostedService<ActivityCleanupService>();
 

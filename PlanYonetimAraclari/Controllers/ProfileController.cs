@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using PlanYonetimAraclari.Models;
 using PlanYonetimAraclari.Data;
 using System.Linq;
+using PlanYonetimAraclari.Services;
 
 namespace PlanYonetimAraclari.Controllers
 {
@@ -17,17 +18,20 @@ namespace PlanYonetimAraclari.Controllers
         private readonly ILogger<ProfileController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ApplicationDbContext _dbContext;
+        private readonly ProfileImageHelper _profileImageHelper;
 
         public ProfileController(
             UserManager<ApplicationUser> userManager,
             ILogger<ProfileController> logger,
             IWebHostEnvironment webHostEnvironment,
-            ApplicationDbContext dbContext)
+            ApplicationDbContext dbContext,
+            ProfileImageHelper profileImageHelper)
         {
             _userManager = userManager;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
             _dbContext = dbContext;
+            _profileImageHelper = profileImageHelper;
         }
 
         // Profil görüntüleme sayfası
@@ -53,13 +57,16 @@ namespace PlanYonetimAraclari.Controllers
                     return RedirectToAction("Index", "Dashboard");
                 }
                 
+                // Profil resmi kontrolü
+                string profileImageUrl = await _profileImageHelper.CheckAndUpdateProfileImage(user, HttpContext);
+                
                 var model = new ProfileViewModel
                 {
                     Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
-                    ProfileImageUrl = user.ProfileImageUrl,
+                    ProfileImageUrl = profileImageUrl,
                     TwoFactorEnabled = user.TwoFactorEnabled,
                     User = user
                 };
@@ -67,16 +74,7 @@ namespace PlanYonetimAraclari.Controllers
                 // Session'dan kullanıcı bilgilerini al
                 string userName = HttpContext.Session.GetString("UserName");
                 
-                // Session'da profil resmi varsa onu kullan (yeni yüklendiyse daha güncel olacaktır)
-                string profileImageUrl = user.ProfileImageUrl;
-                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
-                if (!string.IsNullOrEmpty(sessionProfileImage))
-                {
-                    profileImageUrl = sessionProfileImage;
-                    _logger.LogInformation($"Session'dan profil resmi alındı: {profileImageUrl}");
-                }
-                
-                // Layout için gereken bilgileri ViewData'da sakla (DashboardController ile aynı)
+                // Layout için gereken bilgileri ViewData'da sakla
                 ViewData["UserFullName"] = userName ?? $"{user.FirstName} {user.LastName}";
                 ViewData["UserEmail"] = userEmail;
                 ViewData["UserProfileImage"] = profileImageUrl;
@@ -168,6 +166,23 @@ namespace PlanYonetimAraclari.Controllers
                     {
                         // Debug için loglama
                         _logger.LogInformation($"Profil resmi yükleniyor: {ProfileImage.FileName}, Boyut: {ProfileImage.Length} byte, ContentType: {ProfileImage.ContentType}");
+                        
+                        // Desteklenen dosya formatları kontrolü
+                        string extension = Path.GetExtension(ProfileImage.FileName).ToLowerInvariant();
+                        if (extension != ".jpg" && extension != ".jpeg" && extension != ".png")
+                        {
+                            _logger.LogWarning($"Desteklenmeyen dosya formatı: {extension}");
+                            TempData["ErrorMessage"] = "Sadece JPG, JPEG ve PNG formatları desteklenmektedir.";
+                            return RedirectToAction("Index");
+                        }
+
+                        // Dosya boyutu kontrolü (1MB = 1048576 bytes)
+                        if (ProfileImage.Length > 1048576)
+                        {
+                            _logger.LogWarning($"Dosya boyutu çok büyük: {ProfileImage.Length} bytes");
+                            TempData["ErrorMessage"] = "Dosya boyutu 1MB'dan küçük olmalıdır.";
+                            return RedirectToAction("Index");
+                        }
                         
                         // Profil resimleri için klasör yolu
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles");
@@ -401,16 +416,9 @@ namespace PlanYonetimAraclari.Controllers
                 }
                 
                 // ViewData'yı güncelle
-                string profileImageUrl = user.ProfileImageUrl;
-                string sessionProfileImage = HttpContext.Session.GetString("UserProfileImage");
-                if (!string.IsNullOrEmpty(sessionProfileImage))
-                {
-                    profileImageUrl = sessionProfileImage;
-                }
-                
                 ViewData["UserFullName"] = $"{user.FirstName} {user.LastName}";
                 ViewData["UserEmail"] = user.Email;
-                ViewData["UserProfileImage"] = profileImageUrl;
+                ViewData["UserProfileImage"] = user.ProfileImageUrl;
                 
                 return View("Index", model);
             }

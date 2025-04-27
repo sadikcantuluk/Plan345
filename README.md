@@ -1,7 +1,7 @@
 # Plan345
 
 <div align="center">
-  <img src="https://plan345.com/assets/logo.png" alt="Plan345 Logo" width="200"/>
+  <img src="./readme/logo.png" alt="Plan345 Logo" width="200"/>
   <h3>Modern Proje Yönetim Platformu</h3>
   <p>Ekibinizle birlikte projelerinizi kolayca yönetin, görevleri organize edin ve verimliliğinizi artırın.</p>
   
@@ -44,8 +44,8 @@ Plan345, iş akışını optimize etmek ve ekip işbirliğini geliştirmek için
 ## 📱 Ekran Görüntüleri
 
 <div align="center">
-  <img src="https://plan345.com/assets/screenshots/dashboard.png" alt="Dashboard" width="400"/>
-  <img src="https://plan345.com/assets/screenshots/kanban.png" alt="Kanban Board" width="400"/>
+  <img src="./readme/dashboard.png" alt="Dashboard" width="400"/>
+  <img src="./readme/kanban.png" alt="Kanban Board" width="400"/>
 </div>
 
 ## 🛠️ Teknoloji Yığını
@@ -151,8 +151,8 @@ Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 <div align="center">
   <p>© 2023 Plan345. Tüm hakları saklıdır.</p>
   <p>
-    <a href="https://plan345.com/privacy">Gizlilik Politikası</a> •
-    <a href="https://plan345.com/terms">Kullanım Koşulları</a> •
-    <a href="https://plan345.com/kvkk">KVKK</a>
+    <a href="#">Gizlilik Politikası</a> •
+    <a href="#">Kullanım Koşulları</a> •
+    <a href="#">KVKK</a>
   </p>
 </div> 

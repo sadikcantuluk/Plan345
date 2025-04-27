@@ -1,69 +1,133 @@
-# Plan345 - Modern Proje Yönetim Aracı
+# Plan345
 
-## Proje Tanıtımı
+<div align="center">
+  <img src="https://plan345.com/assets/logo.png" alt="Plan345 Logo" width="200"/>
+  <h3>Modern Proje Yönetim Platformu</h3>
+  <p>Ekibinizle birlikte projelerinizi kolayca yönetin, görevleri organize edin ve verimliliğinizi artırın.</p>
+  
+  [![.NET](https://img.shields.io/badge/.NET%206.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/download/dotnet/6.0)
+  [![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
+  [![SignalR](https://img.shields.io/badge/SignalR-2C2D72?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/apps/aspnet/signalr)
+  [![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/apps/aspnet)
+</div>
 
-Plan345, ekiplerin projelerini verimli bir şekilde yönetmelerini sağlayan kullanıcı dostu bir proje yönetim platformudur. Gerçek zamanlı güncellemeler, sürükle-bırak görev yönetimi ve ekip işbirliği özellikleriyle projelerin zamanında ve bütçe dahilinde tamamlanmasını kolaylaştırır.
+## 📋 İçindekiler
 
-## Temel Özellikler
+- [Proje Tanıtımı](#-proje-tanıtımı)
+- [Temel Özellikler](#-temel-özellikler)
+- [Ekran Görüntüleri](#-ekran-görüntüleri)
+- [Teknoloji Yığını](#-teknoloji-yığını)
+- [Kurulum ve Çalıştırma](#-kurulum-ve-çalıştırma)
+- [Kullanım](#-kullanım)
+- [Katkıda Bulunma](#-katkıda-bulunma)
+- [Lisans](#-lisans)
+- [İletişim](#-iletişim)
 
-- **Kullanıcı Dostu Arayüz**: Sezgisel bir kullanıcı arayüzü ile projeleri ve görevleri hızlıca yönetin
-- **Görev Yönetimi**: Görevleri oluşturun, düzenleyin ve farklı durumlara sürükleyip bırakın (Yapılacak, Devam Ediyor, Tamamlandı)
-- **Gerçek Zamanlı Güncellemeler**: SignalR teknolojisi ile ekip üyeleri arasında anlık güncellemeler
-- **Ekip İşbirliği**: Projelere ekip üyelerini ekleyin ve izinleri yönetin
-- **İş Akışı Takibi**: Görsel proje ilerleme ve tamamlanma durumu takibi
-- **Bildirim Sistemi**: Önemli proje etkinlikleri için bildirimler
-- **Responsive Tasarım**: Masaüstü, tablet ve mobil cihazlarda kusursuz deneyim
+## 🚀 Proje Tanıtımı
 
-## Teknolojiler
+Plan345, iş akışını optimize etmek ve ekip işbirliğini geliştirmek için tasarlanmış modern bir proje yönetim platformudur. 2020 yılından bu yana, şirketlerin dijital dönüşüm süreçlerinde yanında olarak, proje yönetimi alanında yenilikçi çözümler sunmaktadır. Gerçek zamanlı güncellemeler, sezgisel görev yönetimi ve ekip işbirliği özellikleriyle projelerin zamanında ve bütçe dahilinde tamamlanmasını kolaylaştırır.
 
-- **Backend**: ASP.NET Core MVC
-- **Frontend**: HTML5, CSS3, JavaScript, jQuery
-- **Veritabanı**: SQL Server
-- **Kimlik Doğrulama**: ASP.NET Core Identity
-- **Gerçek Zamanlı İletişim**: SignalR
-- **UI Framework**: Tailwind CSS
-- **Sürükle-Bırak**: SortableJS
-- **AJAX**: Asynchronous JavaScript
+## ✨ Temel Özellikler
 
-## Kurulum ve Çalıştırma
+- **Sürükle & Bırak Kanban Tahtası**: Görevleri kolayca organize edin ve iş akışınızı görselleştirin
+- **Gerçek Zamanlı İşbirliği**: SignalR teknolojisi ile ekip üyeleri arasında anlık güncellemeler
+- **Ekip İşbirliği Araçları**: Projelere ekip üyelerini ekleyin, izinleri yönetin ve iletişimi güçlendirin
+- **İlerleme Takibi ve Analizler**: Proje ilerlemesini ölçün ve detaylı raporlar alın
+- **Takvim Entegrasyonu**: Proje takvimini planlayın ve önemli tarihleri takip edin
+- **Görev Yönetimi**: Görevleri oluşturun, düzenleyin ve farklı durumlara atayın
+- **Bildirim Sistemi**: Önemli proje etkinlikleri için otomatik bildirimler
+- **Hızlı Notlar**: Önemli bilgileri kaydetmek için not alma özelliği
+- **Kullanıcı Yönetimi**: Kapsamlı rol ve izin sistemi
+- **Raporlama**: Proje ve görev durumlarıyla ilgili detaylı raporlar
+- **Mobil Uyumlu Tasarım**: Her cihazda kusursuz çalışma deneyimi
+
+## 📱 Ekran Görüntüleri
+
+<div align="center">
+  <img src="https://plan345.com/assets/screenshots/dashboard.png" alt="Dashboard" width="400"/>
+  <img src="https://plan345.com/assets/screenshots/kanban.png" alt="Kanban Board" width="400"/>
+</div>
+
+## 🛠️ Teknoloji Yığını
+
+### Backend
+- **ASP.NET Core 6.0 MVC**: Güçlü ve modern web uygulama çerçevesi
+- **Entity Framework Core**: Veritabanı işlemleri için ORM
+- **ASP.NET Core Identity**: Kimlik doğrulama ve yetkilendirme
+- **SignalR**: Gerçek zamanlı web işlevselliği
+- **SQL Server**: İlişkisel veritabanı
+- **Background Services**: Arka plan görevleri ve temizleme işlemleri
+
+### Frontend
+- **HTML5, CSS3, JavaScript**: Modern web standartları
+- **jQuery**: DOM manipülasyonu ve AJAX istekleri
+- **Tailwind CSS**: Responsive tasarım için UI çerçevesi
+- **SortableJS**: Sürükle-bırak işlevselliği
+
+### Güvenlik
+- **HTTPS Uygulama**: Güvenli iletişim
+- **KVKK Uyumluluğu**: Kişisel verilerin korunması
+- **İki Faktörlü Kimlik Doğrulama**: Hesap güvenliği
+- **E-posta Doğrulama**: Kullanıcı hesap doğrulama
+- **Şifre Politikaları**: Güçlü şifre gereksinimleri
+
+## 💻 Kurulum ve Çalıştırma
 
 ### Gereksinimler
 
 - .NET 6.0 SDK veya üzeri
-- SQL Server
+- SQL Server 2019 veya üzeri
 - Visual Studio 2022 veya VS Code
 
 ### Adımlar
 
 1. Projeyi klonlayın:
-   ```
-   git clone https://github.com/kullaniciadi/Plan345.git
+   ```bash
+   git clone https://github.com/sadikcantuluk/Plan345.git
    cd Plan345
    ```
 
-2. Veritabanı bağlantı dizesini `appsettings.json` dosyasında ayarlayın.
-
-3. Veritabanını oluşturun:
+2. `appsettings.json` dosyasında veritabanı bağlantı dizesini yapılandırın:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Server=YOUR_SERVER;Database=Plan345DB;Trusted_Connection=True;MultipleActiveResultSets=true"
+   }
    ```
+
+3. E-posta servisini ayarlayın:
+   ```json
+   "EmailSettings": {
+     "Mail": "your-email@example.com",
+     "DisplayName": "Plan345",
+     "Password": "your-email-password",
+     "Host": "smtp.example.com",
+     "Port": 587
+   }
+   ```
+
+4. Veritabanını oluşturun:
+   ```bash
    dotnet ef database update
    ```
 
-4. Uygulamayı başlatın:
-   ```
+5. Uygulamayı başlatın:
+   ```bash
    dotnet run
    ```
 
-5. Tarayıcınızda `https://localhost:7091` adresini açın.
+6. Tarayıcınızda `https://localhost:7091` adresini açın.
 
-## Kullanım
+## 📝 Kullanım
 
 1. Hesap oluşturun veya mevcut hesabınızla giriş yapın.
 2. Yeni bir proje oluşturun ve ekip üyelerini davet edin.
-3. Projelere görevler ekleyin ve durumlarını güncelleyin.
-4. Görevleri farklı durumlar arasında sürükleyip bırakarak durumlarını güncelleyin.
-5. Ekip üyelerinin güncellemelerini gerçek zamanlı olarak takip edin.
+3. Projelere görevler ekleyin ve atamalar yapın.
+4. Görevleri kanban tahtasında sürükleyip bırakarak durumlarını güncelleyin.
+5. Proje aktivitelerini ve ekip üyelerinin güncellemelerini gerçek zamanlı olarak takip edin.
+6. Raporlar bölümünden proje ilerleme durumunu analiz edin.
+7. Takvim görünümünde önemli tarihleri ve görevleri planlayın.
 
-## Katkıda Bulunma
+## 👥 Katkıda Bulunma
 
 1. Bu depoyu forklayın
 2. Yeni özellik dalınızı oluşturun (`git checkout -b feature/AmazingFeature`)
@@ -71,13 +135,24 @@ Plan345, ekiplerin projelerini verimli bir şekilde yönetmelerini sağlayan kul
 4. Dalınıza push yapın (`git push origin feature/AmazingFeature`)
 5. Pull request oluşturun
 
-## Lisans
+## 📄 Lisans
 
 Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 
-## İletişim
+## 📞 İletişim
 
-Proje Destek - [plan345destek@gmail.com](mailto:plan345destek@gmail.com)
-Proje İletişim - [sadikcantuluk@gmail.com](mailto:sadikcantuluk@gmail.com)
+- **Web Sitesi**: [https://plan345.com](https://plan345.com)
+- **Proje Destek**: [plan345destek@gmail.com](mailto:plan345destek@gmail.com)
+- **Geliştirici İletişim**: [sadikcantuluk@gmail.com](mailto:sadikcantuluk@gmail.com)
+- **Proje Repository**: [https://github.com/sadikcantuluk/Plan345](https://github.com/sadikcantuluk/Plan345)
 
-Proje Linki: [https://github.com/sadikcantuluk/345Backend](https://github.com/sadikcantuluk/345Backend) 
+---
+
+<div align="center">
+  <p>© 2023 Plan345. Tüm hakları saklıdır.</p>
+  <p>
+    <a href="https://plan345.com/privacy">Gizlilik Politikası</a> •
+    <a href="https://plan345.com/terms">Kullanım Koşulları</a> •
+    <a href="https://plan345.com/kvkk">KVKK</a>
+  </p>
+</div> 
